@@ -84,10 +84,15 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} min-h-screen flex flex-col bg-gray-50`}>
-        {/* Kakao Maps SDK */}
+        {/* Naver Maps API */}
         <Script
-          src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_API_KEY}&libraries=clusterer&autoload=false`}
+          src={`https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${process.env.NEXT_PUBLIC_NAVER_MAP_CLIENT_ID}`}
           strategy="beforeInteractive"
+        />
+        {/* Naver Maps Marker Clustering */}
+        <Script
+          src="https://navermaps.github.io/maps.js.ncp/lib/marker-clustering.js"
+          strategy="lazyOnload"
         />
         {/* Google AdSense */}
         <Script

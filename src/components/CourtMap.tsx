@@ -1,14 +1,13 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
-import { Map, MapMarker, MarkerClusterer, CustomOverlayMap } from 'react-kakao-maps-sdk';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { courtLocations, findCourtLocation, regions } from '@/data/courtLocations';
 import Link from 'next/link';
 
-// Kakao Maps SDK 타입 선언
+// Naver Maps 타입 선언
 declare global {
     interface Window {
-        kakao: any;
+        naver: any;
     }
 }
 
@@ -36,47 +35,18 @@ interface MarkerData {
 }
 
 export default function CourtMap({ notices }: CourtMapProps) {
+    const mapRef = useRef<HTMLDivElement>(null);
+    const mapInstanceRef = useRef<any>(null);
+    const markersRef = useRef<any[]>([]);
+    const clustererRef = useRef<any>(null);
+    const infoWindowRef = useRef<any>(null);
+
     const [isLoaded, setIsLoaded] = useState(false);
     const [loadError, setLoadError] = useState<string | null>(null);
     const [selectedCourt, setSelectedCourt] = useState<MarkerData | null>(null);
     const [selectedRegion, setSelectedRegion] = useState<string>('전체');
     const [mapCenter, setMapCenter] = useState({ lat: 36.5, lng: 127.5 }); // 한국 중심
-    const [mapLevel, setMapLevel] = useState(13); // 전국 보기
-
-    // Kakao Maps SDK 로드 확인
-    useEffect(() => {
-        const checkKakaoLoaded = () => {
-            if (window.kakao && window.kakao.maps) {
-                window.kakao.maps.load(() => {
-                    setIsLoaded(true);
-                    setLoadError(null);
-                });
-                return true;
-            }
-            return false;
-        };
-
-        // 이미 로드되어 있는지 확인
-        if (checkKakaoLoaded()) {
-            return;
-        }
-
-        // 로드될 때까지 폴링 (최대 10초)
-        let attempts = 0;
-        const maxAttempts = 50; // 200ms * 50 = 10초
-        
-        const intervalId = setInterval(() => {
-            attempts++;
-            if (checkKakaoLoaded()) {
-                clearInterval(intervalId);
-            } else if (attempts >= maxAttempts) {
-                clearInterval(intervalId);
-                setLoadError('카카오 맵 SDK 로드 시간이 초과되었습니다. 페이지를 새로고침해주세요.');
-            }
-        }, 200);
-
-        return () => clearInterval(intervalId);
-    }, []);
+    const [mapZoom, setMapZoom] = useState(13); // 전국 보기
 
     // 공고를 법원별로 그룹화
     const markerData = useMemo(() => {
@@ -114,23 +84,171 @@ export default function CourtMap({ notices }: CourtMapProps) {
         return markerData.filter((m) => m.region === selectedRegion);
     }, [markerData, selectedRegion]);
 
+    // 네이버 지도 초기화
+    useEffect(() => {
+        if (!mapRef.current) return;
+
+        const initMap = () => {
+            if (!window.naver || !window.naver.maps) {
+                setLoadError('네이버 지도 API를 불러오는데 실패했습니다.');
+                return;
+            }
+
+            try {
+                const mapOptions = {
+                    center: new window.naver.maps.LatLng(mapCenter.lat, mapCenter.lng),
+                    zoom: mapZoom,
+                    zoomControl: true,
+                    zoomControlOptions: {
+                        position: window.naver.maps.Position.TOP_RIGHT,
+                    },
+                };
+
+                const map = new window.naver.maps.Map(mapRef.current!, mapOptions);
+                mapInstanceRef.current = map;
+
+                // 지도 이벤트 리스너
+                window.naver.maps.Event.addListener(map, 'center_changed', () => {
+                    const center = map.getCenter();
+                    setMapCenter({ lat: center.lat(), lng: center.lng() });
+                });
+
+                window.naver.maps.Event.addListener(map, 'zoom_changed', () => {
+                    setMapZoom(map.getZoom());
+                });
+
+                setIsLoaded(true);
+                setLoadError(null);
+            } catch (error) {
+                console.error('네이버 지도 초기화 실패:', error);
+                setLoadError('지도를 초기화하는데 실패했습니다.');
+            }
+        };
+
+        // 네이버 지도 API 로드 확인
+        if (window.naver && window.naver.maps) {
+            initMap();
+        } else {
+            // 로드될 때까지 폴링 (최대 10초)
+            let attempts = 0;
+            const maxAttempts = 50; // 200ms * 50 = 10초
+
+            const intervalId = setInterval(() => {
+                attempts++;
+                if (window.naver && window.naver.maps) {
+                    clearInterval(intervalId);
+                    initMap();
+                } else if (attempts >= maxAttempts) {
+                    clearInterval(intervalId);
+                    setLoadError('네이버 지도 SDK 로드 시간이 초과되었습니다. 페이지를 새로고침해주세요.');
+                }
+            }, 200);
+
+            return () => clearInterval(intervalId);
+        }
+    }, []);
+
+    // 마커 업데이트
+    useEffect(() => {
+        if (!isLoaded || !mapInstanceRef.current || !window.naver) return;
+
+        // 기존 마커 제거
+        markersRef.current.forEach((marker) => marker.setMap(null));
+        markersRef.current = [];
+
+        if (clustererRef.current) {
+            clustererRef.current.clear();
+        }
+
+        // 클러스터링 라이브러리 로드 확인 및 마커 생성
+        const createMarkers = () => {
+            const map = mapInstanceRef.current;
+            const markers: any[] = [];
+
+            filteredMarkers.forEach((markerData) => {
+                const position = new window.naver.maps.LatLng(markerData.lat, markerData.lng);
+
+                const marker = new window.naver.maps.Marker({
+                    position,
+                    map,
+                    title: markerData.courtName,
+                    icon: {
+                        content: `
+                            <div style="
+                                background: rgba(79, 70, 229, 0.9);
+                                color: white;
+                                padding: 4px 8px;
+                                border-radius: 12px;
+                                font-size: 12px;
+                                font-weight: bold;
+                                white-space: nowrap;
+                                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                            ">
+                                ${markerData.count}
+                            </div>
+                        `,
+                        anchor: new window.naver.maps.Point(12, 12),
+                    },
+                });
+
+                // 마커 클릭 이벤트
+                window.naver.maps.Event.addListener(marker, 'click', () => {
+                    setSelectedCourt(markerData);
+                    map.setCenter(position);
+                    map.setZoom(15);
+                });
+
+                markers.push(marker);
+            });
+
+            markersRef.current = markers;
+
+            // 클러스터링 적용 (간단한 버전)
+            if (markers.length > 0 && window.naver.maps.MarkerClustering) {
+                if (clustererRef.current) {
+                    clustererRef.current.clear();
+                }
+                clustererRef.current = new window.naver.maps.MarkerClustering({
+                    minClusterSize: 2,
+                    maxZoom: 13,
+                    map,
+                    markers,
+                });
+            }
+        };
+
+        createMarkers();
+    }, [filteredMarkers, isLoaded]);
+
+    // 선택된 법원으로 지도 이동
+    useEffect(() => {
+        if (!isLoaded || !mapInstanceRef.current || !selectedCourt) return;
+
+        const position = new window.naver.maps.LatLng(selectedCourt.lat, selectedCourt.lng);
+        mapInstanceRef.current.setCenter(position);
+        mapInstanceRef.current.setZoom(15);
+    }, [selectedCourt, isLoaded]);
+
     // 지역 선택 시 지도 이동
     const handleRegionChange = (region: string) => {
         setSelectedRegion(region);
         setSelectedCourt(null);
 
+        if (!mapInstanceRef.current) return;
+
         if (region === '전체') {
-            setMapCenter({ lat: 36.5, lng: 127.5 });
-            setMapLevel(13);
+            const center = new window.naver.maps.LatLng(36.5, 127.5);
+            mapInstanceRef.current.setCenter(center);
+            mapInstanceRef.current.setZoom(13);
         } else {
-            // 선택한 지역의 첫 번째 법원 위치로 이동
             const regionCourts = Object.entries(courtLocations).filter(
                 ([_, loc]) => loc.region === region
             );
             if (regionCourts.length > 0) {
                 const [_, firstCourt] = regionCourts[0];
-                setMapCenter({ lat: firstCourt.lat, lng: firstCourt.lng });
-                setMapLevel(10);
+                const center = new window.naver.maps.LatLng(firstCourt.lat, firstCourt.lng);
+                mapInstanceRef.current.setCenter(center);
+                mapInstanceRef.current.setZoom(10);
             }
         }
     };
@@ -138,8 +256,6 @@ export default function CourtMap({ notices }: CourtMapProps) {
     // 마커 클릭 핸들러
     const handleMarkerClick = (marker: MarkerData) => {
         setSelectedCourt(marker);
-        setMapCenter({ lat: marker.lat, lng: marker.lng });
-        setMapLevel(8);
     };
 
     // 카테고리 라벨
@@ -221,10 +337,11 @@ export default function CourtMap({ notices }: CourtMapProps) {
                 <div className="flex flex-wrap gap-2">
                     <button
                         onClick={() => handleRegionChange('전체')}
-                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedRegion === '전체'
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                            selectedRegion === '전체'
                                 ? 'bg-indigo-600 text-white'
                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
+                        }`}
                     >
                         전체 ({markerData.reduce((sum, m) => sum + m.count, 0)}건)
                     </button>
@@ -237,10 +354,11 @@ export default function CourtMap({ notices }: CourtMapProps) {
                             <button
                                 key={region}
                                 onClick={() => handleRegionChange(region)}
-                                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedRegion === region
+                                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                                    selectedRegion === region
                                         ? 'bg-indigo-600 text-white'
                                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                    }`}
+                                }`}
                             >
                                 {region} ({regionCount}건)
                             </button>
@@ -252,96 +370,26 @@ export default function CourtMap({ notices }: CourtMapProps) {
             {/* 지도 및 사이드바 */}
             <div className="flex flex-col lg:flex-row gap-4">
                 {/* 지도 */}
-                <div className="flex-1 bg-white rounded-lg shadow overflow-hidden">
-                    <Map
-                        center={mapCenter}
-                        level={mapLevel}
-                        style={{ width: '100%', height: '600px' }}
-                        onCenterChanged={(map) =>
-                            setMapCenter({
-                                lat: map.getCenter().getLat(),
-                                lng: map.getCenter().getLng(),
-                            })
-                        }
-                        onZoomChanged={(map) => setMapLevel(map.getLevel())}
-                    >
-                        <MarkerClusterer
-                            averageCenter={true}
-                            minLevel={10}
-                            styles={[
-                                {
-                                    width: '50px',
-                                    height: '50px',
-                                    background: 'rgba(79, 70, 229, 0.8)',
-                                    borderRadius: '50%',
-                                    color: '#fff',
-                                    textAlign: 'center',
-                                    lineHeight: '50px',
-                                    fontSize: '14px',
-                                    fontWeight: 'bold',
-                                },
-                                {
-                                    width: '60px',
-                                    height: '60px',
-                                    background: 'rgba(79, 70, 229, 0.85)',
-                                    borderRadius: '50%',
-                                    color: '#fff',
-                                    textAlign: 'center',
-                                    lineHeight: '60px',
-                                    fontSize: '16px',
-                                    fontWeight: 'bold',
-                                },
-                                {
-                                    width: '70px',
-                                    height: '70px',
-                                    background: 'rgba(79, 70, 229, 0.9)',
-                                    borderRadius: '50%',
-                                    color: '#fff',
-                                    textAlign: 'center',
-                                    lineHeight: '70px',
-                                    fontSize: '18px',
-                                    fontWeight: 'bold',
-                                },
-                            ]}
-                        >
-                            {filteredMarkers.map((marker) => (
-                                <MapMarker
-                                    key={marker.courtName}
-                                    position={{ lat: marker.lat, lng: marker.lng }}
-                                    onClick={() => handleMarkerClick(marker)}
-                                    image={{
-                                        src: 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png',
-                                        size: { width: 24, height: 35 },
-                                    }}
-                                />
-                            ))}
-                        </MarkerClusterer>
-
-                        {/* 선택된 법원 오버레이 */}
-                        {selectedCourt && (
-                            <CustomOverlayMap
-                                position={{ lat: selectedCourt.lat, lng: selectedCourt.lng }}
-                                yAnchor={1.4}
-                            >
-                                <div className="bg-white rounded-lg shadow-lg p-3 min-w-[200px] max-w-[280px]">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <h3 className="font-bold text-indigo-700">{selectedCourt.courtName}</h3>
-                                        <button
-                                            onClick={() => setSelectedCourt(null)}
-                                            className="text-gray-400 hover:text-gray-600"
-                                        >
-                                            ✕
-                                        </button>
-                                    </div>
-                                    <p className="text-xs text-gray-500 mb-2">{selectedCourt.address}</p>
-                                    <p className="text-sm font-medium text-gray-700">
-                                        총 <span className="text-indigo-600 font-bold">{selectedCourt.count}건</span>의
-                                        공고
-                                    </p>
-                                </div>
-                            </CustomOverlayMap>
-                        )}
-                    </Map>
+                <div className="flex-1 bg-white rounded-lg shadow overflow-hidden relative">
+                    <div ref={mapRef} style={{ width: '100%', height: '600px' }} />
+                    {/* 선택된 법원 정보 오버레이 */}
+                    {selectedCourt && (
+                        <div className="absolute top-2 left-2 bg-white rounded-lg shadow-lg p-3 min-w-[200px] max-w-[280px] z-10">
+                            <div className="flex justify-between items-start mb-2">
+                                <h3 className="font-bold text-indigo-700">{selectedCourt.courtName}</h3>
+                                <button
+                                    onClick={() => setSelectedCourt(null)}
+                                    className="text-gray-400 hover:text-gray-600"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                            <p className="text-xs text-gray-500 mb-2">{selectedCourt.address}</p>
+                            <p className="text-sm font-medium text-gray-700">
+                                총 <span className="text-indigo-600 font-bold">{selectedCourt.count}건</span>의 공고
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 {/* 사이드바 - 선택된 법원의 공고 목록 */}

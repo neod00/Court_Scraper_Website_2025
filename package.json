@@ -13,8 +13,7 @@
     "iconv-lite": "^0.7.1",
     "next": "16.0.10",
     "react": "19.2.1",
-    "react-dom": "19.2.1",
-    "react-kakao-maps-sdk": "^1.2.0"
+    "react-dom": "19.2.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
