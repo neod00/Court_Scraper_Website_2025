@@ -20,7 +20,7 @@ export default async function Home({ searchParams }: HomeProps) {
   const keyword = typeof params.q === 'string' ? params.q : '';
   const category = typeof params.cat === 'string' ? params.cat : '';
 
-  // Build Query
+  // Build Query for search results
   let query = supabase
     .from('court_notices')
     .select('*', { count: 'exact' });
@@ -47,6 +47,34 @@ export default async function Home({ searchParams }: HomeProps) {
   if (error) {
     console.error('Error fetching notices:', error);
   }
+
+  // Calculate dates for weekly notices (last 7 days)
+  const today = new Date();
+  const weekAgo = new Date(today);
+  weekAgo.setDate(today.getDate() - 7);
+
+  const todayStr = today.toISOString().split('T')[0];
+  const weekAgoStr = weekAgo.toISOString().split('T')[0];
+
+  // Query for weekly real estate notices
+  const { data: realEstateNotices } = await supabase
+    .from('court_notices')
+    .select('*')
+    .gte('date_posted', weekAgoStr)
+    .lte('date_posted', todayStr)
+    .eq('category', 'real_estate')
+    .order('date_posted', { ascending: false })
+    .limit(10);
+
+  // Query for weekly vehicle notices
+  const { data: vehicleNotices } = await supabase
+    .from('court_notices')
+    .select('*')
+    .gte('date_posted', weekAgoStr)
+    .lte('date_posted', todayStr)
+    .eq('category', 'vehicle')
+    .order('date_posted', { ascending: false })
+    .limit(10);
 
   return (
     <div className="flex flex-col lg:flex-row gap-8">
@@ -100,6 +128,65 @@ export default async function Home({ searchParams }: HomeProps) {
               </div>
             </div>
           )}
+        </div>
+
+        {/* Weekly Notices Section - Bottom of Page */}
+        <div className="mt-12 border-t border-gray-200 pt-8">
+          <div className="flex items-center gap-2 mb-6">
+            <span className="text-2xl">📌</span>
+            <h2 className="text-xl font-bold text-gray-900">
+              최근 1주일 주요 공고
+            </h2>
+            <span className="text-sm text-gray-500 ml-2">
+              ({weekAgoStr} ~ {todayStr})
+            </span>
+          </div>
+
+          {/* Real Estate Section */}
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                🏠 부동산
+              </span>
+              <span className="text-sm text-gray-500">
+                {realEstateNotices?.length || 0}건
+              </span>
+            </div>
+            {realEstateNotices && realEstateNotices.length > 0 ? (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+                {realEstateNotices.map((notice) => (
+                  <NoticeCard key={notice.id} notice={notice} />
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 bg-gray-50 p-4 rounded-md">
+                최근 1주일간 부동산 관련 공고가 없습니다.
+              </p>
+            )}
+          </div>
+
+          {/* Vehicle Section */}
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                🚗 차량/중기
+              </span>
+              <span className="text-sm text-gray-500">
+                {vehicleNotices?.length || 0}건
+              </span>
+            </div>
+            {vehicleNotices && vehicleNotices.length > 0 ? (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+                {vehicleNotices.map((notice) => (
+                  <NoticeCard key={notice.id} notice={notice} />
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500 bg-gray-50 p-4 rounded-md">
+                최근 1주일간 차량/중기 관련 공고가 없습니다.
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </div>
