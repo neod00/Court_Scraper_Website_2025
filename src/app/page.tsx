@@ -20,32 +20,45 @@ export default async function Home({ searchParams }: HomeProps) {
   const keyword = typeof params.q === 'string' ? params.q : '';
   const category = typeof params.cat === 'string' ? params.cat : '';
 
-  // Build Query for search results
-  let query = supabase
-    .from('court_notices')
-    .select('*', { count: 'exact' });
+  // Check if any search parameter is provided
+  const hasSearchParams = start || end || keyword || category;
 
-  // Apply Filters
-  if (start) {
-    query = query.gte('date_posted', start);
-  }
-  if (end) {
-    query = query.lte('date_posted', end);
-  }
-  if (category) {
-    query = query.eq('category', category);
-  }
-  if (keyword) {
-    query = query.or(`title.ilike.%${keyword}%,content_text.ilike.%${keyword}%`);
-  }
+  // Only execute search query if user has provided search params
+  let notices: any[] | null = null;
+  let count: number | null = null;
+  let error: any = null;
 
-  // Default Order & Limit
-  query = query.order('date_posted', { ascending: false }).limit(50);
+  if (hasSearchParams) {
+    // Build Query for search results
+    let query = supabase
+      .from('court_notices')
+      .select('*', { count: 'exact' });
 
-  const { data: notices, error, count } = await query;
+    // Apply Filters
+    if (start) {
+      query = query.gte('date_posted', start);
+    }
+    if (end) {
+      query = query.lte('date_posted', end);
+    }
+    if (category) {
+      query = query.eq('category', category);
+    }
+    if (keyword) {
+      query = query.or(`title.ilike.%${keyword}%,content_text.ilike.%${keyword}%`);
+    }
 
-  if (error) {
-    console.error('Error fetching notices:', error);
+    // Default Order & Limit
+    query = query.order('date_posted', { ascending: false }).limit(50);
+
+    const result = await query;
+    notices = result.data;
+    count = result.count;
+    error = result.error;
+
+    if (error) {
+      console.error('Error fetching notices:', error);
+    }
   }
 
   // Calculate dates for weekly notices (last 7 days)
