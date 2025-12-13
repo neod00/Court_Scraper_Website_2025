@@ -84,6 +84,11 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} min-h-screen flex flex-col bg-gray-50`}>
+        {/* Kakao Maps SDK */}
+        <Script
+          src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_API_KEY}&libraries=clusterer&autoload=false`}
+          strategy="beforeInteractive"
+        />
         {/* Google AdSense */}
         <Script
           async

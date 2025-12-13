@@ -1,9 +1,16 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { Map, MapMarker, MarkerClusterer, CustomOverlayMap, useKakaoLoader } from 'react-kakao-maps-sdk';
+import { useState, useMemo, useEffect } from 'react';
+import { Map, MapMarker, MarkerClusterer, CustomOverlayMap } from 'react-kakao-maps-sdk';
 import { courtLocations, findCourtLocation, regions } from '@/data/courtLocations';
 import Link from 'next/link';
+
+// Kakao Maps SDK 타입 선언
+declare global {
+    interface Window {
+        kakao: any;
+    }
+}
 
 interface CourtNotice {
     site_id: string;
@@ -29,16 +36,47 @@ interface MarkerData {
 }
 
 export default function CourtMap({ notices }: CourtMapProps) {
-    // useKakaoLoader로 SDK 로드
-    const [loading, error] = useKakaoLoader({
-        appkey: process.env.NEXT_PUBLIC_KAKAO_MAP_API_KEY!,
-        libraries: ['clusterer'],
-    });
-
+    const [isLoaded, setIsLoaded] = useState(false);
+    const [loadError, setLoadError] = useState<string | null>(null);
     const [selectedCourt, setSelectedCourt] = useState<MarkerData | null>(null);
     const [selectedRegion, setSelectedRegion] = useState<string>('전체');
     const [mapCenter, setMapCenter] = useState({ lat: 36.5, lng: 127.5 }); // 한국 중심
     const [mapLevel, setMapLevel] = useState(13); // 전국 보기
+
+    // Kakao Maps SDK 로드 확인
+    useEffect(() => {
+        const checkKakaoLoaded = () => {
+            if (window.kakao && window.kakao.maps) {
+                window.kakao.maps.load(() => {
+                    setIsLoaded(true);
+                    setLoadError(null);
+                });
+                return true;
+            }
+            return false;
+        };
+
+        // 이미 로드되어 있는지 확인
+        if (checkKakaoLoaded()) {
+            return;
+        }
+
+        // 로드될 때까지 폴링 (최대 10초)
+        let attempts = 0;
+        const maxAttempts = 50; // 200ms * 50 = 10초
+        
+        const intervalId = setInterval(() => {
+            attempts++;
+            if (checkKakaoLoaded()) {
+                clearInterval(intervalId);
+            } else if (attempts >= maxAttempts) {
+                clearInterval(intervalId);
+                setLoadError('카카오 맵 SDK 로드 시간이 초과되었습니다. 페이지를 새로고침해주세요.');
+            }
+        }, 200);
+
+        return () => clearInterval(intervalId);
+    }, []);
 
     // 공고를 법원별로 그룹화
     const markerData = useMemo(() => {
@@ -145,16 +183,13 @@ export default function CourtMap({ notices }: CourtMapProps) {
     };
 
     // 에러 상태
-    if (error) {
+    if (loadError) {
         return (
             <div className="flex items-center justify-center h-[600px] bg-gray-100 rounded-lg">
                 <div className="text-center p-8">
                     <div className="text-red-500 text-5xl mb-4">⚠️</div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-2">지도 로딩 실패</h3>
-                    <p className="text-gray-600 mb-4">
-                        카카오 맵을 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.
-                    </p>
-                    <p className="text-gray-400 text-xs mb-4">{error.message}</p>
+                    <p className="text-gray-600 mb-4">{loadError}</p>
                     <button
                         onClick={handleRetry}
                         className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
@@ -167,7 +202,7 @@ export default function CourtMap({ notices }: CourtMapProps) {
     }
 
     // 로딩 상태
-    if (loading) {
+    if (!isLoaded) {
         return (
             <div className="flex items-center justify-center h-[600px] bg-gray-100 rounded-lg">
                 <div className="text-center">
