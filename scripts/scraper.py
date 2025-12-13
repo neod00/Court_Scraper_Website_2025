@@ -102,15 +102,24 @@ class CourtScraper:
         """Deletes records older than X days based on date_posted."""
         try:
             cutoff_date = (datetime.now() - timedelta(days=days)).date().isoformat()
-            # Disable RLS or ensure Service Key is used
             result = supabase.table("court_notices").delete().lt("date_posted", cutoff_date).execute()
             print(f"Cleanup: Deleted records older than {days} days (before {cutoff_date}).")
         except Exception as e:
             print(f"Error deleting old records: {e}")
 
+    def delete_expired_records(self):
+        """Deletes records where expiry_date has passed."""
+        try:
+            today = date.today().isoformat()
+            result = supabase.table("court_notices").delete().lt("expiry_date", today).execute()
+            print(f"Cleanup: Deleted expired notices (expiry_date < {today}).")
+        except Exception as e:
+            print(f"Error deleting expired records: {e}")
+
     def scrape_and_save(self, pages_to_scrape=3):
-        # 1. Cleanup old records first
+        # 1. Cleanup old records and expired notices
         self.delete_old_records(90)
+        self.delete_expired_records()
         
         print(f"Starting Scraper... Target Pages: {pages_to_scrape}")
         count_new = 0
@@ -152,6 +161,11 @@ class CourtScraper:
                         department = self.extract_text_by_th(det_soup, '관할법원')
                         manager = self.extract_text_by_th(det_soup, '작성자')
                         
+                        # New fields: 매각기관, 공고만료일, 전화번호
+                        sale_org = self.extract_text_by_th(det_soup, '매각기관')
+                        expiry_str = self.extract_text_by_th(det_soup, '공고만료일')
+                        phone = self.extract_text_by_th(det_soup, '전화번호')
+                        
                         # Date parsing
                         date_posted = None
                         if date_str:
@@ -162,6 +176,14 @@ class CourtScraper:
                                  pass
                         
                         if not date_posted: continue
+                        
+                        # Expiry date parsing
+                        expiry_date = None
+                        if expiry_str:
+                            try:
+                                expiry_date = datetime.strptime(expiry_str, '%Y.%m.%d').date().isoformat()
+                            except:
+                                pass
 
                         # File Info
                         file_info_list = self.get_file_info_json(det_soup)
@@ -189,7 +211,10 @@ class CourtScraper:
                             "detail_link": detail_url,
                             "file_info": file_info_list if file_info_list else None,
                             "category": category,
-                            "content_text": title
+                            "content_text": title,
+                            "sale_org": sale_org,
+                            "expiry_date": expiry_date,
+                            "phone": phone
                         }
                         
                         result = supabase.table("court_notices").upsert(data, on_conflict="site_id").execute()

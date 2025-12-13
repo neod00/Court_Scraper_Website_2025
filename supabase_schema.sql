@@ -11,6 +11,9 @@ create table public.court_notices (
   detail_link text not null,
   content_text text null,
   category text null,
+  sale_org text null,       -- 매각기관
+  expiry_date date null,    -- 공고만료일
+  phone text null,          -- 전화번호
   created_at timestamp with time zone not null default now(),
   constraint court_notices_pkey primary key (id),
   constraint court_notices_site_id_key unique (site_id)
