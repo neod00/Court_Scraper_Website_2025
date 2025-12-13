@@ -8,6 +8,7 @@ export default function Header() {
 
   const navLinks = [
     { href: '/', label: '홈' },
+    { href: '/map', label: '🗺️ 지역별 지도' },
     { href: '/about', label: '서비스 소개' },
     { href: '/faq', label: 'FAQ' },
     { href: '/contact', label: '문의' },
