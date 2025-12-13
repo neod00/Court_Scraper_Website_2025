@@ -39,7 +39,7 @@ export default function SearchForm() {
     };
 
     return (
-        <div className="bg-white rounded-lg p-0 mb-8">
+        <form onSubmit={handleSubmit} className="bg-white rounded-lg p-0 mb-8">
             {/* Date Inputs */}
             <div className="mb-8">
                 <div className="flex items-center gap-2 mb-4">
@@ -139,6 +139,6 @@ export default function SearchForm() {
 
             {/* Search Info - Blue Box */}
             {/* This will be shown in the parent or below based on results, but let's keep the form clean */}
-        </div>
+        </form>
     );
 }
