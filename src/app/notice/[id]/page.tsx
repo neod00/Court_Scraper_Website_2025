@@ -8,13 +8,17 @@ import DownloadFiles from '@/components/DownloadFiles';
 export const revalidate = 3600;
 
 interface PageProps {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 }
 
 export default async function NoticeDetail({ params }: PageProps) {
-    const { id } = params;
+    const { id } = await params;
+
+    if (!id) {
+        notFound();
+    }
 
     const { data: notice, error } = await supabase
         .from('court_notices')
