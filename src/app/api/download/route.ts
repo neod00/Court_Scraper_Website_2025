@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import iconv from 'iconv-lite';
 
 export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
@@ -13,48 +14,19 @@ export async function GET(request: NextRequest) {
         );
     }
 
-    try {
-        // Construct the court server URL
-        const courtUrl = new URL('https://file.scourt.go.kr/AttachDownload');
-        courtUrl.searchParams.set('path', path);
-        courtUrl.searchParams.set('file', serverFilename);
-        courtUrl.searchParams.set('downFile', originalFilename);
+    // Encode server filename using standard URL encoding
+    const encodedServerFilename = encodeURIComponent(serverFilename);
 
-        // Fetch the file from the court server
-        const response = await fetch(courtUrl.toString(), {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Referer': 'https://www.scourt.go.kr/',
-            },
-        });
-
-        if (!response.ok) {
-            return NextResponse.json(
-                { error: `Failed to fetch file: ${response.status}` },
-                { status: response.status }
-            );
-        }
-
-        // Get the file content as array buffer
-        const fileBuffer = await response.arrayBuffer();
-
-        // RFC 5987 encoding for Content-Disposition header with Korean filename
-        const encodedFilename = encodeURIComponent(originalFilename).replace(/'/g, '%27');
-
-        // Return the file with properly encoded Content-Disposition header
-        return new NextResponse(fileBuffer, {
-            status: 200,
-            headers: {
-                'Content-Type': response.headers.get('Content-Type') || 'application/octet-stream',
-                'Content-Disposition': `attachment; filename="${originalFilename}"; filename*=UTF-8''${encodedFilename}`,
-                'Content-Length': fileBuffer.byteLength.toString(),
-            },
-        });
-    } catch (error) {
-        console.error('Download proxy error:', error);
-        return NextResponse.json(
-            { error: 'Failed to download file' },
-            { status: 500 }
-        );
+    // Encode original filename to EUC-KR, then URL encode
+    const eucKrBuffer = iconv.encode(originalFilename, 'euc-kr');
+    let encodedOriginalFilename = '';
+    for (const byte of eucKrBuffer) {
+        encodedOriginalFilename += '%' + byte.toString(16).toUpperCase().padStart(2, '0');
     }
+
+    // Construct the court server URL with EUC-KR encoded filename
+    const courtUrl = `https://file.scourt.go.kr/AttachDownload?path=${path}&file=${encodedServerFilename}&downFile=${encodedOriginalFilename}`;
+
+    // Redirect to the court server
+    return NextResponse.redirect(courtUrl);
 }
