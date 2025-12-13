@@ -1,0 +1,8 @@
+# 대법원 회생·파산 자산매각 공고 자동조회 시스템
+# https://court-auction-scraper.vercel.app
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://court-auction-scraper.vercel.app/sitemap.xml
