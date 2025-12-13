@@ -149,7 +149,7 @@ class CourtScraper:
                         det_soup = BeautifulSoup(det_res.text, 'html.parser')
                         
                         date_str = self.extract_text_by_th(det_soup, '작성일')
-                        department = self.extract_text_by_th(det_soup, '부서')
+                        department = self.extract_text_by_th(det_soup, '관할법원')
                         manager = self.extract_text_by_th(det_soup, '작성자')
                         
                         # Date parsing

@@ -7,8 +7,8 @@ import Footer from '@/components/Footer';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: '법원경매 알리미 2025',
-  description: '전국 법원 경매/공매 공고를 쉽고 빠르게 검색하세요.',
+  title: '대법원 회생·파산 자산매각 공고 자동조회 시스템',
+  description: '대법원 회생·파산 자산매각 공고를 자동으로 수집하여 제공합니다. 부동산, 차량, 채권, 주식, 특허 등 다양한 매각 자산 정보를 쉽고 빠르게 검색하세요.',
 };
 
 export default function RootLayout({

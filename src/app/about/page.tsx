@@ -1,14 +1,15 @@
 export default function AboutPage() {
     return (
         <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">🏛️ 서비스 소개</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-6">⚖️ 시스템 소개</h1>
 
             <div className="bg-white shadow rounded-lg p-6 space-y-6">
                 <section>
-                    <h2 className="text-xl font-semibold text-gray-800 mb-3">법원경매 알리미 2025란?</h2>
+                    <h2 className="text-xl font-semibold text-gray-800 mb-3">대법원 회생·파산 자산매각 공고 자동조회 시스템이란?</h2>
                     <p className="text-gray-600 leading-relaxed">
-                        대법원 회생·파산 자산매각 공고를 자동으로 수집하여 한눈에 볼 수 있도록 제공하는 서비스입니다.
-                        부동산, 차량, 채권, 주식, 특허 등 다양한 자산 정보를 카테고리별로 쉽게 검색할 수 있습니다.
+                        대법원 회생·파산 자산매각 공고를 자동으로 수집하여 한눈에 볼 수 있도록 제공하는 전문 시스템입니다.
+                        부동산, 차량, 채권, 주식, 특허 등 다양한 매각 자산 정보를 카테고리별로 쉽게 검색하고,
+                        원하는 조건의 매물을 빠르게 찾을 수 있습니다.
                     </p>
                 </section>
 
