@@ -7,15 +7,18 @@ import Sidebar from '@/components/Sidebar';
 export const dynamic = 'force-dynamic';
 
 interface HomeProps {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export default async function Home({ searchParams }: HomeProps) {
+  // Await searchParams (required in Next.js 15+)
+  const params = await searchParams;
+
   // Parse Search Params
-  const start = typeof searchParams.start === 'string' ? searchParams.start : '';
-  const end = typeof searchParams.end === 'string' ? searchParams.end : '';
-  const keyword = typeof searchParams.q === 'string' ? searchParams.q : '';
-  const category = typeof searchParams.cat === 'string' ? searchParams.cat : '';
+  const start = typeof params.start === 'string' ? params.start : '';
+  const end = typeof params.end === 'string' ? params.end : '';
+  const keyword = typeof params.q === 'string' ? params.q : '';
+  const category = typeof params.cat === 'string' ? params.cat : '';
 
   // Build Query
   let query = supabase
