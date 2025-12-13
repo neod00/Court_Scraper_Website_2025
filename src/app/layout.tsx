@@ -84,15 +84,15 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} min-h-screen flex flex-col bg-gray-50`}>
-        {/* Naver Maps API */}
+        {/* Naver Maps API - afterInteractive for proper client-side loading */}
         <Script
           src={`https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${process.env.NEXT_PUBLIC_NAVER_MAP_CLIENT_ID}`}
-          strategy="beforeInteractive"
+          strategy="afterInteractive"
         />
         {/* Naver Maps Marker Clustering */}
         <Script
           src="https://navermaps.github.io/maps.js.ncp/lib/marker-clustering.js"
-          strategy="lazyOnload"
+          strategy="afterInteractive"
         />
         {/* Google AdSense */}
         <Script
