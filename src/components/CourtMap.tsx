@@ -37,6 +37,7 @@ interface MarkerData {
 
 export default function CourtMap({ notices }: CourtMapProps) {
     const [isLoaded, setIsLoaded] = useState(false);
+    const [loadError, setLoadError] = useState<string | null>(null);
     const [selectedCourt, setSelectedCourt] = useState<MarkerData | null>(null);
     const [selectedRegion, setSelectedRegion] = useState<string>('전체');
     const [mapCenter, setMapCenter] = useState({ lat: 36.5, lng: 127.5 }); // 한국 중심
@@ -44,20 +45,49 @@ export default function CourtMap({ notices }: CourtMapProps) {
 
     // Kakao Maps SDK 스크립트 로드
     useEffect(() => {
+        // 이미 로드되어 있는지 확인
+        if (window.kakao?.maps) {
+            setIsLoaded(true);
+            return;
+        }
+
         const script = document.createElement('script');
         script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_API_KEY}&autoload=false&libraries=clusterer`;
         script.async = true;
+
+        // 타임아웃 설정 (10초)
+        const timeoutId = setTimeout(() => {
+            if (!isLoaded) {
+                setLoadError('지도 로딩 시간이 초과되었습니다. 네트워크 연결을 확인해주세요.');
+            }
+        }, 10000);
+
         script.onload = () => {
-            window.kakao.maps.load(() => {
-                setIsLoaded(true);
-            });
+            clearTimeout(timeoutId);
+            try {
+                window.kakao.maps.load(() => {
+                    setIsLoaded(true);
+                    setLoadError(null);
+                });
+            } catch (err) {
+                setLoadError('카카오 맵 초기화에 실패했습니다.');
+            }
         };
+
+        script.onerror = () => {
+            clearTimeout(timeoutId);
+            setLoadError('카카오 맵 SDK를 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.');
+        };
+
         document.head.appendChild(script);
 
         return () => {
-            document.head.removeChild(script);
+            clearTimeout(timeoutId);
+            if (document.head.contains(script)) {
+                document.head.removeChild(script);
+            }
         };
-    }, []);
+    }, [isLoaded]);
 
     // 공고를 법원별로 그룹화
     const markerData = useMemo(() => {
@@ -158,12 +188,48 @@ export default function CourtMap({ notices }: CourtMapProps) {
     // 총 공고 수 계산
     const totalNotices = filteredMarkers.reduce((sum, m) => sum + m.count, 0);
 
+    // 재시도 핸들러
+    const handleRetry = () => {
+        setLoadError(null);
+        setIsLoaded(false);
+        // 기존 스크립트 제거
+        const existingScript = document.querySelector('script[src*="dapi.kakao.com"]');
+        if (existingScript) {
+            existingScript.remove();
+        }
+        // kakao 객체 초기화
+        if (window.kakao) {
+            delete (window as any).kakao;
+        }
+    };
+
+    // 에러 상태
+    if (loadError) {
+        return (
+            <div className="flex items-center justify-center h-[600px] bg-gray-100 rounded-lg">
+                <div className="text-center p-8">
+                    <div className="text-red-500 text-5xl mb-4">⚠️</div>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-2">지도 로딩 실패</h3>
+                    <p className="text-gray-600 mb-4">{loadError}</p>
+                    <button
+                        onClick={handleRetry}
+                        className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                    >
+                        다시 시도
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    // 로딩 상태
     if (!isLoaded) {
         return (
             <div className="flex items-center justify-center h-[600px] bg-gray-100 rounded-lg">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
                     <p className="text-gray-600">지도를 불러오는 중...</p>
+                    <p className="text-gray-400 text-sm mt-2">잠시만 기다려주세요...</p>
                 </div>
             </div>
         );
