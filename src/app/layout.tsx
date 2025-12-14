@@ -84,14 +84,19 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} min-h-screen flex flex-col bg-gray-50`}>
-        {/* Naver Maps API - afterInteractive for proper client-side loading */}
+        {/* Google Maps API 로드 완료 콜백 함수 정의 (먼저 로드) */}
+        <Script id="google-maps-callback" strategy="beforeInteractive">
+          {`window.initGoogleMap = function() {
+            console.log('구글 지도 API 로드 완료 (callback)');
+            window.googleMapReady = true;
+            if (window.onGoogleMapReady) {
+              window.onGoogleMapReady();
+            }
+          };`}
+        </Script>
+        {/* Google Maps API - callback 방식으로 비동기 로딩 */}
         <Script
-          src={`https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${process.env.NEXT_PUBLIC_NAVER_MAP_CLIENT_ID}`}
-          strategy="afterInteractive"
-        />
-        {/* Naver Maps Marker Clustering */}
-        <Script
-          src="https://navermaps.github.io/maps.js.ncp/lib/marker-clustering.js"
+          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY || ''}&libraries=geometry&language=ko&callback=initGoogleMap`}
           strategy="afterInteractive"
         />
         {/* Google AdSense */}

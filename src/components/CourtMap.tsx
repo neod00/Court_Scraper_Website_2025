@@ -4,10 +4,13 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { courtLocations, findCourtLocation, regions } from '@/data/courtLocations';
 import Link from 'next/link';
 
-// Naver Maps 타입 선언
+// Google Maps 타입 선언
 declare global {
     interface Window {
-        naver: any;
+        google: any;
+        initGoogleMap?: () => void;
+        googleMapReady?: boolean;
+        onGoogleMapReady?: () => void;
     }
 }
 
@@ -36,17 +39,16 @@ interface MarkerData {
 
 export default function CourtMap({ notices }: CourtMapProps) {
     const mapRef = useRef<HTMLDivElement>(null);
-    const mapInstanceRef = useRef<any>(null);
-    const markersRef = useRef<any[]>([]);
-    const clustererRef = useRef<any>(null);
-    const infoWindowRef = useRef<any>(null);
+    const mapInstanceRef = useRef<google.maps.Map | null>(null);
+    const markersRef = useRef<google.maps.Marker[]>([]);
+    const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
 
     const [isLoaded, setIsLoaded] = useState(false);
     const [loadError, setLoadError] = useState<string | null>(null);
     const [selectedCourt, setSelectedCourt] = useState<MarkerData | null>(null);
     const [selectedRegion, setSelectedRegion] = useState<string>('전체');
     const [mapCenter, setMapCenter] = useState({ lat: 36.5, lng: 127.5 }); // 한국 중심
-    const [mapZoom, setMapZoom] = useState(13); // 전국 보기
+    const [mapZoom, setMapZoom] = useState(7); // 전국 보기
 
     // 공고를 법원별로 그룹화
     const markerData = useMemo(() => {
@@ -84,147 +86,182 @@ export default function CourtMap({ notices }: CourtMapProps) {
         return markerData.filter((m) => m.region === selectedRegion);
     }, [markerData, selectedRegion]);
 
-    // 네이버 지도 초기화
+    // 구글 지도 초기화
     useEffect(() => {
         if (!mapRef.current) return;
 
         const initMap = () => {
-            if (!window.naver || !window.naver.maps) {
-                setLoadError('네이버 지도 API를 불러오는데 실패했습니다.');
+            if (!window.google || !window.google.maps) {
+                setLoadError('구글 지도 API를 불러오는데 실패했습니다.');
                 return;
             }
 
             try {
-                const mapOptions = {
-                    center: new window.naver.maps.LatLng(mapCenter.lat, mapCenter.lng),
+                console.log('구글 지도 초기화 시작...');
+                const mapOptions: google.maps.MapOptions = {
+                    center: { lat: mapCenter.lat, lng: mapCenter.lng },
                     zoom: mapZoom,
                     zoomControl: true,
-                    zoomControlOptions: {
-                        position: window.naver.maps.Position.TOP_RIGHT,
-                    },
+                    mapTypeControl: false,
+                    streetViewControl: false,
+                    fullscreenControl: true,
                 };
 
-                const map = new window.naver.maps.Map(mapRef.current!, mapOptions);
+                const map = new window.google.maps.Map(mapRef.current!, mapOptions);
                 mapInstanceRef.current = map;
 
                 // 지도 이벤트 리스너
-                window.naver.maps.Event.addListener(map, 'center_changed', () => {
+                map.addListener('center_changed', () => {
                     const center = map.getCenter();
-                    setMapCenter({ lat: center.lat(), lng: center.lng() });
+                    if (center) {
+                        setMapCenter({ lat: center.lat(), lng: center.lng() });
+                    }
                 });
 
-                window.naver.maps.Event.addListener(map, 'zoom_changed', () => {
-                    setMapZoom(map.getZoom());
+                map.addListener('zoom_changed', () => {
+                    setMapZoom(map.getZoom() || 7);
                 });
 
                 setIsLoaded(true);
                 setLoadError(null);
+                console.log('구글 지도 초기화 완료!');
             } catch (error) {
-                console.error('네이버 지도 초기화 실패:', error);
+                console.error('구글 지도 초기화 실패:', error);
                 setLoadError('지도를 초기화하는데 실패했습니다.');
             }
         };
 
-        // 네이버 지도 API 로드 확인
-        if (window.naver && window.naver.maps) {
+        // callback 방식: window.googleMapReady가 true이면 바로 초기화
+        if (window.googleMapReady && window.google && window.google.maps) {
+            console.log('구글 지도 API 이미 로드됨 (googleMapReady)');
             initMap();
         } else {
-            // 로드될 때까지 폴링 (최대 10초)
+            // 콜백이 호출될 때 초기화
+            console.log('구글 지도 API 로드 대기 중...');
+            window.onGoogleMapReady = () => {
+                console.log('onGoogleMapReady 콜백 호출됨');
+                initMap();
+            };
+
+            // 이미 로드되었는지 확인 (폴링 백업)
             let attempts = 0;
-            const maxAttempts = 50; // 200ms * 50 = 10초
+            const maxAttempts = 100; // 100ms * 100 = 10초
 
             const intervalId = setInterval(() => {
                 attempts++;
-                if (window.naver && window.naver.maps) {
+                if (window.googleMapReady || (window.google && window.google.maps && window.google.maps.Map)) {
                     clearInterval(intervalId);
+                    console.log('구글 지도 API 로드 확인 (폴링)');
                     initMap();
                 } else if (attempts >= maxAttempts) {
                     clearInterval(intervalId);
-                    setLoadError('네이버 지도 SDK 로드 시간이 초과되었습니다. 페이지를 새로고침해주세요.');
+                    setLoadError('구글 지도 SDK 로드 시간이 초과되었습니다. API 키를 확인해주세요.');
                 }
-            }, 200);
+            }, 100);
 
-            return () => clearInterval(intervalId);
+            return () => {
+                clearInterval(intervalId);
+                window.onGoogleMapReady = undefined;
+            };
         }
     }, []);
 
     // 마커 업데이트
     useEffect(() => {
-        if (!isLoaded || !mapInstanceRef.current || !window.naver) return;
+        if (!isLoaded || !mapInstanceRef.current || !window.google) return;
 
         // 기존 마커 제거
         markersRef.current.forEach((marker) => marker.setMap(null));
         markersRef.current = [];
 
-        if (clustererRef.current) {
-            clustererRef.current.clear();
+        // 기존 InfoWindow 닫기
+        if (infoWindowRef.current) {
+            infoWindowRef.current.close();
         }
 
-        // 클러스터링 라이브러리 로드 확인 및 마커 생성
-        const createMarkers = () => {
-            const map = mapInstanceRef.current;
-            const markers: any[] = [];
+        const map = mapInstanceRef.current;
+        const markers: google.maps.Marker[] = [];
 
-            filteredMarkers.forEach((markerData) => {
-                const position = new window.naver.maps.LatLng(markerData.lat, markerData.lng);
+        filteredMarkers.forEach((markerData) => {
+            const position = { lat: markerData.lat, lng: markerData.lng };
 
-                const marker = new window.naver.maps.Marker({
-                    position,
-                    map,
-                    title: markerData.courtName,
-                    icon: {
-                        content: `
-                            <div style="
-                                background: rgba(79, 70, 229, 0.9);
-                                color: white;
-                                padding: 4px 8px;
-                                border-radius: 12px;
-                                font-size: 12px;
-                                font-weight: bold;
-                                white-space: nowrap;
-                                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-                            ">
-                                ${markerData.count}
-                            </div>
-                        `,
-                        anchor: new window.naver.maps.Point(12, 12),
-                    },
-                });
+            // 커스텀 마커 아이콘 생성
+            const markerIcon = {
+                path: window.google.maps.SymbolPath.CIRCLE,
+                scale: 8,
+                fillColor: '#4F46E5',
+                fillOpacity: 0.9,
+                strokeColor: '#FFFFFF',
+                strokeWeight: 2,
+            };
 
-                // 마커 클릭 이벤트
-                window.naver.maps.Event.addListener(marker, 'click', () => {
-                    setSelectedCourt(markerData);
-                    map.setCenter(position);
-                    map.setZoom(15);
-                });
-
-                markers.push(marker);
+            const marker = new window.google.maps.Marker({
+                position,
+                map,
+                title: `${markerData.courtName} (${markerData.count}건)`,
+                icon: markerIcon,
+                label: {
+                    text: markerData.count.toString(),
+                    color: 'white',
+                    fontSize: '11px',
+                    fontWeight: 'bold',
+                },
             });
 
-            markersRef.current = markers;
+            // 마커 클릭 이벤트
+            marker.addListener('click', () => {
+                setSelectedCourt(markerData);
+                map.setCenter(position);
+                map.setZoom(15);
 
-            // 클러스터링 적용 (간단한 버전)
-            if (markers.length > 0 && window.naver.maps.MarkerClustering) {
-                if (clustererRef.current) {
-                    clustererRef.current.clear();
+                // InfoWindow 표시
+                if (infoWindowRef.current) {
+                    infoWindowRef.current.close();
                 }
-                clustererRef.current = new window.naver.maps.MarkerClustering({
-                    minClusterSize: 2,
-                    maxZoom: 13,
-                    map,
-                    markers,
-                });
-            }
-        };
 
-        createMarkers();
+                const infoWindow = new window.google.maps.InfoWindow({
+                    content: `
+                        <div style="padding: 8px; min-width: 200px;">
+                            <h3 style="margin: 0 0 8px 0; font-weight: bold; color: #4F46E5;">
+                                ${markerData.courtName}
+                            </h3>
+                            <p style="margin: 0 0 4px 0; font-size: 12px; color: #666;">
+                                ${markerData.address}
+                            </p>
+                            <p style="margin: 0; font-size: 14px; color: #333;">
+                                총 <strong style="color: #4F46E5;">${markerData.count}건</strong>의 공고
+                            </p>
+                        </div>
+                    `,
+                });
+
+                infoWindow.open(map, marker);
+                infoWindowRef.current = infoWindow;
+            });
+
+            markers.push(marker);
+        });
+
+        markersRef.current = markers;
+
+        // 마커가 있으면 지도 범위 조정
+        if (markers.length > 0) {
+            const bounds = new window.google.maps.LatLngBounds();
+            markers.forEach((marker) => {
+                const pos = marker.getPosition();
+                if (pos) {
+                    bounds.extend(pos);
+                }
+            });
+            map.fitBounds(bounds);
+        }
     }, [filteredMarkers, isLoaded]);
 
     // 선택된 법원으로 지도 이동
     useEffect(() => {
         if (!isLoaded || !mapInstanceRef.current || !selectedCourt) return;
 
-        const position = new window.naver.maps.LatLng(selectedCourt.lat, selectedCourt.lng);
+        const position = { lat: selectedCourt.lat, lng: selectedCourt.lng };
         mapInstanceRef.current.setCenter(position);
         mapInstanceRef.current.setZoom(15);
     }, [selectedCourt, isLoaded]);
@@ -237,17 +274,15 @@ export default function CourtMap({ notices }: CourtMapProps) {
         if (!mapInstanceRef.current) return;
 
         if (region === '전체') {
-            const center = new window.naver.maps.LatLng(36.5, 127.5);
-            mapInstanceRef.current.setCenter(center);
-            mapInstanceRef.current.setZoom(13);
+            mapInstanceRef.current.setCenter({ lat: 36.5, lng: 127.5 });
+            mapInstanceRef.current.setZoom(7);
         } else {
             const regionCourts = Object.entries(courtLocations).filter(
                 ([_, loc]) => loc.region === region
             );
             if (regionCourts.length > 0) {
                 const [_, firstCourt] = regionCourts[0];
-                const center = new window.naver.maps.LatLng(firstCourt.lat, firstCourt.lng);
-                mapInstanceRef.current.setCenter(center);
+                mapInstanceRef.current.setCenter({ lat: firstCourt.lat, lng: firstCourt.lng });
                 mapInstanceRef.current.setZoom(10);
             }
         }
