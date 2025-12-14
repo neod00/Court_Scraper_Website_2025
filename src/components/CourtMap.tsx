@@ -39,9 +39,9 @@ interface MarkerData {
 
 export default function CourtMap({ notices }: CourtMapProps) {
     const mapRef = useRef<HTMLDivElement>(null);
-    const mapInstanceRef = useRef<google.maps.Map | null>(null);
-    const markersRef = useRef<google.maps.Marker[]>([]);
-    const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
+    const mapInstanceRef = useRef<any>(null);
+    const markersRef = useRef<any[]>([]);
+    const infoWindowRef = useRef<any>(null);
 
     const [isLoaded, setIsLoaded] = useState(false);
     const [loadError, setLoadError] = useState<string | null>(null);
@@ -98,7 +98,7 @@ export default function CourtMap({ notices }: CourtMapProps) {
 
             try {
                 console.log('구글 지도 초기화 시작...');
-                const mapOptions: google.maps.MapOptions = {
+                const mapOptions: any = {
                     center: { lat: mapCenter.lat, lng: mapCenter.lng },
                     zoom: mapZoom,
                     zoomControl: true,
@@ -180,7 +180,7 @@ export default function CourtMap({ notices }: CourtMapProps) {
         }
 
         const map = mapInstanceRef.current;
-        const markers: google.maps.Marker[] = [];
+        const markers: any[] = [];
 
         filteredMarkers.forEach((markerData) => {
             const position = { lat: markerData.lat, lng: markerData.lng };
