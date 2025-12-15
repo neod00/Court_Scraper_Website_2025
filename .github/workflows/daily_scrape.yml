@@ -2,8 +2,10 @@ name: Daily Court Scraper
 
 on:
   schedule:
-    # Run at 15:00 UTC (00:00 KST) everyday
-    - cron: '0 15 * * *'
+    # Run at 03:00 UTC (12:00 KST) everyday
+    - cron: '0 3 * * *'
+    # Run at 09:00 UTC (18:00 KST) everyday
+    - cron: '0 9 * * *'
   workflow_dispatch:  # Manual trigger
 
 jobs:
