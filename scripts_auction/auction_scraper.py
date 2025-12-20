@@ -99,17 +99,14 @@ class AuctionScraper:
         elif '상가' in usage_lower or '근린' in usage_lower:
             category = 'commercial'
         
-        # Build correct detail link using boCd and saNo
-        bo_cd = item.get('boCd', '')
-        sa_no = item.get('saNo', '')
-        maemul_ser = item.get('maemulSer', '1')
-        detail_link = f"https://www.courtauction.go.kr/pgj/index.on?w2xPath=/pgj/ui/pgj100/PGJ151F01.xml&boCd={bo_cd}&saNo={sa_no}&maemulSer={maemul_ser}"
+        # Build correct detail link - link to main search page since direct links don't work
+        detail_link = "https://www.courtauction.go.kr/pgj/index.on?w2xPath=/pgj/ui/pgj100/PGJ151F00.xml"
         
         return {
             "site_id": site_id,
             "title": title,
             "department": item.get('jiwonNm', '') + ' ' + item.get('jpDeptNm', ''),
-            "manager": None,
+            "manager": case_no,  # Store case number here for copy feature
             "date_posted": datetime.now().date().isoformat(),
             "detail_link": detail_link,
             "content_text": address,
