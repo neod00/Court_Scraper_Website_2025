@@ -1,4 +1,4 @@
--- Create the main table for court notices
+-- Create the main table for court notices and auctions
 create table public.court_notices (
   id uuid not null default gen_random_uuid (),
   site_id text not null,
@@ -14,9 +14,17 @@ create table public.court_notices (
   sale_org text null,       -- 매각기관
   expiry_date date null,    -- 공고만료일
   phone text null,          -- 전화번호
+  -- New auction-specific fields
+  source_type text not null default 'notice', -- 'notice' or 'auction'
+  minimum_price text null,   -- 최저매각가격
+  appraised_price text null, -- 감정평가액
+  auction_date date null,    -- 매각기일
+  address text null,         -- 물건지 상세주소
+  status text null,          -- 물건상태 (신건/유찰 등)
+  thumbnail_url text null,   -- 물건 이미지 URL
   created_at timestamp with time zone not null default now(),
   constraint court_notices_pkey primary key (id),
-  constraint court_notices_site_id_key unique (site_id)
+  constraint court_notices_site_id_source_key unique (site_id, source_type)
 );
 
 -- Establish separate indices for better performance
