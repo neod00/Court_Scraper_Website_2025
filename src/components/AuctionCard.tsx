@@ -176,8 +176,9 @@ export default function AuctionCard({ auction }: { auction: AuctionItem }) {
                                     )}
                                 </div>
                                 {dday && (
-                                    <span className={`text-xs font-bold whitespace-nowrap flex-shrink-0 ${dday === 'D-Day' ? 'text-red-500' :
-                                        dday.startsWith('D-') ? 'text-indigo-500' : 'text-gray-400'
+                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded shadow-sm whitespace-nowrap flex-shrink-0
+                                        ${dday === 'D-Day' ? 'bg-red-500 text-white animate-pulse' :
+                                            dday.startsWith('D-') ? 'bg-indigo-600 text-white' : 'bg-gray-400 text-white'
                                         }`}>
                                         {dday}
                                     </span>
