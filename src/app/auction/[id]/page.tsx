@@ -115,200 +115,190 @@ export default function AuctionDetailPage({ params }: { params: Promise<{ id: st
 
     const discount = calculateDiscount(auction.appraised_price, auction.minimum_price);
     const dDay = getDDay(auction.auction_date);
+    const isYuchal = auction.status?.includes('유찰');
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-8 px-4">
-            <div className="max-w-4xl mx-auto">
-                {/* Back button */}
-                <Link
-                    href="/auction"
-                    className="inline-flex items-center text-slate-400 hover:text-white mb-6 transition-colors"
-                >
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
-                    목록으로 돌아가기
-                </Link>
+        <div className="min-h-screen bg-slate-50 text-slate-900 pb-20">
+            {/* 1. Header Navigation */}
+            <header className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
+                <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+                    <Link href="/auction" className="flex items-center text-slate-500 hover:text-blue-600 transition-colors">
+                        <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                        목록으로
+                    </Link>
+                    <div className="font-bold text-lg text-slate-800">{auction.manager}</div>
+                    <div className="w-20"></div> {/* Spacer for center alignment */}
+                </div>
+            </header>
 
-                {/* Main Card */}
-                <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50 overflow-hidden shadow-2xl">
+            <main className="max-w-6xl mx-auto px-4 py-8">
 
-                    {/* Header */}
-                    <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 p-6 border-b border-slate-700/50">
-                        <div className="flex flex-wrap items-center justify-between gap-4">
-                            <div>
-                                <div className="flex items-center gap-3 mb-2">
-                                    <span className="text-2xl">🏠</span>
-                                    <h1 className="text-2xl font-bold text-white">{auction.manager}</h1>
-                                    <button
-                                        onClick={handleCopy}
-                                        className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${copied
-                                                ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                                                : 'bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 border border-slate-600/50'
-                                            }`}
-                                    >
-                                        {copied ? '✓ 복사됨' : '복사'}
-                                    </button>
-                                </div>
-                                <div className="flex flex-wrap items-center gap-2 text-slate-400">
-                                    <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded text-sm">
-                                        {auction.category === 'apartment' ? '아파트' :
-                                            auction.category === 'villa' ? '빌라/다세대' :
-                                                auction.category === 'officetel' ? '오피스텔' :
-                                                    auction.category === 'commercial' ? '상가' : '부동산'}
+                {/* 2. Top Summary Section */}
+                <div className="grid md:grid-cols-12 gap-6 mb-8">
+
+                    {/* Left: Key Info Card (Cols 1-8) */}
+                    <div className="md:col-span-7 lg:col-span-8 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div className="p-6">
+                            <div className="flex items-center gap-3 mb-4">
+                                <span className={`px-3 py-1 rounded-full text-sm font-bold 
+                                    ${auction.category === 'apartment' ? 'bg-blue-100 text-blue-700' :
+                                        auction.category === 'villa' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700'}`}>
+                                    {auction.category === 'apartment' ? '아파트' :
+                                        auction.category === 'villa' ? '빌라/다세대' :
+                                            auction.category === 'commercial' ? '상가' : '부동산'}
+                                </span>
+                                {dDay && (
+                                    <span className={`px-3 py-1 rounded-full text-sm font-bold ${dDay === 'D-Day' ? 'bg-red-500 text-white' : 'bg-slate-800 text-white'}`}>
+                                        {dDay}
                                     </span>
-                                    <span>|</span>
-                                    <span>{auction.department}</span>
-                                </div>
+                                )}
                             </div>
 
-                            {dDay && (
-                                <div className={`px-4 py-2 rounded-xl text-lg font-bold ${dDay === 'D-Day' ? 'bg-red-500 text-white' :
-                                        dDay.startsWith('D-') ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' :
-                                            'bg-slate-600/50 text-slate-400'
-                                    }`}>
-                                    {dDay}
+                            <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2 leading-tight">
+                                {auction.address}
+                            </h1>
+                            <p className="text-slate-500 text-lg mb-6">{auction.building_info || "건물 정보 없음"}</p>
+
+                            {/* Price Timeline Visualization */}
+                            <div className="bg-slate-50 rounded-xl p-5 border border-slate-100 relative overflow-hidden">
+                                <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
+                                    <div className="text-center md:text-left opacity-60 grayscale filter">
+                                        <div className="text-sm text-slate-500 mb-1">1차 감정가</div>
+                                        <div className="text-xl font-bold text-slate-400 line-through decoration-slate-400">
+                                            {formatPrice(auction.appraised_price)}
+                                        </div>
+                                    </div>
+
+                                    <div className="hidden md:block flex-1 border-t-2 border-dashed border-slate-300 mx-4 relative top-2">
+                                        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-slate-50 px-2 text-xs text-slate-400 font-medium">
+                                            {discount ? `${discount}% 하락` : '진행'}
+                                        </div>
+                                    </div>
+
+                                    <div className="text-center md:text-right">
+                                        <div className="flex items-center justify-center md:justify-end gap-2 mb-1">
+                                            <span className="text-sm font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-full">현재 최저가</span>
+                                            {discount && <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">-{discount}%</span>}
+                                        </div>
+                                        <div className="text-3xl font-extrabold text-blue-600">
+                                            {formatPrice(auction.minimum_price)}
+                                        </div>
+                                    </div>
                                 </div>
-                            )}
+                            </div>
+                        </div>
+
+                        {/* Action Bar */}
+                        <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex gap-3">
+                            <a
+                                href="https://www.courtauction.go.kr/"
+                                target="_blank"
+                                rel="noreferrer"
+                                className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold text-center transition-colors shadow-lg shadow-indigo-200"
+                            >
+                                대법원 공고 원문 보기
+                            </a>
+                            <button
+                                onClick={handleCopy}
+                                className="px-6 py-3 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium rounded-xl transition-colors"
+                            >
+                                {copied ? '✓ 복사완료' : '사건번호 복사'}
+                            </button>
                         </div>
                     </div>
 
-                    {/* Address Section */}
-                    <div className="p-6 border-b border-slate-700/50">
-                        <h2 className="text-sm font-medium text-slate-500 mb-2">📍 소재지</h2>
-                        <p className="text-xl text-white">{auction.address}</p>
-                        {auction.building_info && (
-                            <p className="text-slate-400 mt-1">{auction.building_info}</p>
-                        )}
-                    </div>
-
-                    {/* Map Section */}
-                    {auction.longitude && auction.latitude && (
-                        <div className="p-6 border-b border-slate-700/50">
-                            <h2 className="text-sm font-medium text-slate-500 mb-3">🗺️ 위치</h2>
-                            <div className="aspect-video bg-slate-700/30 rounded-xl overflow-hidden">
-                                <iframe
-                                    src={`https://map.kakao.com/link/map/${encodeURIComponent(auction.address)},${auction.latitude},${auction.longitude}`}
-                                    width="100%"
-                                    height="100%"
-                                    style={{ border: 0 }}
-                                    allowFullScreen
-                                    loading="lazy"
-                                    referrerPolicy="no-referrer-when-downgrade"
-                                />
+                    {/* Right: Map Section (Cols 9-12) */}
+                    <div className="md:col-span-5 lg:col-span-4 flex flex-col gap-4">
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full min-h-[300px]">
+                            <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                                <h3 className="font-bold text-slate-700 flex items-center gap-2">
+                                    <span>🗺️</span> 위치
+                                </h3>
+                                <div className="text-xs text-slate-400">카카오맵 기반</div>
                             </div>
-                            <div className="mt-2 flex gap-2">
+                            <div className="flex-1 relative bg-slate-100">
+                                {auction.longitude && auction.latitude ? (
+                                    <iframe
+                                        src={`https://map.kakao.com/link/map/${encodeURIComponent(auction.address || '')},${auction.latitude},${auction.longitude}`}
+                                        className="absolute inset-0 w-full h-full"
+                                        style={{ border: 0 }}
+                                        allowFullScreen
+                                        loading="lazy"
+                                    />
+                                ) : (
+                                    <div className="absolute inset-0 flex items-center justify-center text-slate-400">
+                                        좌표 정보 없음
+                                    </div>
+                                )}
+                            </div>
+                            <div className="p-3 bg-white border-t border-slate-100 grid grid-cols-2 gap-2">
                                 <a
-                                    href={`https://map.kakao.com/link/search/${encodeURIComponent(auction.address)}`}
+                                    href={`https://map.kakao.com/link/to/${encodeURIComponent(auction.address || '')},${auction.latitude},${auction.longitude}`}
                                     target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-sm text-blue-400 hover:underline"
+                                    rel="noreferrer"
+                                    className="text-center text-xs font-bold text-slate-700 bg-yellow-400/20 hover:bg-yellow-400/30 py-2 rounded-lg transition-colors"
                                 >
-                                    카카오맵에서 보기 →
+                                    카카오 길찾기
                                 </a>
                                 <a
-                                    href={`https://map.naver.com/v5/search/${encodeURIComponent(auction.address)}`}
+                                    href={`https://map.kakao.com/link/roadview/${auction.latitude},${auction.longitude}`}
                                     target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-sm text-green-400 hover:underline"
+                                    rel="noreferrer"
+                                    className="text-center text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 py-2 rounded-lg transition-colors"
                                 >
-                                    네이버지도에서 보기 →
+                                    로드뷰 보기
                                 </a>
                             </div>
                         </div>
-                    )}
-
-                    {/* Price Section */}
-                    <div className="p-6 border-b border-slate-700/50 bg-gradient-to-r from-green-900/10 to-emerald-900/10">
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div>
-                                <h2 className="text-sm font-medium text-slate-500 mb-1">감정가</h2>
-                                <p className="text-xl text-slate-500 line-through">
-                                    {formatPrice(auction.appraised_price)}
-                                </p>
-                            </div>
-                            <div>
-                                <h2 className="text-sm font-medium text-slate-500 mb-1">최저매각가격</h2>
-                                <div className="flex items-center gap-3">
-                                    <p className="text-2xl font-bold text-emerald-400">
-                                        {formatPrice(auction.minimum_price)}
-                                    </p>
-                                    {discount !== null && discount > 0 && (
-                                        <span className="px-2 py-1 bg-red-500/20 text-red-400 rounded-lg text-sm font-bold">
-                                            {discount}% 할인
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Details Grid */}
-                    <div className="p-6 border-b border-slate-700/50">
-                        <div className="grid md:grid-cols-2 gap-y-4 gap-x-8">
-                            <div className="flex justify-between">
-                                <span className="text-slate-500">매각기일</span>
-                                <span className="text-white font-medium">{formatDate(auction.auction_date)}</span>
-                            </div>
-                            {auction.auction_location && (
-                                <div className="flex justify-between">
-                                    <span className="text-slate-500">입찰장소</span>
-                                    <span className="text-white">{auction.auction_location}</span>
-                                </div>
-                            )}
-                            <div className="flex justify-between">
-                                <span className="text-slate-500">상태</span>
-                                <span className={`font-medium ${auction.status?.includes('유찰') ? 'text-orange-400' : 'text-green-400'
-                                    }`}>{auction.status}</span>
-                            </div>
-                            {auction.result_date && (
-                                <div className="flex justify-between">
-                                    <span className="text-slate-500">매각결정기일</span>
-                                    <span className="text-white">{formatDate(auction.result_date)}</span>
-                                </div>
-                            )}
-                            {auction.view_count !== null && (
-                                <div className="flex justify-between">
-                                    <span className="text-slate-500">조회수</span>
-                                    <span className="text-white">{auction.view_count.toLocaleString()}회</span>
-                                </div>
-                            )}
-                            {auction.phone && (
-                                <div className="flex justify-between">
-                                    <span className="text-slate-500">연락처</span>
-                                    <span className="text-white">{auction.phone}</span>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Note Section */}
-                    {auction.note && (
-                        <div className="p-6 border-b border-slate-700/50 bg-yellow-900/10">
-                            <h2 className="text-sm font-medium text-yellow-500 mb-2">📋 비고 / 특별매각조건</h2>
-                            <p className="text-white whitespace-pre-wrap">{auction.note}</p>
-                        </div>
-                    )}
-
-                    {/* Action Buttons */}
-                    <div className="p-6 flex flex-wrap gap-4">
-                        <a
-                            href="https://www.courtauction.go.kr/pgj/index.on?w2xPath=/pgj/ui/pgj100/PGJ151F00.xml"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex-1 min-w-[200px] py-3 px-6 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl text-center transition-colors"
-                        >
-                            법원경매 검색 페이지 →
-                        </a>
-                        <button
-                            onClick={handleCopy}
-                            className="py-3 px-6 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-xl transition-colors"
-                        >
-                            {copied ? '✓ 사건번호 복사됨' : '📋 사건번호 복사'}
-                        </button>
                     </div>
                 </div>
-            </div>
+
+                {/* 3. Detail Grid Sections */}
+                <div className="grid md:grid-cols-2 gap-6">
+                    {/* Basic Info */}
+                    <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                        <h2 className="text-lg font-bold text-slate-800 mb-4 pb-2 border-b border-slate-100 flex items-center gap-2">
+                            <span>📄</span> 사건 기본 정보
+                        </h2>
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center">
+                                <span className="text-slate-500">담당계</span>
+                                <span className="font-medium text-slate-900">{auction.department}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-slate-500">매각기일</span>
+                                <span className="font-medium text-slate-900">{formatDate(auction.auction_date)}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-slate-500">매각결정기일</span>
+                                <span className="font-medium text-slate-900">{formatDate(auction.result_date)}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-slate-500">조회수</span>
+                                <span className="font-medium text-slate-900">{auction.view_count?.toLocaleString()}회</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Additional Info / Notes */}
+                    <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                        <h2 className="text-lg font-bold text-slate-800 mb-4 pb-2 border-b border-slate-100 flex items-center gap-2">
+                            <span>💡</span> 참고 사항
+                        </h2>
+                        {auction.note ? (
+                            <div className="bg-yellow-50 text-yellow-800 p-4 rounded-xl text-sm leading-relaxed border border-yellow-100">
+                                <span className="font-bold block mb-1">⚠️ 주의사항/비고</span>
+                                {auction.note}
+                            </div>
+                        ) : (
+                            <div className="text-slate-400 text-center py-8">
+                                특이사항이 없습니다.
+                            </div>
+                        )}
+                    </section>
+                </div>
+
+            </main>
         </div>
     );
 }

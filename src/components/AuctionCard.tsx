@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Badge from './Badge';
+
 
 interface AuctionItem {
     id: string;
@@ -68,17 +68,6 @@ export default function AuctionCard({ auction }: { auction: AuctionItem }) {
         return `D-${diff}`;
     };
 
-    // Category color mapping
-    const getCategoryColor = (cat: string | null) => {
-        switch (cat) {
-            case 'apartment': return 'blue';
-            case 'villa': return 'green';
-            case 'officetel': return 'purple';
-            case 'commercial': return 'yellow';
-            default: return 'gray';
-        }
-    };
-
     const getCategoryName = (cat: string | null) => {
         switch (cat) {
             case 'apartment': return '아파트';
@@ -89,149 +78,151 @@ export default function AuctionCard({ auction }: { auction: AuctionItem }) {
         }
     };
 
+    // Category color mapping with background gradients
+    const getCategoryStyles = (cat: string | null) => {
+        switch (cat) {
+            case 'apartment':
+                return {
+                    bg: 'bg-blue-50',
+                    border: 'border-blue-100',
+                    text: 'text-blue-600',
+                    badge: 'bg-blue-100 text-blue-700',
+                    icon: (
+                        <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                    )
+                };
+            case 'villa':
+                return {
+                    bg: 'bg-emerald-50',
+                    border: 'border-emerald-100',
+                    text: 'text-emerald-600',
+                    badge: 'bg-emerald-100 text-emerald-700',
+                    icon: (
+                        <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                    )
+                };
+            case 'officetel':
+                return {
+                    bg: 'bg-indigo-50',
+                    border: 'border-indigo-100',
+                    text: 'text-indigo-600',
+                    badge: 'bg-indigo-100 text-indigo-700',
+                    icon: (
+                        <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+                        </svg>
+                    )
+                };
+            case 'commercial':
+                return {
+                    bg: 'bg-purple-50',
+                    border: 'border-purple-100',
+                    text: 'text-purple-600',
+                    badge: 'bg-purple-100 text-purple-700',
+                    icon: (
+                        <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    )
+                };
+            default:
+                return {
+                    bg: 'bg-slate-50',
+                    border: 'border-slate-100',
+                    text: 'text-slate-600',
+                    badge: 'bg-slate-100 text-slate-700',
+                    icon: (
+                        <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                    )
+                };
+        }
+    };
+
+    const styles = getCategoryStyles(auction.category);
     const discountRate = getDiscountRate();
     const dday = getDday();
 
     return (
-        <Link href={`/auction/${auction.id}`} className="block">
-            <div className="bg-white overflow-hidden shadow-lg rounded-xl hover:shadow-xl transition-all duration-300 border border-gray-100 group cursor-pointer">
-                {/* Image Section */}
-                <div className="relative h-48 bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden">
-                    {auction.thumbnail_url ? (
-                        <img
-                            src={auction.thumbnail_url}
-                            alt={auction.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                    ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                            <div className="text-center text-gray-400">
-                                <svg className="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                </svg>
-                                <span className="text-sm">{getCategoryName(auction.category)}</span>
-                            </div>
+        <Link href={`/auction/${auction.id}`} className="block group">
+            <div className={`bg-white overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border ${styles.border} rounded-2xl`}>
+                <div className="flex h-full">
+                    {/* Left Side: Visual Identity (Approx 30%) */}
+                    <div className={`w-32 flex-shrink-0 flex flex-col items-center justify-center p-4 ${styles.bg} border-r ${styles.border} group-hover:bg-opacity-80 transition-colors`}>
+                        <div className={`${styles.text} transform group-hover:scale-110 transition-transform duration-300`}>
+                            {styles.icon}
                         </div>
-                    )}
-
-                    {/* Discount Badge */}
-                    {discountRate && discountRate > 0 && (
-                        <div className="absolute top-3 left-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
-                            {discountRate}% 할인
-                        </div>
-                    )}
-
-                    {/* D-day Badge */}
-                    {dday && (
-                        <div className={`absolute top-3 right-3 px-3 py-1 rounded-full text-sm font-bold shadow-lg ${dday === '종료' ? 'bg-gray-500 text-white' :
-                            dday === 'D-Day' ? 'bg-orange-500 text-white animate-pulse' :
-                                'bg-blue-600 text-white'
-                            }`}>
-                            {dday}
-                        </div>
-                    )}
-                </div>
-
-                {/* Content Section */}
-                <div className="p-5">
-                    {/* Category & Status */}
-                    <div className="flex items-center justify-between mb-3">
-                        <Badge color={getCategoryColor(auction.category)}>
+                        <span className={`text-xs font-bold uppercase tracking-wider ${styles.text}`}>
                             {getCategoryName(auction.category)}
-                        </Badge>
-                        {auction.status && (
-                            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                                {auction.status}
-                            </span>
-                        )}
+                        </span>
                     </div>
 
-                    {/* Address */}
-                    <h3 className="text-base font-semibold text-gray-900 mb-3 line-clamp-2 min-h-[48px]">
-                        {auction.address || auction.title}
-                    </h3>
-
-                    {/* Price Info */}
-                    <div className="space-y-2 mb-4">
-                        {auction.appraised_price && (
-                            <div className="flex justify-between items-center text-sm">
-                                <span className="text-gray-500">감정가</span>
-                                <span className="text-gray-400 line-through">
-                                    {formatPrice(auction.appraised_price)}
-                                </span>
-                            </div>
-                        )}
-                        <div className="flex justify-between items-center">
-                            <span className="text-gray-600 font-medium">최저가</span>
-                            <span className="text-xl font-bold text-indigo-600">
-                                {formatPrice(auction.minimum_price)}
-                            </span>
-                        </div>
-                    </div>
-
-                    {/* Case Number with Copy Button */}
-                    {auction.manager && (
-                        <div className="mb-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <span className="text-xs text-gray-500 block mb-1">사건번호</span>
-                                    <span className="text-sm font-mono font-semibold text-gray-800">
-                                        {auction.manager}
-                                    </span>
-                                </div>
-                                <button
-                                    onClick={handleCopyCase}
-                                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${copied
-                                        ? 'bg-green-100 text-green-700'
-                                        : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
-                                        }`}
-                                >
-                                    {copied ? (
-                                        <span className="flex items-center gap-1">
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                            </svg>
-                                            복사됨
-                                        </span>
-                                    ) : (
-                                        <span className="flex items-center gap-1">
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                            </svg>
-                                            복사
+                    {/* Right Side: Information (Approx 70%) */}
+                    <div className="flex-1 p-5 flex flex-col justify-between">
+                        <div>
+                            {/* Header: Status & Tags */}
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="flex gap-2">
+                                    {auction.status && (
+                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${auction.status.includes('유찰') ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-600'
+                                            }`}>
+                                            {auction.status}
                                         </span>
                                     )}
-                                </button>
+                                </div>
+                                {dday && (
+                                    <span className={`text-xs font-bold ${dday === 'D-Day' ? 'text-red-500' :
+                                        dday.startsWith('D-') ? 'text-indigo-500' : 'text-gray-400'
+                                        }`}>
+                                        {dday}
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* Title / Address */}
+                            <h3 className="text-base font-bold text-slate-800 line-clamp-1 mb-1 group-hover:text-indigo-600 transition-colors">
+                                {auction.address || "주소 미상"}
+                            </h3>
+                            <div className="text-xs text-slate-500 font-mono mb-4">
+                                {auction.manager}
                             </div>
                         </div>
-                    )}
 
-                    {/* Footer */}
-                    <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                        <span className="text-xs text-gray-500">
-                            {auction.department}
-                        </span>
-                        {auction.auction_date && (
-                            <span className="text-xs text-gray-500">
-                                매각기일: {auction.auction_date}
-                            </span>
-                        )}
+                        {/* Price Section - Key Focus */}
+                        <div className="bg-slate-50 rounded-lg p-3 border border-slate-100">
+                            <div className="flex flex-col">
+                                {auction.appraised_price && (
+                                    <div className="flex justify-between items-center mb-1">
+                                        <span className="text-xs text-slate-400">감정가</span>
+                                        <span className="text-xs text-slate-400 line-through decoration-slate-400">
+                                            {parseInt(auction.appraised_price).toLocaleString()}
+                                        </span>
+                                    </div>
+                                )}
+                                <div className="flex justify-between items-end">
+                                    <span className="text-xs font-semibold text-slate-600">최저가</span>
+                                    <div className="text-right">
+                                        <span className="text-lg font-bold text-slate-900">
+                                            {formatPrice(auction.minimum_price).replace('원', '')}
+                                        </span>
+                                        <span className="text-sm text-slate-600 ml-0.5">원</span>
+                                    </div>
+                                </div>
+                                {discountRate && discountRate > 0 && (
+                                    <div className="mt-1 flex justify-end">
+                                        <span className="text-xs font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded">
+                                            ↓ {discountRate}%
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </div>
-
-                    {/* View Court Search Button */}
-                    {auction.detail_link && (
-                        <a
-                            href={auction.detail_link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="mt-4 w-full inline-flex items-center justify-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors"
-                        >
-                            법원경매 검색 페이지
-                            <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                            </svg>
-                        </a>
-                    )}
                 </div>
             </div>
         </Link>
