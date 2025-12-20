@@ -19,7 +19,6 @@ async def run():
             nonlocal captured_data
             if "searchControllerMain.on" in response.url:
                 try:
-                    # WebSquare seems to return JSON in some configurations or we intercepted a JSON bridge
                     json_data = await response.json()
                     captured_data = json_data
                 except:
@@ -37,42 +36,21 @@ async def run():
 
         if captured_data:
             print("Successfully captured JSON data!")
-            # Extract list - based on common WebSquare patterns, it's likely in 'data'
-            # Let's try to find the list.
             try:
-                # Based on the previous log: data.dlt_list or similar
                 items = captured_data.get('data', {}).get('dlt_list', [])
                 if not items:
-                    # Alternative lookups
                     for key, value in captured_data.get('data', {}).items():
                         if isinstance(value, list) and len(value) > 0:
                             items = value
                             break
                 
-                print(f"\nFound {len(items)} items. Displaying first 5:")
-                print("-" * 50)
-                print(f"\nFound {len(items)} items. Displaying first 5:")
-                print("-" * 50)
-                for i, item in enumerate(items[:5]):
-                    court = item.get('jiwonNm', 'N/A')
-                    case_no = item.get('caseNo', 'N/A')
-                    address = item.get('addr', 'N/A')
-                    price = item.get('lowPrice', 'N/A')
-                    status = item.get('mulStatnm', 'N/A')
-                    usage = item.get('dspslUsgNm', 'N/A')
-                    date = item.get('maegDate', 'N/A')
-                    
-                    print(f"[{i+1}] {court} {case_no}")
-                    print(f"    물건: {usage}")
-                    print(f"    주소: {address}")
-                    print(f"    최저가: {price}")
-                    print(f"    매각기일: {date}")
-                    print(f"    상태: {status}")
-                    print("-" * 30)
+                print(f"\nFound {len(items)} items.")
+                if items:
+                    print("\n=== FULL FIRST ITEM (ALL FIELDS) ===")
+                    print(json.dumps(items[0], ensure_ascii=False, indent=2))
                     
             except Exception as e:
-                print(f"Error parsing items: {e}")
-                print("Full Data Structure keys:", captured_data.keys())
+                print(f"Error: {e}")
         else:
             print("Failed to capture search response.")
 

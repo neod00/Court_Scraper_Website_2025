@@ -70,17 +70,22 @@ class AuctionScraper:
     def map_to_db_record(self, item):
         """Map raw API item to database record structure"""
         # Extract case number for site_id
-        case_no = item.get('caseNo') or item.get('printCsNo', '').replace('<br/>', ' ')
-        site_id = f"auction_{item.get('colMerge', case_no)}"
+        case_no = item.get('srnSaNo', '')  # e.g., "2022타경3289"
+        col_merge = item.get('colMerge', '')
+        site_id = f"auction_{col_merge}" if col_merge else f"auction_{case_no}"
         
         # Build title from address and usage
         usage = item.get('dspslUsgNm', '물건')
-        address = item.get('printSt') or item.get('addr') or item.get('bgPlaceRdAllAddr', '')
+        address = item.get('printSt') or item.get('bgPlaceRdAllAddr', '')
         title = f"[{usage}] {address[:50]}..." if len(address) > 50 else f"[{usage}] {address}"
         
-        # Parse prices
-        min_price = item.get('lowPrice') or item.get('minSalePrice')
-        appraised = item.get('gamPrice') or item.get('appraisalPrice')
+        # Parse prices - CORRECTED FIELD NAMES
+        min_price = item.get('minmaePrice')  # 최저매각가격
+        appraised = item.get('gamevalAmt')   # 감정평가액
+        
+        # Build status from yuchalCnt (유찰횟수)
+        yuchal_cnt = item.get('yuchalCnt', '0')
+        status = f"유찰 {yuchal_cnt}회" if yuchal_cnt and int(yuchal_cnt) > 0 else "신건"
         
         # Determine category
         category = 'real_estate'
@@ -94,24 +99,30 @@ class AuctionScraper:
         elif '상가' in usage_lower or '근린' in usage_lower:
             category = 'commercial'
         
+        # Build correct detail link using boCd and saNo
+        bo_cd = item.get('boCd', '')
+        sa_no = item.get('saNo', '')
+        maemul_ser = item.get('maemulSer', '1')
+        detail_link = f"https://www.courtauction.go.kr/pgj/index.on?w2xPath=/pgj/ui/pgj100/PGJ151F01.xml&boCd={bo_cd}&saNo={sa_no}&maemulSer={maemul_ser}"
+        
         return {
             "site_id": site_id,
             "title": title,
             "department": item.get('jiwonNm', '') + ' ' + item.get('jpDeptNm', ''),
             "manager": None,
             "date_posted": datetime.now().date().isoformat(),
-            "detail_link": f"https://www.courtauction.go.kr/pgj/index.on?w2xPath=/pgj/ui/pgj100/PGJ151F01.xml&saession={item.get('colMerge', '')}",
+            "detail_link": detail_link,
             "content_text": address,
             "category": category,
             "phone": item.get('tel'),
-            # New auction fields
+            # New auction fields - CORRECTED
             "source_type": "auction",
             "minimum_price": self.parse_price(min_price),
             "appraised_price": self.parse_price(appraised),
-            "auction_date": self.parse_date(item.get('maegDate')),
+            "auction_date": self.parse_date(item.get('maeGiil')),  # CORRECTED: maeGiil not maegDate
             "address": address,
-            "status": item.get('mulStatnm') or item.get('jinstatNm'),
-            "thumbnail_url": self.build_thumbnail_url(item)
+            "status": status,
+            "thumbnail_url": None  # API doesn't provide images; frontend uses placeholder
         }
 
     async def scrape_auctions(self, max_pages=3):
