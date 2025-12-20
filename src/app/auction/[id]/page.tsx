@@ -216,40 +216,29 @@ export default function AuctionDetailPage({ params }: { params: Promise<{ id: st
                                 </h3>
                                 <div className="text-xs text-slate-400">카카오맵 기반</div>
                             </div>
-                            <div className="flex-1 relative bg-slate-100 min-h-[300px]">
-                                {auction.longitude && auction.latitude ? (
-                                    <iframe
-                                        src={`https://map.kakao.com/link/map/${encodeURIComponent(auction.address || '')},${auction.latitude},${auction.longitude}`}
-                                        className="absolute inset-0 w-full h-full"
-                                        style={{ border: 0 }}
-                                        allowFullScreen
-                                        loading="lazy"
-                                    />
-                                ) : (
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500 bg-slate-50 p-6 text-center">
-                                        <div className="text-4xl mb-3">🗺️</div>
-                                        <p className="font-medium mb-1">상세 위치 정보가 없습니다.</p>
-                                        <p className="text-sm text-slate-400 mb-4">아래 버튼을 눌러 지도에서 확인해보세요.</p>
-                                    </div>
-                                )}
-                            </div>
-                            <div className="p-3 bg-white border-t border-slate-100 grid grid-cols-2 gap-2">
-                                <a
-                                    href={`https://map.kakao.com/link/search/${encodeURIComponent(auction.address || '')}`}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="text-center text-xs font-bold text-slate-700 bg-yellow-400/20 hover:bg-yellow-400/30 py-3 rounded-xl transition-colors flex items-center justify-center gap-1"
-                                >
-                                    <span>🔍</span> 카카오맵 검색
-                                </a>
-                                <a
-                                    href={`https://map.naver.com/p/search/${encodeURIComponent(auction.address || '')}`}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="text-center text-xs font-bold text-slate-700 bg-green-500/10 hover:bg-green-500/20 py-3 rounded-xl transition-colors flex items-center justify-center gap-1"
-                                >
-                                    <span>🔍</span> 네이버지도 검색
-                                </a>
+                            <div className="flex-1 relative bg-slate-50 min-h-[200px] flex flex-col items-center justify-center p-6 text-center">
+                                <div className="text-4xl mb-3">🗺️</div>
+                                <p className="font-medium text-slate-600 mb-1">지도 앱에서 위치를 확인하세요</p>
+                                <p className="text-sm text-slate-400 mb-6">정확한 위치 확인을 위해 아래 버튼을 이용해 주세요.</p>
+
+                                <div className="grid grid-cols-2 gap-3 w-full max-w-md">
+                                    <a
+                                        href={`https://map.kakao.com/link/search/${encodeURIComponent(auction.address || '')}`}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="text-center text-sm font-bold text-slate-700 bg-[#FEE500] hover:bg-[#FDD835] py-4 rounded-xl transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+                                    >
+                                        <span className="text-lg">📍</span> 카카오맵
+                                    </a>
+                                    <a
+                                        href={`https://map.naver.com/p/search/${encodeURIComponent(auction.address || '')}`}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="text-center text-sm font-bold text-white bg-[#03C75A] hover:bg-[#02B351] py-4 rounded-xl transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2"
+                                    >
+                                        <span className="text-lg">📍</span> 네이버지도
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
