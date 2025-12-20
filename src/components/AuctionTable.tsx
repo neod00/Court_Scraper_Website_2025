@@ -83,7 +83,7 @@ export default function AuctionTable({ auctions }: { auctions: AuctionItem[] }) 
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`text-[11px] font-bold px-2 py-1 rounded border ${cat.color}`}>
+                                        <span className={`text-[11px] font-bold px-2 py-1 rounded border whitespace-nowrap ${cat.color}`}>
                                             {cat.text}
                                         </span>
                                     </td>
