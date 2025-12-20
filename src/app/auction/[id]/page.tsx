@@ -216,7 +216,7 @@ export default function AuctionDetailPage({ params }: { params: Promise<{ id: st
                                 </h3>
                                 <div className="text-xs text-slate-400">카카오맵 기반</div>
                             </div>
-                            <div className="flex-1 relative bg-slate-100">
+                            <div className="flex-1 relative bg-slate-100 min-h-[300px]">
                                 {auction.longitude && auction.latitude ? (
                                     <iframe
                                         src={`https://map.kakao.com/link/map/${encodeURIComponent(auction.address || '')},${auction.latitude},${auction.longitude}`}
@@ -226,27 +226,29 @@ export default function AuctionDetailPage({ params }: { params: Promise<{ id: st
                                         loading="lazy"
                                     />
                                 ) : (
-                                    <div className="absolute inset-0 flex items-center justify-center text-slate-400">
-                                        좌표 정보 없음
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-500 bg-slate-50 p-6 text-center">
+                                        <div className="text-4xl mb-3">🗺️</div>
+                                        <p className="font-medium mb-1">상세 위치 정보가 없습니다.</p>
+                                        <p className="text-sm text-slate-400 mb-4">아래 버튼을 눌러 지도에서 확인해보세요.</p>
                                     </div>
                                 )}
                             </div>
                             <div className="p-3 bg-white border-t border-slate-100 grid grid-cols-2 gap-2">
                                 <a
-                                    href={`https://map.kakao.com/link/to/${encodeURIComponent(auction.address || '')},${auction.latitude},${auction.longitude}`}
+                                    href={`https://map.kakao.com/link/search/${encodeURIComponent(auction.address || '')}`}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="text-center text-xs font-bold text-slate-700 bg-yellow-400/20 hover:bg-yellow-400/30 py-2 rounded-lg transition-colors"
+                                    className="text-center text-xs font-bold text-slate-700 bg-yellow-400/20 hover:bg-yellow-400/30 py-3 rounded-xl transition-colors flex items-center justify-center gap-1"
                                 >
-                                    카카오 길찾기
+                                    <span>🔍</span> 카카오맵 검색
                                 </a>
                                 <a
-                                    href={`https://map.kakao.com/link/roadview/${auction.latitude},${auction.longitude}`}
+                                    href={`https://map.naver.com/p/search/${encodeURIComponent(auction.address || '')}`}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="text-center text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 py-2 rounded-lg transition-colors"
+                                    className="text-center text-xs font-bold text-slate-700 bg-green-500/10 hover:bg-green-500/20 py-3 rounded-xl transition-colors flex items-center justify-center gap-1"
                                 >
-                                    로드뷰 보기
+                                    <span>🔍</span> 네이버지도 검색
                                 </a>
                             </div>
                         </div>

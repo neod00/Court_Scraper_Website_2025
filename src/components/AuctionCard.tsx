@@ -185,7 +185,7 @@ export default function AuctionCard({ auction }: { auction: AuctionItem }) {
                             </div>
 
                             {/* Title / Address */}
-                            <h3 className="text-base font-bold text-slate-800 line-clamp-1 mb-1 group-hover:text-indigo-600 transition-colors">
+                            <h3 className="text-base font-bold text-slate-800 line-clamp-2 mb-1 group-hover:text-indigo-600 transition-colors h-[3rem]">
                                 {auction.address || "주소 미상"}
                             </h3>
                             <div className="text-xs text-slate-500 font-mono mb-4">
