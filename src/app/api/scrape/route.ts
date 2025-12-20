@@ -20,20 +20,20 @@ export async function GET(request: Request) {
 
     console.log(`Executing: ${pythonPath} ${args.join(' ')}`);
 
-    return new Promise((resolve) => {
-        const process = spawn(pythonPath, args);
+    return new Promise<NextResponse>((resolve) => {
+        const pyProcess = spawn(pythonPath, args);
         let output = '';
         let errorOutput = '';
 
-        process.stdout.on('data', (data) => {
+        pyProcess.stdout.on('data', (data) => {
             output += data.toString();
         });
 
-        process.stderr.on('data', (data) => {
+        pyProcess.stderr.on('data', (data) => {
             errorOutput += data.toString();
         });
 
-        process.on('close', (code) => {
+        pyProcess.on('close', (code) => {
             if (code === 0) {
                 resolve(NextResponse.json({
                     success: true,
