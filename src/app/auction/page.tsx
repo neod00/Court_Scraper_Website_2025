@@ -69,11 +69,15 @@ function AuctionPageContent() {
                 .range((page - 1) * 10, page * 10 - 1);
 
             const { data, count, error } = await query;
-            if (data && data.length > 5) { // If we have at least some data, show it
+
+            // IF region is selected AND we have fewer than 50 items total, force scrape to "top up"
+            if (filters.region && (count || 0) < 50) {
+                await triggerScrape(page);
+            } else if (data && data.length > 0) {
                 setAuctions(data);
                 setTotalCount(count || 0);
-            } else if (page === 1 || filters.region) {
-                // If no data found OR very little data for the current filter/page, trigger scraping
+            } else if (page === 1) {
+                // If no data found at all for the current filter/page, trigger scraping
                 await triggerScrape(page);
             } else {
                 setAuctions([]);
