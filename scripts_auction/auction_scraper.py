@@ -214,9 +214,7 @@ class AuctionScraper:
             if end_date:
                 await page.fill("#mf_wfm_mainFrame_cal_rletPerdEnd_input", end_date)
 
-            all_items = []
             captured_data = None
-
             async def handle_response(response):
                 nonlocal captured_data
                 if "searchControllerMain.on" in response.url:
@@ -227,45 +225,69 @@ class AuctionScraper:
                         pass
 
             page.on("response", handle_response)
+            
+            # Initial search click
             await page.click("#mf_wfm_mainFrame_btn_gdsDtlSrch")
 
-            # Handle pagination if page_index > 1
-            if page_index > 1:
-                print(f"   Navigating to page {page_index}...")
-                await asyncio.sleep(2) # Wait for initial search results
-                page_selector = f"#mf_wfm_mainFrame_pgl_gdsDtlSrchPage_page_{page_index}"
-                try:
-                    await page.wait_for_selector(page_selector, timeout=10000)
-                    captured_data = None # Reset to capture the next page's data
-                    await page.click(page_selector)
-                except:
-                    print(f"   ⚠ Could not find pagination button for page {page_index}")
-
-            for _ in range(30):
-                if captured_data:
-                    break
-                await asyncio.sleep(0.5)
-
-            if captured_data:
-                data = captured_data.get('data', {})
-                for key, value in data.items():
-                    if isinstance(value, list) and len(value) > 0:
-                        all_items = value[:max_items]
+            all_collected_items = []
+            current_collect_page = page_index
+            
+            while len(all_collected_items) < max_items:
+                print(f"   Collecting items from page {current_collect_page}...")
+                captured_data = None
+                
+                if current_collect_page > 1:
+                    page_selector = f"#mf_wfm_mainFrame_pgl_gdsDtlSrchPage_page_{current_collect_page}"
+                    try:
+                        await page.wait_for_selector(page_selector, timeout=10000)
+                        await page.click(page_selector)
+                    except:
+                        print(f"      ⚠ Reached end of pagination or could not find page {current_collect_page}")
                         break
-                print(f"   Found {len(all_items)} items on page {page_index}\n")
-            else:
-                print("   Failed to get items")
-                await browser.close()
-                return 0
+                
+                # Wait for data
+                for _ in range(20):
+                    if captured_data: break
+                    await asyncio.sleep(0.5)
+                
+                if not captured_data:
+                    print(f"      ✗ No data captured for page {current_collect_page}")
+                    break
+                
+                # Extract items from XHR
+                page_items = []
+                data_dict = captured_data.get('data', {})
+                for key, value in data_dict.items():
+                    if isinstance(value, list) and len(value) > 0:
+                        page_items = value
+                        break
+                
+                if not page_items:
+                    break
+                    
+                for pi in page_items:
+                    all_collected_items.append({
+                        'data': pi,
+                        'page': current_collect_page
+                    })
+                print(f"      + Added {len(page_items)} items")
+                
+                if len(all_collected_items) >= max_items or len(page_items) < 10:
+                    break
+                    
+                current_collect_page += 1
+                await asyncio.sleep(1)
 
-            # Step 2: Process each item
-            print("Step 2: Processing and saving items...")
+            all_items = all_collected_items[:max_items]
+            print(f"   Total items collected: {len(all_items)}\n")
+            
             success_count = 0
             image_count = 0
 
             # First, save all basic information from the list data
             print("   Saving basic records from list data...")
-            for item in all_items:
+            for item_wrapper in all_items:
+                item = item_wrapper['data']
                 try:
                     record = self.map_to_db_record(item, None)
                     supabase.table("court_notices").upsert(
@@ -278,12 +300,25 @@ class AuctionScraper:
 
             # Second, try to enrich with images and details
             print("   Enriching with images and details (Step 2)...")
-            for idx, item in enumerate(all_items):
+            current_ui_page = current_collect_page # The last page we were on
+            
+            for idx, item_wrapper in enumerate(all_items):
+                item = item_wrapper['data']
+                target_page = item_wrapper['page']
                 case_no = item.get('srnSaNo', '')
-                print(f"   [{idx+1}/{len(all_items)}] Enriching {case_no}...")
                 
-                thumbnail_url = None
+                print(f"   [{idx+1}/{len(all_items)}] Enriching {case_no} (Page {target_page})...")
+                
                 try:
+                    # Navigate to correct page if needed
+                    if current_ui_page != target_page:
+                        print(f"      Navigating to UI page {target_page}...")
+                        page_selector = f"#mf_wfm_mainFrame_pgl_gdsDtlSrchPage_page_{target_page}"
+                        await page.wait_for_selector(page_selector, timeout=10000)
+                        await page.click(page_selector)
+                        await asyncio.sleep(3)
+                        current_ui_page = target_page
+
                     # Target the address row in the already loaded list
                     target_address = (item.get('printSt') or '')[:15]
                     
@@ -326,7 +361,7 @@ class AuctionScraper:
                         else:
                             print(f"      ⚠ No image found for {case_no}")
                     else:
-                        print(f"      ⚠ Could not find link for {case_no} on current page")
+                        print(f"      ⚠ Could not find link for {case_no} on current page (UI {current_ui_page})")
                         
                 except Exception as e:
                     print(f"      ✗ Enrichment error: {str(e)[:50]}")

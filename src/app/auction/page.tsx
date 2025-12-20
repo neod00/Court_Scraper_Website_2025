@@ -66,14 +66,14 @@ function AuctionPageContent() {
 
             // Exclude old data if needed or sort
             query = query.order('auction_date', { ascending: true })
-                .range((page - 1) * 9, page * 9 - 1);
+                .range((page - 1) * 10, page * 10 - 1);
 
             const { data, count, error } = await query;
-            if (data && data.length > 0) {
+            if (data && data.length > 5) { // If we have at least some data, show it
                 setAuctions(data);
                 setTotalCount(count || 0);
             } else if (page === 1 || filters.region) {
-                // If no data found for the current filter/page, trigger scraping
+                // If no data found OR very little data for the current filter/page, trigger scraping
                 await triggerScrape(page);
             } else {
                 setAuctions([]);
@@ -90,8 +90,8 @@ function AuctionPageContent() {
         setScraping(true);
         try {
             const params = new URLSearchParams({
-                max: '9',
-                page: page.toString(),
+                max: '50', // Fetch 50 items (5 pages worth) at once
+                page: '1', // Always start from page 1 of court site to get the top 50
                 region: filters.region,
                 start: filters.start?.replace(/-/g, '.'),
                 end: filters.end?.replace(/-/g, '.')
@@ -108,7 +108,7 @@ function AuctionPageContent() {
                     .eq('source_type', 'auction')
                     .ilike('address', `%${filters.region.substring(0, 2)}%`)
                     .order('auction_date', { ascending: true })
-                    .range((page - 1) * 9, page * 9 - 1);
+                    .range((page - 1) * 10, page * 10 - 1);
 
                 if (data) {
                     setAuctions(data);
@@ -251,14 +251,14 @@ function AuctionPageContent() {
                         <div className="flex items-center justify-between mb-4 px-2">
                             <h2 className="text-sm font-bold text-slate-500">
                                 신규 검색 결과 <span className="text-indigo-600 ml-1">{totalCount}</span>
-                                <span className="text-slate-300 ml-1">/ 9개씩 보기</span>
+                                <span className="text-slate-300 ml-1">/ 10개씩 보기</span>
                             </h2>
                         </div>
                         <AuctionTable auctions={auctions} />
 
                         {/* Pagination */}
                         <div className="mt-10 flex justify-center gap-2">
-                            {Array.from({ length: Math.min(10, Math.ceil(totalCount / 9)) }).map((_, i) => (
+                            {Array.from({ length: Math.ceil(totalCount / 10) }).map((_, i) => (
                                 <button
                                     key={i}
                                     onClick={() => setCurrentPage(i + 1)}
@@ -267,7 +267,6 @@ function AuctionPageContent() {
                                     {i + 1}
                                 </button>
                             ))}
-                            {totalCount > 90 && <span className="flex items-end px-2 text-slate-300">...</span>}
                         </div>
                     </>
                 ) : (
