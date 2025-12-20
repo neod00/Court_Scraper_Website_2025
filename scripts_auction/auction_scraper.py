@@ -79,7 +79,7 @@ class AuctionScraper:
         address = item.get('printSt') or item.get('bgPlaceRdAllAddr', '')
         title = f"[{usage}] {address[:50]}..." if len(address) > 50 else f"[{usage}] {address}"
         
-        # Parse prices - CORRECTED FIELD NAMES
+        # Parse prices
         min_price = item.get('minmaePrice')  # 최저매각가격
         appraised = item.get('gamevalAmt')   # 감정평가액
         
@@ -99,8 +99,17 @@ class AuctionScraper:
         elif '상가' in usage_lower or '근린' in usage_lower:
             category = 'commercial'
         
-        # Build correct detail link - link to main search page since direct links don't work
+        # Detail link to main search page
         detail_link = "https://www.courtauction.go.kr/pgj/index.on?w2xPath=/pgj/ui/pgj100/PGJ151F00.xml"
+        
+        # Extended fields from XHR
+        building_info = item.get('pjbBuldList') or item.get('convAddr', '')  # 건물 구조/면적
+        auction_location = item.get('maePlace', '')  # 입찰 장소
+        longitude = str(item.get('wgs84Xcordi', '')) if item.get('wgs84Xcordi') else None
+        latitude = str(item.get('wgs84Ycordi', '')) if item.get('wgs84Ycordi') else None
+        note = item.get('mulBigo', '')  # 비고/특별조건
+        view_count = int(item.get('inqCnt', 0)) if item.get('inqCnt') else None
+        result_date = self.parse_date(item.get('maegyuljGiil'))  # 매각결정기일
         
         return {
             "site_id": site_id,
@@ -112,14 +121,22 @@ class AuctionScraper:
             "content_text": address,
             "category": category,
             "phone": item.get('tel'),
-            # New auction fields - CORRECTED
+            # Auction fields
             "source_type": "auction",
             "minimum_price": self.parse_price(min_price),
             "appraised_price": self.parse_price(appraised),
-            "auction_date": self.parse_date(item.get('maeGiil')),  # CORRECTED: maeGiil not maegDate
+            "auction_date": self.parse_date(item.get('maeGiil')),
             "address": address,
             "status": status,
-            "thumbnail_url": None  # API doesn't provide images; frontend uses placeholder
+            "thumbnail_url": None,
+            # Extended detail fields
+            "building_info": building_info if building_info else None,
+            "auction_location": auction_location if auction_location else None,
+            "longitude": longitude,
+            "latitude": latitude,
+            "note": note if note else None,
+            "view_count": view_count,
+            "result_date": result_date
         }
 
     async def scrape_auctions(self, max_pages=3):
