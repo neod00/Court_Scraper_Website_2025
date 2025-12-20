@@ -186,20 +186,33 @@ class AuctionScraper:
             print(f"      Image extraction error: {e}")
             return None
 
-    async def scrape_auctions_with_images(self, max_items=10):
-        """Main scraping function with image extraction."""
-        print("Starting Auction Scraper with Image Extraction...")
-        print(f"Target: {max_items} items\n")
+    async def scrape_auctions_with_images(self, max_items=9, region=None, page_index=1, start_date=None, end_date=None):
+        """Main scraping function with image extraction and filtering."""
+        print(f"Starting Auction Scraper: Region={region}, Page={page_index}, Dates={start_date}~{end_date}")
+        print(f"Targeting {max_items} items\n")
         
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
             context = await browser.new_context()
             page = await context.new_page()
 
-            # Step 1: Get list of items from XHR
-            print("Step 1: Fetching item list from search...")
+            # Step 1: Set filters and search
+            print("Step 1: Setting filters and starting search...")
             await page.goto(self.base_url)
             await page.wait_for_selector("#mf_wfm_mainFrame_btn_gdsDtlSrch", timeout=30000)
+
+            # Apply region filter if specified
+            if region:
+                await page.click("label:has-text('소재지(지번주소)')")
+                await asyncio.sleep(1)
+                await page.select_option("#mf_wfm_mainFrame_sbx_rletAdongSdS", label=region)
+                await asyncio.sleep(0.5)
+
+            # Apply date filters if specified
+            if start_date:
+                await page.fill("#mf_wfm_mainFrame_cal_rletPerdStr_input", start_date)
+            if end_date:
+                await page.fill("#mf_wfm_mainFrame_cal_rletPerdEnd_input", end_date)
 
             all_items = []
             captured_data = None
@@ -216,7 +229,19 @@ class AuctionScraper:
             page.on("response", handle_response)
             await page.click("#mf_wfm_mainFrame_btn_gdsDtlSrch")
 
-            for _ in range(20):
+            # Handle pagination if page_index > 1
+            if page_index > 1:
+                print(f"   Navigating to page {page_index}...")
+                await asyncio.sleep(2) # Wait for initial search results
+                page_selector = f"#mf_wfm_mainFrame_pgl_gdsDtlSrchPage_page_{page_index}"
+                try:
+                    await page.wait_for_selector(page_selector, timeout=10000)
+                    captured_data = None # Reset to capture the next page's data
+                    await page.click(page_selector)
+                except:
+                    print(f"   ⚠ Could not find pagination button for page {page_index}")
+
+            for _ in range(30):
                 if captured_data:
                     break
                 await asyncio.sleep(0.5)
@@ -227,38 +252,43 @@ class AuctionScraper:
                     if isinstance(value, list) and len(value) > 0:
                         all_items = value[:max_items]
                         break
-                print(f"   Found {len(all_items)} items\n")
+                print(f"   Found {len(all_items)} items on page {page_index}\n")
             else:
                 print("   Failed to get items")
                 await browser.close()
                 return 0
 
             # Step 2: Process each item
-            print("Step 2: Processing items with image extraction...")
+            print("Step 2: Processing and saving items...")
             success_count = 0
             image_count = 0
 
+            # First, save all basic information from the list data
+            print("   Saving basic records from list data...")
+            for item in all_items:
+                try:
+                    record = self.map_to_db_record(item, None)
+                    supabase.table("court_notices").upsert(
+                        record, 
+                        on_conflict="site_id,source_type"
+                    ).execute()
+                    success_count += 1
+                except Exception as e:
+                    print(f"      Initial save error: {str(e)[:50]}")
+
+            # Second, try to enrich with images and details
+            print("   Enriching with images and details (Step 2)...")
             for idx, item in enumerate(all_items):
                 case_no = item.get('srnSaNo', '')
-                address_short = (item.get('printSt') or '')[:30]
-                print(f"\n[{idx+1}/{len(all_items)}] {case_no} - {address_short}...")
+                print(f"   [{idx+1}/{len(all_items)}] Enriching {case_no}...")
                 
                 thumbnail_url = None
-                
                 try:
-                    # Click to enter detail page using pixel coordinates (more reliable)
-                    await page.goto(self.base_url)
-                    await page.wait_for_selector("#mf_wfm_mainFrame_btn_gdsDtlSrch", timeout=15000)
-                    await page.click("#mf_wfm_mainFrame_btn_gdsDtlSrch")
-                    await asyncio.sleep(3)
+                    # Target the address row in the already loaded list
+                    target_address = (item.get('printSt') or '')[:15]
                     
-                    # Double-click on the row using JavaScript
-                    # We'll target the address anchor with matching text
-                    target_address = (item.get('printSt') or '')[:20]
-                    
-                    click_result = await page.evaluate(f"""
+                    found = await page.evaluate(f"""
                     (() => {{
-                        // Find all address links
                         const links = document.querySelectorAll('a[target="_self"]');
                         for (const link of links) {{
                             const text = link.title || link.innerText || '';
@@ -271,69 +301,61 @@ class AuctionScraper:
                                 return true;
                             }}
                         }}
-                        // Fallback: click first visible address link
-                        for (const link of links) {{
-                            if (link.offsetParent !== null && link.title && link.title.length > 10) {{
-                                link.dispatchEvent(new MouseEvent('dblclick', {{
-                                    bubbles: true,
-                                    cancelable: true,
-                                    view: window
-                                }}));
-                                return true;
-                            }}
-                        }}
                         return false;
                     }})()
                     """)
-                    
-                    if click_result:
-                        # Wait for detail page to load
-                        await asyncio.sleep(5)
-                        
+
+                    if found:
+                        await asyncio.sleep(4) # Wait for detail content
                         # Scroll to reveal image section
                         await page.evaluate("window.scrollBy(0, 800)")
                         await asyncio.sleep(2)
-                        
-                        # Extract image
                         thumbnail_url = await self.extract_image_from_page(page, case_no)
                         
+                        # Go back using the list button
+                        await page.click("#mf_wfm_mainFrame_btn_gdsDtlSrchLst")
+                        await asyncio.sleep(2)
+                        
                         if thumbnail_url:
-                            print(f"   ✓ Image: {thumbnail_url[:50]}...")
+                            # Update existing record with thumbnail
+                            col_merge = item.get('colMerge', '')
+                            site_id = f"auction_{col_merge}" if col_merge else f"auction_{case_no}"
+                            supabase.table("court_notices").update({"thumbnail_url": thumbnail_url}).eq("site_id", site_id).eq("source_type", "auction").execute()
                             image_count += 1
+                            print(f"      ✓ Details & Image saved")
                         else:
-                            print(f"   ⚠ No image found")
+                            print(f"      ⚠ No image found for {case_no}")
                     else:
-                        print(f"   ⚠ Could not enter detail page")
+                        print(f"      ⚠ Could not find link for {case_no} on current page")
                         
                 except Exception as e:
-                    print(f"   ✗ Error: {str(e)[:50]}")
-
-                # Save to database
-                try:
-                    record = self.map_to_db_record(item, thumbnail_url)
-                    result = supabase.table("court_notices").upsert(
-                        record, 
-                        on_conflict="site_id,source_type"
-                    ).execute()
-                    
-                    if result.data:
-                        success_count += 1
-                        print(f"   ✓ Saved to DB")
-                except Exception as e:
-                    print(f"   ✗ DB error: {str(e)[:50]}")
+                    print(f"      ✗ Enrichment error: {str(e)[:50]}")
 
             await browser.close()
 
         print(f"\n{'='*50}")
-        print(f"Scraping Complete!")
-        print(f"Items saved: {success_count}/{len(all_items)}")
         print(f"Images extracted: {image_count}")
         return success_count
 
 
 async def main():
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--max", type=int, default=9)
+    parser.add_argument("--region", type=str, default=None)
+    parser.add_argument("--page", type=int, default=1)
+    parser.add_argument("--start", type=str, default=None)
+    parser.add_argument("--end", type=str, default=None)
+    args = parser.parse_args()
+
     scraper = AuctionScraper()
-    await scraper.scrape_auctions_with_images(max_items=5)
+    await scraper.scrape_auctions_with_images(
+        max_items=args.max, 
+        region=args.region, 
+        page_index=args.page,
+        start_date=args.start,
+        end_date=args.end
+    )
 
 
 if __name__ == "__main__":

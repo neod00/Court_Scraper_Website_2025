@@ -1,187 +1,291 @@
+'use client';
+
+import { useEffect, useState, use, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import AuctionCard from '@/components/AuctionCard';
+import AuctionTable from '@/components/AuctionTable';
 import Sidebar from '@/components/Sidebar';
+import Link from 'next/link';
 
-export const dynamic = 'force-dynamic';
+const REGIONS = [
+    { label: '전체 지역', value: '' },
+    { label: '서울 (서울특별시)', value: '서울특별시' },
+    { label: '인천 (인천광역시)', value: '인천광역시' },
+    { label: '경기 (경기도)', value: '경기도' },
+    { label: '충북 (충청북도)', value: '충청북도' },
+    { label: '충남 (충청남도)', value: '충청남도' },
+    { label: '강원 (강원특별자치도)', value: '강원특별자치도' },
+];
 
-interface AuctionPageProps {
-    searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}
+const CATEGORIES = [
+    { value: '', label: '전체 물건' },
+    { value: 'apartment', label: '아파트' },
+    { value: 'villa', label: '빌라/다세대' },
+    { value: 'officetel', label: '오피스텔' },
+    { value: 'commercial', label: '상가' },
+];
 
-export default async function AuctionPage({ searchParams }: AuctionPageProps) {
-    const params = await searchParams;
+function AuctionPageContent() {
+    const searchParams = useSearchParams();
+    const router = useRouter();
 
-    // Parse search params
-    const category = typeof params.cat === 'string' ? params.cat : '';
-    const minPrice = typeof params.minPrice === 'string' ? params.minPrice : '';
-    const maxPrice = typeof params.maxPrice === 'string' ? params.maxPrice : '';
-    const keyword = typeof params.q === 'string' ? params.q : '';
+    const [auctions, setAuctions] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [scraping, setScraping] = useState(false);
+    const [totalCount, setTotalCount] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
 
-    // Build query for auction items only
-    let query = supabase
-        .from('court_notices')
-        .select('*', { count: 'exact' })
-        .eq('source_type', 'auction');
+    // Filters State initialized from URL
+    const [filters, setFilters] = useState({
+        cat: searchParams.get('cat') || '',
+        minPrice: searchParams.get('minPrice') || '',
+        maxPrice: searchParams.get('maxPrice') || '',
+        q: searchParams.get('q') || '',
+        region: searchParams.get('region') || '',
+        start: searchParams.get('start') || '',
+        end: searchParams.get('end') || ''
+    });
 
-    // Apply filters
-    if (category) {
-        query = query.eq('category', category);
-    }
-    if (minPrice) {
-        query = query.gte('minimum_price', minPrice);
-    }
-    if (maxPrice) {
-        query = query.lte('minimum_price', maxPrice);
-    }
-    if (keyword) {
-        query = query.or(`title.ilike.%${keyword}%,address.ilike.%${keyword}%`);
-    }
+    const fetchAuctions = async (page = 1) => {
+        setLoading(true);
+        try {
+            let query = supabase
+                .from('court_notices')
+                .select('*', { count: 'exact' })
+                .eq('source_type', 'auction');
 
-    // Order by auction date (upcoming first)
-    query = query.order('auction_date', { ascending: true }).limit(50);
+            if (filters.cat) query = query.eq('category', filters.cat);
+            if (filters.minPrice) query = query.gte('minimum_price', filters.minPrice);
+            if (filters.maxPrice) query = query.lte('minimum_price', filters.maxPrice);
+            if (filters.q) query = query.or(`title.ilike.%${filters.q}%,address.ilike.%${filters.q}%`);
 
-    const { data: auctions, count, error } = await query;
+            // Region filter (simple text match for and-condition)
+            if (filters.region) {
+                query = query.ilike('address', `%${filters.region.substring(0, 2)}%`);
+            }
 
-    if (error) {
-        console.error('Error fetching auctions:', error);
-    }
+            // Exclude old data if needed or sort
+            query = query.order('auction_date', { ascending: true })
+                .range((page - 1) * 9, page * 9 - 1);
 
-    // Category options for filter
-    const categories = [
-        { value: '', label: '전체' },
-        { value: 'apartment', label: '아파트' },
-        { value: 'villa', label: '빌라/다세대' },
-        { value: 'officetel', label: '오피스텔' },
-        { value: 'commercial', label: '상가' },
-    ];
+            const { data, count, error } = await query;
+            if (data && data.length > 0) {
+                setAuctions(data);
+                setTotalCount(count || 0);
+            } else if (page === 1 || filters.region) {
+                // If no data found for the current filter/page, trigger scraping
+                await triggerScrape(page);
+            } else {
+                setAuctions([]);
+                setTotalCount(0);
+            }
+        } catch (err) {
+            console.error('Fetch error:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const triggerScrape = async (page = 1) => {
+        setScraping(true);
+        try {
+            const params = new URLSearchParams({
+                max: '9',
+                page: page.toString(),
+                region: filters.region,
+                start: filters.start?.replace(/-/g, '.'),
+                end: filters.end?.replace(/-/g, '.')
+            });
+
+            const res = await fetch(`/api/scrape?${params.toString()}`);
+            const result = await res.json();
+
+            if (result.success) {
+                // Re-fetch after scraping saves to DB
+                const { data, count } = await supabase
+                    .from('court_notices')
+                    .select('*', { count: 'exact' })
+                    .eq('source_type', 'auction')
+                    .ilike('address', `%${filters.region.substring(0, 2)}%`)
+                    .order('auction_date', { ascending: true })
+                    .range((page - 1) * 9, page * 9 - 1);
+
+                if (data) {
+                    setAuctions(data);
+                    setTotalCount(count || 0);
+                }
+            }
+        } catch (err) {
+            console.error('Scrape trigger error:', err);
+        } finally {
+            setScraping(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchAuctions(currentPage);
+    }, [currentPage]);
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        // Update URL with filters
+        const params = new URLSearchParams();
+        Object.entries(filters).forEach(([key, val]) => {
+            if (val) params.set(key, val);
+        });
+        router.push(`/auction?${params.toString()}`);
+
+        setCurrentPage(1);
+        fetchAuctions(1);
+    };
 
     return (
-        <div className="flex flex-col lg:flex-row gap-8">
-            {/* Left Sidebar */}
+        <div className="flex flex-col lg:flex-row gap-8 pb-20">
             <Sidebar />
 
-            {/* Main Content Area */}
             <div className="flex-1 min-w-0">
-                {/* Header */}
-                <div className="flex items-center gap-3 mb-8">
-                    <span className="text-3xl">🏠</span>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
-                        법원경매 물건 검색
-                    </h1>
+                <div className="flex items-center justify-between mb-8">
+                    <div className="flex items-center gap-3">
+                        <span className="text-3xl">⚖️</span>
+                        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">현장 경매물건 전문 필터링</h1>
+                    </div>
+                    {scraping && (
+                        <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-100 px-4 py-2 rounded-full animate-pulse">
+                            <div className="w-2 h-2 bg-indigo-600 rounded-full animate-ping"></div>
+                            <span className="text-xs font-bold text-indigo-700">법원 데이터 실시간 수집 중...</span>
+                        </div>
+                    )}
                 </div>
 
-                {/* Search & Filter Form */}
-                <form method="GET" className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                        {/* Category Filter */}
+                {/* Advanced Search Form */}
+                <form onSubmit={handleSearch} className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                         <div>
-                            <label htmlFor="cat" className="block text-sm font-medium text-gray-700 mb-2">
-                                물건 종류
-                            </label>
+                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">물건 종류</label>
                             <select
-                                id="cat"
-                                name="cat"
-                                defaultValue={category}
-                                className="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                value={filters.cat}
+                                onChange={(e) => setFilters({ ...filters, cat: e.target.value })}
+                                className="w-full bg-slate-50 border-slate-100 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all py-3"
                             >
-                                {categories.map((cat) => (
-                                    <option key={cat.value} value={cat.value}>
-                                        {cat.label}
-                                    </option>
-                                ))}
+                                {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                             </select>
                         </div>
-
-                        {/* Min Price */}
                         <div>
-                            <label htmlFor="minPrice" className="block text-sm font-medium text-gray-700 mb-2">
-                                최저가 (하한)
-                            </label>
-                            <input
-                                type="number"
-                                id="minPrice"
-                                name="minPrice"
-                                defaultValue={minPrice}
-                                placeholder="예: 100000000"
-                                className="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                            />
+                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">수집 지역</label>
+                            <select
+                                value={filters.region}
+                                onChange={(e) => setFilters({ ...filters, region: e.target.value })}
+                                className="w-full bg-slate-50 border-slate-100 rounded-xl text-sm font-bold text-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all py-3"
+                            >
+                                {REGIONS.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+                            </select>
                         </div>
-
-                        {/* Max Price */}
                         <div>
-                            <label htmlFor="maxPrice" className="block text-sm font-medium text-gray-700 mb-2">
-                                최저가 (상한)
-                            </label>
-                            <input
-                                type="number"
-                                id="maxPrice"
-                                name="maxPrice"
-                                defaultValue={maxPrice}
-                                placeholder="예: 500000000"
-                                className="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                            />
-                        </div>
-
-                        {/* Keyword Search */}
-                        <div>
-                            <label htmlFor="q" className="block text-sm font-medium text-gray-700 mb-2">
-                                주소/키워드 검색
-                            </label>
+                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">키워드/주소 검색</label>
                             <input
                                 type="text"
-                                id="q"
-                                name="q"
-                                defaultValue={keyword}
-                                placeholder="예: 강남, 아파트"
-                                className="w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                value={filters.q}
+                                onChange={(e) => setFilters({ ...filters, q: e.target.value })}
+                                placeholder="예: 아파트, 역세권, 하이츠"
+                                className="w-full bg-slate-50 border-slate-100 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all py-3"
                             />
                         </div>
                     </div>
 
-                    {/* Search Button */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div>
+                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">최저가 하한 (원)</label>
+                            <input
+                                type="number"
+                                value={filters.minPrice}
+                                onChange={(e) => setFilters({ ...filters, minPrice: e.target.value })}
+                                className="w-full bg-slate-50 border-slate-100 rounded-xl text-sm py-3"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">최저가 상한 (원)</label>
+                            <input
+                                type="number"
+                                value={filters.maxPrice}
+                                onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
+                                className="w-full bg-slate-50 border-slate-100 rounded-xl text-sm py-3"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">조회 시작일</label>
+                            <input
+                                type="date"
+                                value={filters.start}
+                                onChange={(e) => setFilters({ ...filters, start: e.target.value })}
+                                className="w-full bg-slate-50 border-slate-100 rounded-xl text-sm py-3"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">조회 종료일</label>
+                            <input
+                                type="date"
+                                value={filters.end}
+                                onChange={(e) => setFilters({ ...filters, end: e.target.value })}
+                                className="w-full bg-slate-50 border-slate-100 rounded-xl text-sm py-3"
+                            />
+                        </div>
+                    </div>
+
                     <button
                         type="submit"
-                        className="w-full md:w-auto px-8 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors shadow-sm"
+                        disabled={scraping}
+                        className="w-full py-4 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-all shadow-lg shadow-slate-200 disabled:opacity-50"
                     >
-                        🔍 검색하기
+                        {scraping ? '수집 로봇 가동 중...' : '🔍 조건에 맞는 물건 찾기'}
                     </button>
                 </form>
 
-                {/* Results Section */}
-                <div>
-                    {(!auctions || auctions.length === 0) ? (
-                        <div className="bg-blue-50 border-l-4 border-blue-400 p-6 rounded-r-lg">
-                            <div className="flex items-start">
-                                <svg className="h-6 w-6 text-blue-400 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <div>
-                                    <h3 className="text-lg font-medium text-blue-900 mb-1">경매 물건 데이터가 없습니다.</h3>
-                                    <p className="text-sm text-blue-700">
-                                        위에서 필터 조건을 변경하거나, 데이터 수집이 완료될 때까지 잠시 기다려 주세요.
-                                    </p>
-                                </div>
-                            </div>
+                {/* Results Table */}
+                {loading && !scraping ? (
+                    <div className="py-20 flex justify-center">
+                        <div className="w-10 h-10 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin"></div>
+                    </div>
+                ) : auctions.length > 0 ? (
+                    <>
+                        <div className="flex items-center justify-between mb-4 px-2">
+                            <h2 className="text-sm font-bold text-slate-500">
+                                신규 검색 결과 <span className="text-indigo-600 ml-1">{totalCount}</span>
+                                <span className="text-slate-300 ml-1">/ 9개씩 보기</span>
+                            </h2>
                         </div>
-                    ) : (
-                        <div>
-                            <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-xl font-bold text-gray-900">
-                                    📊 검색 결과
-                                </h2>
-                                <span className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                                    총 {count}건
-                                </span>
-                            </div>
-                            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                                {auctions.map((auction) => (
-                                    <AuctionCard key={auction.id} auction={auction} />
-                                ))}
-                            </div>
+                        <AuctionTable auctions={auctions} />
+
+                        {/* Pagination */}
+                        <div className="mt-10 flex justify-center gap-2">
+                            {Array.from({ length: Math.min(10, Math.ceil(totalCount / 9)) }).map((_, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => setCurrentPage(i + 1)}
+                                    className={`w-10 h-10 rounded-lg font-bold text-sm transition-all ${currentPage === i + 1 ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200' : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+                                >
+                                    {i + 1}
+                                </button>
+                            ))}
+                            {totalCount > 90 && <span className="flex items-end px-2 text-slate-300">...</span>}
                         </div>
-                    )}
-                </div>
+                    </>
+                ) : (
+                    <div className="py-20 text-center bg-white rounded-2xl border border-slate-100">
+                        <div className="text-4xl mb-4">🔍</div>
+                        <p className="text-slate-500 font-medium">검색 결과가 없습니다.</p>
+                        <p className="text-xs text-slate-400 mt-1">상단의 수집 지역을 변경하거나 검색어를 조정해 보세요.</p>
+                    </div>
+                )}
             </div>
         </div>
+    );
+}
+
+export default function AuctionPage() {
+    return (
+        <Suspense fallback={<div className="p-20 text-center">로딩 중...</div>}>
+            <AuctionPageContent />
+        </Suspense>
     );
 }

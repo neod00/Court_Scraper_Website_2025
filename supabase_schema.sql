@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS public.court_notices (
     note text,               -- 비고/특별조건 (mulBigo)
     view_count integer,      -- 조회수 (inqCnt)
     result_date date,        -- 매각결정기일 (maegyuljGiil)
+    lawd_cd text,            -- 법정동 코드 (Regional Code for transaction API)
     
     CONSTRAINT court_notices_site_id_source_key UNIQUE (site_id, source_type)
 );
@@ -57,5 +58,6 @@ ADD COLUMN IF NOT EXISTS longitude text,
 ADD COLUMN IF NOT EXISTS latitude text,
 ADD COLUMN IF NOT EXISTS note text,
 ADD COLUMN IF NOT EXISTS view_count integer,
-ADD COLUMN IF NOT EXISTS result_date date;
+ADD COLUMN IF NOT EXISTS result_date date,
+ADD COLUMN IF NOT EXISTS lawd_cd text;
 */
