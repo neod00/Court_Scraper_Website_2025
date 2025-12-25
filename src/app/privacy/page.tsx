@@ -92,8 +92,8 @@ export default function PrivacyPage() {
                     <div className="bg-gray-50 p-4 rounded-md mt-3">
                         <p className="text-gray-600">
                             <strong>이메일:</strong>{' '}
-                            <a href="mailto:openbrain.carbonmate@gmail.com" className="text-indigo-600 hover:underline">
-                                openbrain.carbonmate@gmail.com
+                            <a href="mailto:openbrain.main@gmail.com" className="text-indigo-600 hover:underline">
+                                openbrain.main@gmail.com
                             </a>
                         </p>
                     </div>

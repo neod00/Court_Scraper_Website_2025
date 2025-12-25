@@ -23,10 +23,10 @@ export default function ContactPage() {
                             <div>
                                 <p className="text-sm text-gray-500">이메일</p>
                                 <a
-                                    href="mailto:openbrain.carbonmate@gmail.com"
+                                    href="mailto:openbrain.main@gmail.com"
                                     className="text-xl font-semibold text-indigo-600 hover:underline"
                                 >
-                                    openbrain.carbonmate@gmail.com
+                                    openbrain.main@gmail.com
                                 </a>
                             </div>
                         </div>
