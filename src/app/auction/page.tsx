@@ -43,6 +43,11 @@ function AuctionPageContent() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
+    const [filters, setFilters] = useState({
+        region: '서울특별시',
+        category: '아파트',
+        days: '7'
+    });
     const itemsPerPage = 10;
 
     // Pagination calculations
@@ -52,11 +57,17 @@ function AuctionPageContent() {
     const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
     const currentItems = items.slice(startIndex, endIndex);
 
-    const fetchPopularItems = async () => {
+    const fetchItems = async () => {
         setLoading(true);
         setError(null);
+        setCurrentPage(1); // Reset to first page on new search
         try {
-            const res = await fetch('/api/popular-auctions');
+            const queryParams = new URLSearchParams({
+                region: filters.region,
+                category: filters.category,
+                days: filters.days
+            });
+            const res = await fetch(`/api/auction-search?${queryParams.toString()}`);
             const data = await res.json();
 
             if (data.success && data.items) {
@@ -73,7 +84,7 @@ function AuctionPageContent() {
     };
 
     useEffect(() => {
-        fetchPopularItems();
+        fetchItems();
     }, []);
 
     return (
@@ -82,30 +93,96 @@ function AuctionPageContent() {
 
             <div className="flex-1 min-w-0">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
                     <div className="flex items-center gap-3">
-                        <span className="text-3xl">🔥</span>
+                        <span className="text-3xl">🏛️</span>
                         <div>
                             <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-                                다수관심물건 {totalItems > 0 && <span className="text-indigo-600">({totalItems}개)</span>}
+                                경매물건 탐색 {totalItems > 0 && <span className="text-indigo-600">({totalItems}개)</span>}
                             </h1>
-                            <p className="text-sm text-slate-500 mt-1">현재 투자자들이 가장 많이 보는 경매 물건</p>
+                            <p className="text-sm text-slate-500 mt-1">지역 및 물건별 실시간 입찰 정보를 확인하세요</p>
                         </div>
                     </div>
                     <button
-                        onClick={fetchPopularItems}
+                        onClick={fetchItems}
                         disabled={loading}
-                        className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700 transition-all disabled:opacity-50"
+                        className="flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-md active:scale-95 disabled:opacity-50"
                     >
                         {loading ? (
                             <>
                                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                수집 중...
+                                검색 중...
                             </>
                         ) : (
-                            <>🔄 새로고침</>
+                            <>🔍 조건으로 검색</>
                         )}
                     </button>
+                </div>
+
+                {/* Filter Bar */}
+                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm mb-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {/* Region */}
+                        <div>
+                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">지역 선택</label>
+                            <div className="grid grid-cols-3 gap-2">
+                                {['서울특별시', '경기도', '인천광역시'].map((reg) => (
+                                    <button
+                                        key={reg}
+                                        onClick={() => setFilters({ ...filters, region: reg })}
+                                        className={`py-2 px-1 text-xs font-bold rounded-lg border transition-all ${filters.region === reg
+                                            ? 'bg-indigo-50 border-indigo-200 text-indigo-600'
+                                            : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
+                                            }`}
+                                    >
+                                        {reg.replace('특별시', '').replace('광역시', '')}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Category */}
+                        <div>
+                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">물건 종류</label>
+                            <div className="grid grid-cols-2 gap-2">
+                                {['아파트', '빌라'].map((cat) => (
+                                    <button
+                                        key={cat}
+                                        onClick={() => setFilters({ ...filters, category: cat })}
+                                        className={`py-2 px-4 text-xs font-bold rounded-lg border transition-all ${filters.category === cat
+                                            ? 'bg-indigo-50 border-indigo-200 text-indigo-600'
+                                            : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
+                                            }`}
+                                    >
+                                        {cat}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Period */}
+                        <div>
+                            <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">조회 기간</label>
+                            <div className="grid grid-cols-3 gap-2">
+                                {[
+                                    { label: '7일', val: '7' },
+                                    { label: '14일', val: '14' },
+                                    { label: '30일', val: '30' }
+                                ].map((p) => (
+                                    <button
+                                        key={p.val}
+                                        onClick={() => setFilters({ ...filters, days: p.val })}
+                                        className={`py-2 px-1 text-xs font-bold rounded-lg border transition-all ${filters.days === p.val
+                                            ? 'bg-indigo-50 border-indigo-200 text-indigo-600'
+                                            : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
+                                            }`}
+                                    >
+                                        {p.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Loading State */}
@@ -123,7 +200,7 @@ function AuctionPageContent() {
                         <div className="text-3xl mb-3">⚠️</div>
                         <p className="text-red-600 font-medium">{error}</p>
                         <button
-                            onClick={fetchPopularItems}
+                            onClick={fetchItems}
                             className="mt-4 px-4 py-2 bg-red-600 text-white text-sm font-bold rounded-lg hover:bg-red-700"
                         >
                             다시 시도
@@ -250,8 +327,8 @@ function AuctionPageContent() {
                                         key={page}
                                         onClick={() => setCurrentPage(page)}
                                         className={`w-10 h-10 text-sm font-bold rounded-lg transition-all ${currentPage === page
-                                                ? 'bg-indigo-600 text-white'
-                                                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                                            ? 'bg-indigo-600 text-white'
+                                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                                             }`}
                                     >
                                         {page}
@@ -274,8 +351,8 @@ function AuctionPageContent() {
                 {!loading && !error && items.length === 0 && (
                     <div className="py-20 text-center bg-white rounded-2xl border border-slate-100">
                         <div className="text-4xl mb-4">🔍</div>
-                        <p className="text-slate-500 font-medium">표시할 물건이 없습니다.</p>
-                        <p className="text-xs text-slate-400 mt-1">새로고침 버튼을 눌러 다시 시도해 보세요.</p>
+                        <p className="text-slate-500 font-medium">검색된 물건이 없습니다.</p>
+                        <p className="text-xs text-slate-400 mt-1">지역이나 물건 종류를 변경하여 다시 검색해 보세요.</p>
                     </div>
                 )}
             </div>
