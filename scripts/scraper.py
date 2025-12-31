@@ -214,10 +214,11 @@ class CourtScraper:
                             "content_text": title,
                             "sale_org": sale_org,
                             "expiry_date": expiry_date,
-                            "phone": phone
+                            "phone": phone,
+                            "source_type": "notice"
                         }
                         
-                        result = supabase.table("court_notices").upsert(data, on_conflict="site_id").execute()
+                        result = supabase.table("court_notices").upsert(data, on_conflict="site_id,source_type").execute()
                         
                         if result.data:
                             count_new += 1

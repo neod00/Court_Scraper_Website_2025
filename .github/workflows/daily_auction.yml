@@ -1,9 +1,10 @@
 name: Daily Auction Scrape
 
+# on:
+#   schedule:
+#     # Run at 3:00 AM KST (18:00 UTC previous day) - Different time from notice scraper
+#     - cron: '0 18 * * *'
 on:
-  schedule:
-    # Run at 3:00 AM KST (18:00 UTC previous day) - Different time from notice scraper
-    - cron: '0 18 * * *'
   workflow_dispatch: # Allow manual trigger
 
 jobs:

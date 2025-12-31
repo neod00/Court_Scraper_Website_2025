@@ -108,9 +108,9 @@ class AuctionScraper:
         result_date = self.parse_date(item.get('maegyuljGiil'))
         
         # Capture LAWD_CD (Region Code for transaction API)
-        rd1_cd = item.get('rd1Cd', '')
-        rd2_cd = item.get('rd2Cd', '')
-        lawd_cd = f"{rd1_cd}{rd2_cd}" if rd1_cd and rd2_cd else None
+        # rd1_cd = item.get('rd1Cd', '')
+        # rd2_cd = item.get('rd2Cd', '')
+        # lawd_cd = f"{rd1_cd}{rd2_cd}" if rd1_cd and rd2_cd else None
         
         return {
             "site_id": site_id,
@@ -136,7 +136,7 @@ class AuctionScraper:
             "note": note if note else None,
             "view_count": view_count,
             "result_date": result_date,
-            "lawd_cd": lawd_cd
+            # "lawd_cd": lawd_cd
         }
 
     async def extract_image_from_page(self, page, case_no: str) -> str | None:
