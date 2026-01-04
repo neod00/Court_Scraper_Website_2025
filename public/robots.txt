@@ -3,6 +3,8 @@
 
 User-agent: *
 Allow: /
+Disallow: /auction
+Disallow: /map
 
 # Sitemap
 Sitemap: https://court-auction-scraper.vercel.app/sitemap.xml

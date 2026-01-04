@@ -8,8 +8,7 @@ export default function Header() {
 
   const navLinks = [
     { href: '/', label: '홈' },
-    { href: '/auction', label: '🏠 법원경매', hidden: true },
-    { href: '/map', label: '🗺️ 지역별 지도', hidden: true },
+    { href: '/guide', label: '자산매각 가이드' },
     { href: '/about', label: '서비스 소개' },
     { href: '/faq', label: 'FAQ' },
     { href: '/contact', label: '문의' },
@@ -27,7 +26,7 @@ export default function Header() {
             </div>
             {/* Desktop Navigation */}
             <div className="hidden md:ml-6 md:flex md:space-x-8">
-              {navLinks.filter(link => !link.hidden).map((link) => (
+              {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
@@ -64,7 +63,7 @@ export default function Header() {
       {isMenuOpen && (
         <div className="md:hidden border-t border-gray-200">
           <div className="pt-2 pb-3 space-y-1">
-            {navLinks.filter(link => !link.hidden).map((link) => (
+            {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}

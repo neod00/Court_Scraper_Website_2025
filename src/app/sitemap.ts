@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = 'https://court-auction-scraper.vercel.app';
+    const baseUrl = 'https://court-scraper-website-2025.vercel.app';
     const lastModified = new Date();
 
     return [
@@ -40,6 +40,30 @@ export default function sitemap(): MetadataRoute.Sitemap {
             lastModified,
             changeFrequency: 'monthly',
             priority: 0.7,
+        },
+        {
+            url: `${baseUrl}/guide`,
+            lastModified,
+            changeFrequency: 'weekly',
+            priority: 0.9,
+        },
+        {
+            url: `${baseUrl}/guide/rehabilitation-asset-guide`,
+            lastModified,
+            changeFrequency: 'monthly',
+            priority: 0.8,
+        },
+        {
+            url: `${baseUrl}/guide/bankruptcy-vs-auction`,
+            lastModified,
+            changeFrequency: 'monthly',
+            priority: 0.8,
+        },
+        {
+            url: `${baseUrl}/guide/law-changes-2025`,
+            lastModified,
+            changeFrequency: 'monthly',
+            priority: 0.8,
         },
     ];
 }

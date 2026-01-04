@@ -104,6 +104,16 @@ export default async function Home({ searchParams }: HomeProps) {
           </h1>
         </div>
 
+        {/* Service Introduction for AdSense/SEO */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-8">
+          <p className="text-gray-700 leading-relaxed">
+            본 서비스는 <strong>대한민국법원 회생·파산 자산매각 공고</strong> 정보를 실시간으로 수집하여 제공하는 전문 검색 플랫폼입니다.
+            복잡한 법정 공고들 중에서 사용자가 원하는 부동산, 차량, 비상장 주식, 채권, 지식재산권 등의 자산을
+            정확하고 빠르게 찾을 수 있도록 돕기 위해 구축되었습니다. 모든 정보는 법원 공식 데이터를 기반으로 하며,
+            사용자의 편의를 위해 카테고리별 필터링과 키워드 검색 기능을 무료로 제공하고 있습니다.
+          </p>
+        </div>
+
         {/* Search Form */}
         <SearchForm />
 
