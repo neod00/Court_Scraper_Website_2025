@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     description: siteDescription,
   },
   verification: {
-    google: '', // Google Search Console 인증 코드 (추후 추가)
+    google: '79oi2iVGVHIfUYpQATCgM4IwwNlKj8AAyQs5RBM5Xs0',
   },
   alternates: {
     canonical: siteUrl,
