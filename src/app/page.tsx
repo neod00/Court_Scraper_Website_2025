@@ -2,6 +2,9 @@ import { supabase } from '@/lib/supabase';
 import NoticeCard from '@/components/NoticeCard';
 import SearchForm from '@/components/SearchForm';
 import Sidebar from '@/components/Sidebar';
+import Link from 'next/link';
+import { getRecentPosts, blogCategories } from '@/data/blog-posts';
+import { glossaryTerms } from '@/data/glossary';
 
 // Force dynamic rendering to handle searchParams correctly
 export const dynamic = 'force-dynamic';
@@ -209,6 +212,131 @@ export default async function Home({ searchParams }: HomeProps) {
                 최근 1주일간 차량/중기 관련 공고가 없습니다.
               </p>
             )}
+          </div>
+        </div>
+
+        {/* 블로그 & 가이드 섹션 */}
+        <div className="mt-12 border-t border-gray-200 pt-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">✍️</span>
+              <h2 className="text-xl font-bold text-gray-900">
+                입찰 가이드 & 블로그
+              </h2>
+            </div>
+            <Link href="/blog" className="text-indigo-600 hover:text-indigo-800 font-medium text-sm">
+              전체 보기 →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {getRecentPosts(3).map((post) => (
+              <Link
+                key={post.slug}
+                href={`/blog/${post.slug}`}
+                className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:border-indigo-200 transition-all duration-300"
+              >
+                <div className="h-2 bg-gradient-to-r from-indigo-500 to-blue-500" />
+                <div className="p-5">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-1 rounded">
+                      {blogCategories.find(c => c.name === post.category)?.icon} {post.category}
+                    </span>
+                    <span className="text-xs text-gray-400">{post.readingTime}분</span>
+                  </div>
+                  <h3 className="text-base font-bold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors line-clamp-2">
+                    {post.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm line-clamp-2">
+                    {post.description}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* 용어사전 미리보기 섹션 */}
+        <div className="mt-12 border-t border-gray-200 pt-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">📖</span>
+              <h2 className="text-xl font-bold text-gray-900">
+                회생·파산 용어사전
+              </h2>
+            </div>
+            <Link href="/glossary" className="text-indigo-600 hover:text-indigo-800 font-medium text-sm">
+              전체 보기 →
+            </Link>
+          </div>
+
+          <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-2xl p-6">
+            <p className="text-gray-700 mb-4">
+              경매와 자산매각에서 자주 사용되는 법률 용어를 쉽게 설명합니다.
+              입찰 전에 꼭 알아야 할 핵심 개념들을 확인하세요.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {glossaryTerms.slice(0, 10).map((term) => (
+                <Link
+                  key={term.slug}
+                  href={`/glossary/${term.slug}`}
+                  className="bg-white text-gray-700 px-3 py-1.5 rounded-full text-sm font-medium border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 transition-colors"
+                >
+                  {term.term}
+                </Link>
+              ))}
+              <Link
+                href="/glossary"
+                className="bg-indigo-600 text-white px-4 py-1.5 rounded-full text-sm font-bold hover:bg-indigo-700 transition-colors"
+              >
+                +{glossaryTerms.length - 10}개 더보기
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* 카테고리 바로가기 */}
+        <div className="mt-12 border-t border-gray-200 pt-8">
+          <div className="flex items-center gap-2 mb-6">
+            <span className="text-2xl">🗂️</span>
+            <h2 className="text-xl font-bold text-gray-900">
+              카테고리별 가이드
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Link
+              href="/category/real-estate"
+              className="bg-green-50 rounded-xl p-6 text-center hover:bg-green-100 transition-colors group"
+            >
+              <span className="text-4xl block mb-2">🏠</span>
+              <span className="font-bold text-gray-900 group-hover:text-green-700 transition-colors">부동산</span>
+              <p className="text-xs text-gray-500 mt-1">아파트, 상가, 토지</p>
+            </Link>
+            <Link
+              href="/category/vehicle"
+              className="bg-blue-50 rounded-xl p-6 text-center hover:bg-blue-100 transition-colors group"
+            >
+              <span className="text-4xl block mb-2">🚗</span>
+              <span className="font-bold text-gray-900 group-hover:text-blue-700 transition-colors">차량/동산</span>
+              <p className="text-xs text-gray-500 mt-1">승용차, 중장비</p>
+            </Link>
+            <Link
+              href="/category/bonds"
+              className="bg-amber-50 rounded-xl p-6 text-center hover:bg-amber-100 transition-colors group"
+            >
+              <span className="text-4xl block mb-2">📄</span>
+              <span className="font-bold text-gray-900 group-hover:text-amber-700 transition-colors">채권/주식</span>
+              <p className="text-xs text-gray-500 mt-1">매출채권, 비상장주식</p>
+            </Link>
+            <Link
+              href="/category/ip"
+              className="bg-purple-50 rounded-xl p-6 text-center hover:bg-purple-100 transition-colors group"
+            >
+              <span className="text-4xl block mb-2">💡</span>
+              <span className="font-bold text-gray-900 group-hover:text-purple-700 transition-colors">특허/상표</span>
+              <p className="text-xs text-gray-500 mt-1">지식재산권</p>
+            </Link>
           </div>
         </div>
       </div>
