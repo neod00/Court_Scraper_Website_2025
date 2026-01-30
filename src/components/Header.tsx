@@ -8,10 +8,11 @@ export default function Header() {
 
   const navLinks = [
     { href: '/', label: '홈' },
-    { href: '/guide', label: '자산매각 가이드' },
-    { href: '/about', label: '서비스 소개' },
+    { href: '/guide', label: '가이드' },
+    { href: '/glossary', label: '용어사전' },
+    { href: '/blog', label: '블로그' },
     { href: '/faq', label: 'FAQ' },
-    { href: '/contact', label: '문의' },
+    { href: '/about', label: '소개' },
   ];
 
   return (
