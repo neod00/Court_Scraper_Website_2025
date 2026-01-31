@@ -26,6 +26,9 @@ export const metadata: Metadata = {
       follow: true,
     },
   },
+  verification: {
+    google: 'uWs5v8AWst5Ar4eYtkM-3S6DEZprpeiOnJRAGxofTwg',
+  },
   openGraph: {
     title: siteName,
     description: siteDescription,
@@ -38,9 +41,6 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: siteName,
     description: siteDescription,
-  },
-  verification: {
-    google: '79oi2iVGVHIfUYpQATCgM4IwwNlKj8AAyQs5RBM5Xs0',
   },
   alternates: {
     canonical: siteUrl,
