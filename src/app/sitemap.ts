@@ -111,5 +111,27 @@ export default function sitemap(): MetadataRoute.Sitemap {
         priority: 0.85,
     }));
 
-    return [...staticPages, ...glossaryPages, ...blogPages, ...categoryPages];
+    // 도구 페이지
+    const toolPages: MetadataRoute.Sitemap = [
+        {
+            url: `${baseUrl}/tools`,
+            lastModified,
+            changeFrequency: 'monthly',
+            priority: 0.9,
+        },
+        {
+            url: `${baseUrl}/tools/acquisition-tax`,
+            lastModified,
+            changeFrequency: 'monthly',
+            priority: 0.9,
+        },
+        {
+            url: `${baseUrl}/tools/bid-calculator`,
+            lastModified,
+            changeFrequency: 'monthly',
+            priority: 0.9,
+        },
+    ];
+
+    return [...staticPages, ...glossaryPages, ...blogPages, ...categoryPages, ...toolPages];
 }
