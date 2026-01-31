@@ -345,7 +345,7 @@ export default function BidCalculatorPage() {
                                 </p>
                                 <input
                                     type="range"
-                                    min="5"
+                                    min="0"
                                     max="50"
                                     step="1"
                                     value={targetProfit}
@@ -353,7 +353,7 @@ export default function BidCalculatorPage() {
                                     className="w-full accent-indigo-600"
                                 />
                                 <div className="flex justify-between text-xs text-gray-400 mt-1">
-                                    <span>5% (보수적)</span>
+                                    <span>0% (손익분기)</span>
                                     <span>50% (공격적)</span>
                                 </div>
                             </div>
@@ -426,15 +426,15 @@ export default function BidCalculatorPage() {
                                 <input
                                     type="range"
                                     min="0"
-                                    max="20"
-                                    step="1"
+                                    max="30"
+                                    step="0.5"
                                     value={mileage}
                                     onChange={(e) => setMileage(e.target.value)}
                                     className="w-full accent-indigo-600"
                                 />
                                 <div className="flex justify-between text-xs text-gray-400 mt-1">
                                     <span>신차</span>
-                                    <span>20만km</span>
+                                    <span>30만km</span>
                                 </div>
                             </div>
 
@@ -497,7 +497,7 @@ export default function BidCalculatorPage() {
                                 </p>
                                 <input
                                     type="range"
-                                    min="5"
+                                    min="0"
                                     max="40"
                                     step="1"
                                     value={targetDiscount}
@@ -505,7 +505,7 @@ export default function BidCalculatorPage() {
                                     className="w-full accent-indigo-600"
                                 />
                                 <div className="flex justify-between text-xs text-gray-400 mt-1">
-                                    <span>5% (보수적)</span>
+                                    <span>0% (손익분기)</span>
                                     <span>40% (공격적)</span>
                                 </div>
                             </div>
