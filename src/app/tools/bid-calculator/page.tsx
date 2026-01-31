@@ -57,7 +57,14 @@ export default function BidCalculatorPage() {
 
         // 적정 입찰가 = (시세 / 목표수익률) - 취득세 - 기타비용
         const idealBidBase = (market / targetMultiplier) - totalCost;
-        const idealBid = idealBidBase / (1 + taxRate);
+        let idealBid = idealBidBase / (1 + taxRate);
+
+        // 최저매각가격보다 낮으면 안 됨
+        let belowMinimum = false;
+        if (minimum > 0 && idealBid < minimum) {
+            belowMinimum = true;
+            idealBid = minimum;
+        }
 
         const acquisitionTax = idealBid * taxRate;
         const totalInvestment = idealBid + acquisitionTax + totalCost;
@@ -74,6 +81,7 @@ export default function BidCalculatorPage() {
             expectedProfit: Math.round(expectedProfit),
             profitRate: market > 0 ? ((expectedProfit / totalInvestment) * 100).toFixed(1) : '0',
             bidToAppraisedRate: appraised > 0 ? ((idealBid / appraised) * 100).toFixed(1) : '0',
+            belowMinimum,
         };
     }, [appraisedValue, minimumBid, marketPrice, repairCost, evictionCost, houseCount, targetProfit]);
 
@@ -339,7 +347,7 @@ export default function BidCalculatorPage() {
                                     type="range"
                                     min="5"
                                     max="50"
-                                    step="5"
+                                    step="1"
                                     value={targetProfit}
                                     onChange={(e) => setTargetProfit(parseInt(e.target.value))}
                                     className="w-full accent-indigo-600"
@@ -491,7 +499,7 @@ export default function BidCalculatorPage() {
                                     type="range"
                                     min="5"
                                     max="40"
-                                    step="5"
+                                    step="1"
                                     value={targetDiscount}
                                     onChange={(e) => setTargetDiscount(parseInt(e.target.value))}
                                     className="w-full accent-indigo-600"
@@ -514,10 +522,20 @@ export default function BidCalculatorPage() {
                     {activeTab === 'property' ? (
                         propertyResult ? (
                             <div className="space-y-4">
+                                {/* 최저매각가격 경고 */}
+                                {propertyResult.belowMinimum && (
+                                    <div className="bg-amber-500/20 border border-amber-400/50 rounded-lg p-3 text-amber-100 text-sm">
+                                        ⚠️ 목표 수익률 달성을 위한 입찰가가 최저매각가격보다 낮습니다. 최저매각가격({propertyResult.minimum.toLocaleString()}원)으로 조정되었습니다.
+                                    </div>
+                                )}
+
                                 {/* 이 가격으로 입찰하세요 */}
                                 <div className="bg-white/10 rounded-xl p-4">
                                     <div className="text-green-200 text-sm">이 가격으로 입찰하세요</div>
                                     <div className="text-3xl font-bold">{propertyResult.idealBid.toLocaleString()}원</div>
+                                    {propertyResult.belowMinimum && (
+                                        <div className="text-amber-300 text-xs mt-1">= 최저매각가격</div>
+                                    )}
                                 </div>
 
                                 {/* 비용 상세 */}
