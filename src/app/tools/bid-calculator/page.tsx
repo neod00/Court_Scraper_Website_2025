@@ -332,6 +332,9 @@ export default function BidCalculatorPage() {
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     목표 수익률: <span className="text-indigo-600 font-bold">{targetProfit}%</span>
                                 </label>
+                                <p className="text-xs text-gray-500 mb-2">
+                                    시세로 되팔았을 때 원하는 수익률
+                                </p>
                                 <input
                                     type="range"
                                     min="5"
@@ -342,8 +345,8 @@ export default function BidCalculatorPage() {
                                     className="w-full accent-indigo-600"
                                 />
                                 <div className="flex justify-between text-xs text-gray-400 mt-1">
-                                    <span>5%</span>
-                                    <span>50%</span>
+                                    <span>5% (보수적)</span>
+                                    <span>50% (공격적)</span>
                                 </div>
                             </div>
                         </div>
@@ -511,14 +514,13 @@ export default function BidCalculatorPage() {
                     {activeTab === 'property' ? (
                         propertyResult ? (
                             <div className="space-y-4">
+                                {/* 이 가격으로 입찰하세요 */}
                                 <div className="bg-white/10 rounded-xl p-4">
-                                    <div className="text-green-200 text-sm">적정 입찰가</div>
+                                    <div className="text-green-200 text-sm">이 가격으로 입찰하세요</div>
                                     <div className="text-3xl font-bold">{propertyResult.idealBid.toLocaleString()}원</div>
-                                    <div className="text-green-200 text-sm mt-1">
-                                        감정가 대비 {propertyResult.bidToAppraisedRate}%
-                                    </div>
                                 </div>
 
+                                {/* 비용 상세 */}
                                 <div className="space-y-3">
                                     <div className="flex justify-between">
                                         <span className="text-green-200">입찰가</span>
@@ -532,27 +534,33 @@ export default function BidCalculatorPage() {
                                         <span className="text-green-200">+ 수리/명도비</span>
                                         <span className="font-medium">{propertyResult.totalCost.toLocaleString()}원</span>
                                     </div>
-                                </div>
-
-                                <div className="border-t border-white/20 pt-4">
-                                    <div className="flex justify-between">
-                                        <span className="text-green-200">총 투자비용</span>
+                                    <div className="flex justify-between border-t border-white/20 pt-2 mt-2">
+                                        <span className="text-green-100 font-medium">내 총 투자금</span>
                                         <span className="font-bold">{propertyResult.totalInvestment.toLocaleString()}원</span>
                                     </div>
-                                    <div className="flex justify-between mt-2">
-                                        <span className="text-green-200">예상 시세</span>
+                                </div>
+
+                                {/* 시세로 팔면 */}
+                                <div className="border-t border-white/20 pt-4">
+                                    <div className="flex justify-between">
+                                        <span className="text-green-200">시세로 팔면</span>
                                         <span className="font-medium">{propertyResult.market.toLocaleString()}원</span>
                                     </div>
                                 </div>
 
+                                {/* 예상 수익 (핵심) */}
                                 <div className="bg-white/20 rounded-xl p-4 text-center">
-                                    <div className="text-green-100 text-sm">예상 수익</div>
+                                    <div className="text-green-100 text-sm">💰 예상 수익</div>
                                     <div className="text-2xl font-bold">
                                         {propertyResult.expectedProfit >= 0 ? '+' : ''}{propertyResult.expectedProfit.toLocaleString()}원
                                     </div>
-                                    <div className="text-lg font-medium text-green-100">
-                                        (수익률 {propertyResult.profitRate}%)
+                                    <div className="text-sm text-green-100 mt-1">
+                                        (수익률 약 {propertyResult.profitRate}%)
                                     </div>
+                                </div>
+
+                                <div className="bg-white/10 rounded-lg p-3 text-xs text-green-200">
+                                    💡 낙찰 후 시세({propertyResult.market.toLocaleString()}원)로 되팔면 약 {propertyResult.expectedProfit.toLocaleString()}원 수익
                                 </div>
                             </div>
                         ) : (
