@@ -4,7 +4,7 @@ import { blogPosts } from '@/data/blog-posts';
 import { categories } from '@/data/categories';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = 'https://court-scraper-website-2025.vercel.app';
+    const baseUrl = 'https://courtauction.site';
     const lastModified = new Date();
 
     // 정적 페이지

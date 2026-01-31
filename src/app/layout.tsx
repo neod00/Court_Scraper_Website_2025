@@ -7,7 +7,7 @@ import Footer from '@/components/Footer';
 
 const inter = Inter({ subsets: ['latin'] });
 
-const siteUrl = 'https://court-scraper-website-2025.vercel.app';
+const siteUrl = 'https://courtauction.site';
 const siteName = '대법원 회생·파산 자산매각 공고 자동조회 시스템';
 const siteDescription = '대법원 회생·파산 자산매각 공고를 자동으로 수집하여 제공합니다. 부동산, 차량, 채권, 주식, 특허 등 다양한 매각 자산 정보를 쉽고 빠르게 검색하세요.';
 
