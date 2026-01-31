@@ -47,14 +47,16 @@ export default function AcquisitionTaxPage() {
                 // 2주택
                 taxRate = 0.08;
             } else if (houseCount === 1) {
-                // 1주택 (기존 보유 시 2주택이 됨)
+                // 1주택 보유 중 추가 취득 (취득 후 2주택)
                 taxRate = 0.08;
             } else {
-                // 무주택자 (1주택자가 됨)
+                // 무주택자가 1주택 취득
                 if (price <= 600000000) {
                     taxRate = 0.01;
                 } else if (price <= 900000000) {
-                    taxRate = 0.02;
+                    // 6억~9억 구간: 점감세율 적용
+                    // 세율 = ((취득가 / 1억) × 2/3 - 3) / 100
+                    taxRate = ((price / 100000000) * (2 / 3) - 3) / 100;
                 } else {
                     taxRate = 0.03;
                 }
@@ -152,8 +154,8 @@ export default function AcquisitionTaxPage() {
                 <button
                     onClick={() => setActiveTab('property')}
                     className={`px-6 py-3 font-medium text-sm border-b-2 transition-colors ${activeTab === 'property'
-                            ? 'border-indigo-600 text-indigo-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700'
+                        ? 'border-indigo-600 text-indigo-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
                         }`}
                 >
                     🏠 부동산
@@ -161,8 +163,8 @@ export default function AcquisitionTaxPage() {
                 <button
                     onClick={() => setActiveTab('vehicle')}
                     className={`px-6 py-3 font-medium text-sm border-b-2 transition-colors ${activeTab === 'vehicle'
-                            ? 'border-indigo-600 text-indigo-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700'
+                        ? 'border-indigo-600 text-indigo-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
                         }`}
                 >
                     🚗 차량
@@ -193,8 +195,8 @@ export default function AcquisitionTaxPage() {
                                             key={option.value}
                                             onClick={() => setPropertyType(option.value as PropertyType)}
                                             className={`py-2 px-3 rounded-lg text-sm font-medium border transition-colors ${propertyType === option.value
-                                                    ? 'bg-indigo-600 text-white border-indigo-600'
-                                                    : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
+                                                ? 'bg-indigo-600 text-white border-indigo-600'
+                                                : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
                                                 }`}
                                         >
                                             {option.label}
@@ -226,25 +228,25 @@ export default function AcquisitionTaxPage() {
                                     {/* 보유 주택 수 */}
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            현재 보유 주택 수 (본인 포함)
+                                            현재 보유 주택 수
                                         </label>
+                                        <p className="text-xs text-gray-500 mb-2">
+                                            이번 취득 전 보유 주택 수 (세대원 포함)
+                                        </p>
                                         <div className="grid grid-cols-4 gap-2">
                                             {[0, 1, 2, 3].map((count) => (
                                                 <button
                                                     key={count}
                                                     onClick={() => setHouseCount(count)}
                                                     className={`py-2 px-3 rounded-lg text-sm font-medium border transition-colors ${houseCount === count
-                                                            ? 'bg-indigo-600 text-white border-indigo-600'
-                                                            : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
+                                                        ? 'bg-indigo-600 text-white border-indigo-600'
+                                                        : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
                                                         }`}
                                                 >
-                                                    {count === 3 ? '3주택+' : `${count}주택`}
+                                                    {count === 0 ? '무주택' : count === 3 ? '3+' : `${count}주택`}
                                                 </button>
                                             ))}
                                         </div>
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            * 취득 후 주택 수 기준입니다
-                                        </p>
                                     </div>
 
                                     {/* 면적 */}
@@ -256,8 +258,8 @@ export default function AcquisitionTaxPage() {
                                             <button
                                                 onClick={() => setIsSmallHouse(true)}
                                                 className={`py-2 px-3 rounded-lg text-sm font-medium border transition-colors ${isSmallHouse
-                                                        ? 'bg-indigo-600 text-white border-indigo-600'
-                                                        : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
+                                                    ? 'bg-indigo-600 text-white border-indigo-600'
+                                                    : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
                                                     }`}
                                             >
                                                 85㎡ 이하
@@ -265,8 +267,8 @@ export default function AcquisitionTaxPage() {
                                             <button
                                                 onClick={() => setIsSmallHouse(false)}
                                                 className={`py-2 px-3 rounded-lg text-sm font-medium border transition-colors ${!isSmallHouse
-                                                        ? 'bg-indigo-600 text-white border-indigo-600'
-                                                        : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
+                                                    ? 'bg-indigo-600 text-white border-indigo-600'
+                                                    : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
                                                     }`}
                                             >
                                                 85㎡ 초과
@@ -293,8 +295,8 @@ export default function AcquisitionTaxPage() {
                                             key={option.value}
                                             onClick={() => setVehicleType(option.value as VehicleType)}
                                             className={`py-2 px-3 rounded-lg text-sm font-medium border transition-colors ${vehicleType === option.value
-                                                    ? 'bg-indigo-600 text-white border-indigo-600'
-                                                    : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
+                                                ? 'bg-indigo-600 text-white border-indigo-600'
+                                                : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
                                                 }`}
                                         >
                                             {option.label}

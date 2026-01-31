@@ -165,8 +165,8 @@ export default function BidCalculatorPage() {
                 <button
                     onClick={() => setActiveTab('property')}
                     className={`px-6 py-3 font-medium text-sm border-b-2 transition-colors ${activeTab === 'property'
-                            ? 'border-indigo-600 text-indigo-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700'
+                        ? 'border-indigo-600 text-indigo-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
                         }`}
                 >
                     🏠 부동산
@@ -174,8 +174,8 @@ export default function BidCalculatorPage() {
                 <button
                     onClick={() => setActiveTab('vehicle')}
                     className={`px-6 py-3 font-medium text-sm border-b-2 transition-colors ${activeTab === 'vehicle'
-                            ? 'border-indigo-600 text-indigo-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700'
+                        ? 'border-indigo-600 text-indigo-600'
+                        : 'border-transparent text-gray-500 hover:text-gray-700'
                         }`}
                 >
                     🚗 차량
@@ -242,6 +242,32 @@ export default function BidCalculatorPage() {
                                 </div>
                             </div>
 
+                            {/* 시세 확인 링크 */}
+                            <div className="bg-blue-50 rounded-lg p-4">
+                                <p className="text-sm text-blue-800 mb-2">
+                                    💡 부동산 시세를 모르시나요?
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                    <a
+                                        href="https://land.naver.com/"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-600 font-medium text-sm hover:underline"
+                                    >
+                                        네이버 부동산 →
+                                    </a>
+                                    <span className="text-blue-300">|</span>
+                                    <a
+                                        href="https://hogangnono.com/"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-600 font-medium text-sm hover:underline"
+                                    >
+                                        호갱노노 →
+                                    </a>
+                                </div>
+                            </div>
+
                             {/* 예상 수리비 */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -270,8 +296,8 @@ export default function BidCalculatorPage() {
                                             key={cost}
                                             onClick={() => setEvictionCost(cost)}
                                             className={`py-2 px-2 rounded-lg text-xs font-medium border transition-colors ${evictionCost === cost
-                                                    ? 'bg-indigo-600 text-white border-indigo-600'
-                                                    : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
+                                                ? 'bg-indigo-600 text-white border-indigo-600'
+                                                : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
                                                 }`}
                                         >
                                             {cost === '0' ? '없음' : `${parseInt(cost) / 10000}만원`}
@@ -291,8 +317,8 @@ export default function BidCalculatorPage() {
                                             key={count}
                                             onClick={() => setHouseCount(count)}
                                             className={`py-2 px-3 rounded-lg text-sm font-medium border transition-colors ${houseCount === count
-                                                    ? 'bg-indigo-600 text-white border-indigo-600'
-                                                    : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
+                                                ? 'bg-indigo-600 text-white border-indigo-600'
+                                                : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
                                                 }`}
                                         >
                                             {count === 3 ? '3+' : count}
@@ -338,8 +364,8 @@ export default function BidCalculatorPage() {
                                             key={option.value}
                                             onClick={() => setVehicleClass(option.value as VehicleClass)}
                                             className={`py-2 px-3 rounded-lg text-sm font-medium border transition-colors ${vehicleClass === option.value
-                                                    ? 'bg-indigo-600 text-white border-indigo-600'
-                                                    : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
+                                                ? 'bg-indigo-600 text-white border-indigo-600'
+                                                : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
                                                 }`}
                                         >
                                             {option.label}
@@ -355,8 +381,8 @@ export default function BidCalculatorPage() {
                                             key={option.value}
                                             onClick={() => setVehicleClass(option.value as VehicleClass)}
                                             className={`py-2 px-3 rounded-lg text-sm font-medium border transition-colors ${vehicleClass === option.value
-                                                    ? 'bg-indigo-600 text-white border-indigo-600'
-                                                    : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
+                                                ? 'bg-indigo-600 text-white border-indigo-600'
+                                                : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
                                                 }`}
                                         >
                                             {option.label}
@@ -375,7 +401,7 @@ export default function BidCalculatorPage() {
                                     onChange={(e) => setVehicleYear(e.target.value)}
                                     className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                                 >
-                                    {[2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015].map((year) => (
+                                    {Array.from({ length: 27 }, (_, i) => 2026 - i).map((year) => (
                                         <option key={year} value={year}>{year}년</option>
                                     ))}
                                 </select>
@@ -450,11 +476,14 @@ export default function BidCalculatorPage() {
                                 </div>
                             </div>
 
-                            {/* 목표 할인율 */}
+                            {/* 목표 수익률 */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    목표 할인율: <span className="text-indigo-600 font-bold">{targetDiscount}%</span>
+                                    목표 수익률: <span className="text-indigo-600 font-bold">{targetDiscount}%</span>
                                 </label>
+                                <p className="text-xs text-gray-500 mb-2">
+                                    시세로 되팔았을 때 원하는 수익률
+                                </p>
                                 <input
                                     type="range"
                                     min="5"
@@ -465,8 +494,8 @@ export default function BidCalculatorPage() {
                                     className="w-full accent-indigo-600"
                                 />
                                 <div className="flex justify-between text-xs text-gray-400 mt-1">
-                                    <span>5%</span>
-                                    <span>40%</span>
+                                    <span>5% (보수적)</span>
+                                    <span>40% (공격적)</span>
                                 </div>
                             </div>
                         </div>
@@ -535,14 +564,13 @@ export default function BidCalculatorPage() {
                     ) : (
                         vehicleResult ? (
                             <div className="space-y-4">
+                                {/* 이 가격으로 입찰하세요 */}
                                 <div className="bg-white/10 rounded-xl p-4">
-                                    <div className="text-green-200 text-sm">적정 입찰가</div>
+                                    <div className="text-green-200 text-sm">이 가격으로 입찰하세요</div>
                                     <div className="text-3xl font-bold">{vehicleResult.idealBid.toLocaleString()}원</div>
-                                    <div className="text-green-200 text-sm mt-1">
-                                        시세 대비 {targetDiscount}% 할인
-                                    </div>
                                 </div>
 
+                                {/* 비용 상세 */}
                                 <div className="space-y-3">
                                     <div className="flex justify-between">
                                         <span className="text-green-200">입찰가</span>
@@ -560,28 +588,33 @@ export default function BidCalculatorPage() {
                                         <span className="text-green-200">+ 수리비</span>
                                         <span className="font-medium">{vehicleResult.repair.toLocaleString()}원</span>
                                     </div>
-                                </div>
-
-                                <div className="border-t border-white/20 pt-4">
-                                    <div className="flex justify-between">
-                                        <span className="text-green-200">총 예상 비용</span>
+                                    <div className="flex justify-between border-t border-white/20 pt-2 mt-2">
+                                        <span className="text-green-100 font-medium">내 총 투자금</span>
                                         <span className="font-bold">{vehicleResult.totalCost.toLocaleString()}원</span>
                                     </div>
                                 </div>
 
+                                {/* 시세로 팔면 */}
+                                <div className="border-t border-white/20 pt-4">
+                                    <div className="flex justify-between">
+                                        <span className="text-green-200">시세로 팔면</span>
+                                        <span className="font-medium">{vehicleResult.market.toLocaleString()}원</span>
+                                    </div>
+                                </div>
+
+                                {/* 예상 수익 (핵심) */}
                                 <div className="bg-white/20 rounded-xl p-4 text-center">
-                                    <div className="text-green-100 text-sm">시세 대비 절감액</div>
+                                    <div className="text-green-100 text-sm">💰 예상 수익</div>
                                     <div className="text-2xl font-bold">
                                         {vehicleResult.savings >= 0 ? '+' : ''}{vehicleResult.savings.toLocaleString()}원
                                     </div>
                                     <div className="text-sm text-green-100 mt-1">
-                                        ({vehicleResult.savingsRate}% 절감)
+                                        (수익률 약 {vehicleResult.savingsRate}%)
                                     </div>
                                 </div>
 
-                                <div className="bg-white/10 rounded-lg p-3 text-sm">
-                                    <span className="text-green-200">📉 참고: 신차 대비 예상 감가율</span>
-                                    <span className="font-bold ml-2">{vehicleResult.depreciationRate}%</span>
+                                <div className="bg-white/10 rounded-lg p-3 text-xs text-green-200">
+                                    💡 낙찰 후 시세({vehicleResult.market.toLocaleString()}원)로 되팔면 약 {vehicleResult.savings.toLocaleString()}원 수익
                                 </div>
                             </div>
                         ) : (
