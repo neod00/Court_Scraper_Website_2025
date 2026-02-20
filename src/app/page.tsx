@@ -113,6 +113,7 @@ export default async function Home({ searchParams }: HomeProps) {
   const topDepartment = Object.entries(departmentCounts)
     .sort(([, a], [, b]) => b - a)[0];
 
+
   // ===== 기존 주간 공고 쿼리 =====
   // Query for weekly real estate notices
   const { data: realEstateNotices } = await supabase
