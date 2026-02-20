@@ -61,7 +61,11 @@ export default function SearchForm() {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg p-0 mb-8">
+        <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100 mb-8 relative z-0 group/form transition-shadow hover:shadow-md">
+            {/* 배경 은은한 효과 */}
+            <div className="absolute top-0 right-0 w-40 h-40 bg-blue-50 rounded-full blur-3xl -z-10 opacity-40 transition-opacity duration-500 group-hover/form:opacity-100" />
+            <div className="absolute bottom-0 left-0 w-40 h-40 bg-indigo-50 rounded-full blur-3xl -z-10 opacity-40 transition-opacity duration-500 group-hover/form:opacity-100" />
+
             {/* Date Inputs */}
             <div className="mb-8">
                 <div className="flex items-center gap-2 mb-4">
@@ -78,7 +82,7 @@ export default function SearchForm() {
                             id="startDate"
                             value={startDate}
                             onChange={(e) => setStartDate(e.target.value)}
-                            className={`w-full px-4 py-2 bg-gray-50 border rounded-md text-gray-900 focus:ring-0 focus:border-blue-500 transition-colors ${dateError ? 'border-red-400' : 'border-gray-200'}`}
+                            className={`w-full px-4 py-3 bg-white border rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm hover:border-gray-300 ${dateError ? 'border-red-400' : 'border-gray-200'}`}
                         />
                     </div>
                     <div>
@@ -90,7 +94,7 @@ export default function SearchForm() {
                             id="endDate"
                             value={endDate}
                             onChange={(e) => setEndDate(e.target.value)}
-                            className={`w-full px-4 py-2 bg-gray-50 border rounded-md text-gray-900 focus:ring-0 focus:border-blue-500 transition-colors ${dateError ? 'border-red-400' : 'border-gray-200'}`}
+                            className={`w-full px-4 py-3 bg-white border rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm hover:border-gray-300 ${dateError ? 'border-red-400' : 'border-gray-200'}`}
                         />
                     </div>
                 </div>
@@ -122,7 +126,7 @@ export default function SearchForm() {
                                 id="category"
                                 value={category}
                                 onChange={(e) => setCategory(e.target.value)}
-                                className="w-full appearance-none px-4 py-3 bg-gray-50 border border-gray-200 rounded-md text-gray-900 focus:ring-0 focus:border-blue-500 transition-colors"
+                                className="w-full appearance-none px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm hover:border-gray-300"
                             >
                                 {presets.map((p) => (
                                     <option key={p.value} value={p.value}>
@@ -149,22 +153,21 @@ export default function SearchForm() {
                             placeholder="직접입력"
                             value={keyword}
                             onChange={(e) => setKeyword(e.target.value)}
-                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-md text-gray-900 focus:ring-0 focus:border-blue-500 transition-colors placeholder-gray-400"
+                            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm placeholder-gray-400 hover:border-gray-300"
                         />
                     </div>
                 </div>
             </div>
 
-            {/* Submit Button with Progress */}
             <div className="pt-4">
                 <button
                     type="submit"
                     disabled={isLoading || !!dateError}
-                    className={`w-full flex flex-col items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-base font-bold text-white transition-all duration-300 ${dateError
-                            ? 'bg-gray-400 cursor-not-allowed'
-                            : isLoading
-                                ? 'bg-[#ff6b6b] cursor-wait'
-                                : 'bg-[#ff4b4b] hover:bg-[#ff3333] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#ff4b4b]'
+                    className={`w-full flex flex-col items-center py-4 px-6 border border-transparent rounded-xl shadow-sm text-base font-bold text-white transition-all duration-300 ${dateError
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : isLoading
+                            ? 'bg-indigo-400 cursor-wait'
+                            : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 hover:shadow-[0_8px_20px_rgb(59,130,246,0.3)] hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
                         }`}
                 >
                     {isLoading ? (

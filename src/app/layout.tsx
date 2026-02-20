@@ -8,7 +8,7 @@ import Footer from '@/components/Footer';
 const inter = Inter({ subsets: ['latin'] });
 
 const siteUrl = 'https://courtauction.site';
-const siteName = '대법원 회생·파산 자산매각 공고 자동조회 시스템';
+const siteName = '로옥션(LawAuction) - 프리미엄 법원 자산매각 플랫폼';
 const siteDescription = '대법원 회생·파산 자산매각 공고 자동 수집 및 조회. 부동산, 차량, 채권 등 다양한 법원 자산 정보를 쉽고 빠르게 검색하세요.';
 
 export const metadata: Metadata = {

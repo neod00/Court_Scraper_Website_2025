@@ -135,28 +135,34 @@ export default async function Home({ searchParams }: HomeProps) {
     .limit(10);
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8">
-      {/* Left Sidebar */}
-      <Sidebar />
-
+    <div className="flex flex-col xl:flex-row gap-8 xl:gap-12">
       {/* Main Content Area */}
       <div className="flex-1 min-w-0">
-        {/* Header Title */}
-        <div className="flex items-center gap-3 mb-8">
-          <span className="text-3xl">🏛️</span>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
-            대법원 회생·파산 자산매각 공고 수집기
-          </h1>
-        </div>
 
-        {/* Service Introduction for AdSense/SEO */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-8">
-          <p className="text-gray-700 leading-relaxed">
-            본 서비스는 <strong>대한민국법원 회생·파산 자산매각 공고</strong> 정보를 실시간으로 수집하여 제공하는 전문 검색 플랫폼입니다.
-            복잡한 법정 공고들 중에서 사용자가 원하는 부동산, 차량, 비상장 주식, 채권, 지식재산권 등의 자산을
-            정확하고 빠르게 찾을 수 있도록 돕기 위해 구축되었습니다. 모든 정보는 법원 공식 데이터를 기반으로 하며,
-            사용자의 편의를 위해 카테고리별 필터링과 키워드 검색 기능을 무료로 제공하고 있습니다.
-          </p>
+        {/* Premium Hero Section */}
+        <div className="relative rounded-3xl bg-slate-900 overflow-hidden shadow-2xl mb-12 border border-slate-800">
+          {/* Abstract Background Effects */}
+          <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
+          <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-cyan-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.05)_0%,transparent_100%)] pointer-events-none" />
+
+          <div className="relative p-8 sm:p-10 z-10 flex flex-col justify-center min-h-[220px]">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-300 text-xs font-bold tracking-wide w-fit mb-4">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+              </span>
+              실시간 데이터 연동 중
+            </div>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight mb-4 leading-tight">
+              법원 자산매각 공고<br className="max-sm:hidden" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">프리미엄 수집 플랫폼</span>
+            </h1>
+            <p className="text-slate-300 leading-relaxed text-[0.95rem] max-w-2xl font-light">
+              복잡한 법정 공고들 중에서 사용자가 원하는 부동산, 차량, 비상장 주식 등의 우량 자산을
+              가장 빠르고 정확하게 찾아드립니다. 대한민국법원 공식 데이터를 기반으로 제공합니다.
+            </p>
+          </div>
         </div>
 
         {/* Search Form */}
@@ -324,43 +330,52 @@ export default async function Home({ searchParams }: HomeProps) {
         </div>
 
         {/* 블로그 & 가이드 섹션 */}
-        <div className="mt-12 border-t border-gray-200 pt-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">✍️</span>
-              <h2 className="text-xl font-bold text-gray-900">
-                입찰 가이드 & 블로그
-              </h2>
-            </div>
-            <Link href="/blog" className="text-indigo-600 hover:text-indigo-800 font-medium text-sm">
-              전체 보기 →
-            </Link>
+        <div className="mt-16 border-t border-gray-100 pt-10">
+          <div className="flex flex-col items-center justify-center mb-10 text-center">
+            <span className="text-3xl mb-3">✍️</span>
+            <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">
+              입찰 가이드 & 투자 전략
+            </h2>
+            <p className="text-gray-500 mt-2 text-sm max-w-lg mx-auto leading-relaxed">
+              성공적인 투자를 위한 전문가의 인사이트와 실전 팁을 확인하세요.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {getRecentPosts(3).map((post) => (
               <Link
                 key={post.slug}
                 href={`/blog/${post.slug}`}
-                className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:border-indigo-200 transition-all duration-300"
+                className="group bg-white rounded-2xl shadow-sm border border-gray-100/80 overflow-hidden hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col"
               >
-                <div className="h-2 bg-gradient-to-r from-indigo-500 to-blue-500" />
-                <div className="p-5">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-1 rounded">
+                <div className="h-1.5 w-full bg-gradient-to-r from-gray-200 to-gray-200 group-hover:from-indigo-500 group-hover:to-blue-500 transition-all duration-500" />
+                <div className="p-6 flex-grow flex flex-col">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="bg-indigo-50 text-indigo-700 text-xs font-bold px-2.5 py-1 rounded-md border border-indigo-100/50">
                       {blogCategories.find(c => c.name === post.category)?.icon} {post.category}
                     </span>
-                    <span className="text-xs text-gray-400">{post.readingTime}분</span>
+                    <span className="text-xs font-medium text-gray-400 flex items-center gap-1">
+                      ⏱️ {post.readingTime}분
+                    </span>
                   </div>
-                  <h3 className="text-base font-bold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors line-clamp-2">
+                  <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-snug">
                     {post.title}
                   </h3>
-                  <p className="text-gray-600 text-sm line-clamp-2">
+                  <p className="text-gray-500 text-sm line-clamp-2 leading-relaxed mb-4">
                     {post.description}
                   </p>
+                  <div className="mt-auto pt-4 border-t border-gray-50 text-xs font-bold text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-end gap-1">
+                    자세히 보기 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                  </div>
                 </div>
               </Link>
             ))}
+          </div>
+
+          <div className="mt-8 text-center">
+            <Link href="/blog" className="inline-flex items-center justify-center px-6 py-2.5 bg-gray-50 text-gray-700 font-semibold text-sm rounded-full hover:bg-gray-100 hover:text-gray-900 transition-colors border border-gray-200">
+              블로그 전체 보기
+            </Link>
           </div>
         </div>
 
@@ -404,50 +419,71 @@ export default async function Home({ searchParams }: HomeProps) {
         </div>
 
         {/* 카테고리 바로가기 */}
-        <div className="mt-12 border-t border-gray-200 pt-8">
-          <div className="flex items-center gap-2 mb-6">
-            <span className="text-2xl">🗂️</span>
-            <h2 className="text-xl font-bold text-gray-900">
-              카테고리별 가이드
+        <div className="mt-16 mb-8 pt-8 border-t border-gray-100">
+          <div className="flex flex-col items-center justify-center mb-10 text-center">
+            <span className="text-3xl mb-3">🗂️</span>
+            <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">
+              무엇을 찾고 계신가요?
             </h2>
+            <p className="text-gray-500 mt-2 text-sm max-w-lg mx-auto leading-relaxed">
+              관심 있는 자산 카테고리를 선택하면 관련 최신 공고와 맞춤형 투자 가이드를 한 번에 볼 수 있습니다.
+            </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
             <Link
               href="/category/real-estate"
-              className="bg-green-50 rounded-xl p-6 text-center hover:bg-green-100 transition-colors group"
+              className="relative overflow-hidden bg-white border border-green-100/60 rounded-2xl p-6 text-center hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1.5 transition-all duration-300 group z-10"
             >
-              <span className="text-4xl block mb-2">🏠</span>
-              <span className="font-bold text-gray-900 group-hover:text-green-700 transition-colors">부동산</span>
-              <p className="text-xs text-gray-500 mt-1">아파트, 상가, 토지</p>
+              <div className="absolute inset-0 bg-gradient-to-br from-green-50/50 to-emerald-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
+              <div className="w-16 h-16 mx-auto bg-green-50 text-green-600 rounded-2xl flex items-center justify-center text-3xl mb-5 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-sm border border-green-100">
+                🏠
+              </div>
+              <span className="block font-bold text-gray-900 text-lg mb-1 group-hover:text-green-700 transition-colors">부동산</span>
+              <p className="text-xs text-gray-500 font-medium tracking-wide">아파트, 상가, 토지</p>
             </Link>
+
             <Link
               href="/category/vehicle"
-              className="bg-blue-50 rounded-xl p-6 text-center hover:bg-blue-100 transition-colors group"
+              className="relative overflow-hidden bg-white border border-blue-100/60 rounded-2xl p-6 text-center hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1.5 transition-all duration-300 group z-10"
             >
-              <span className="text-4xl block mb-2">🚗</span>
-              <span className="font-bold text-gray-900 group-hover:text-blue-700 transition-colors">차량/동산</span>
-              <p className="text-xs text-gray-500 mt-1">승용차, 중장비</p>
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-indigo-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
+              <div className="w-16 h-16 mx-auto bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-3xl mb-5 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300 shadow-sm border border-blue-100">
+                🚗
+              </div>
+              <span className="block font-bold text-gray-900 text-lg mb-1 group-hover:text-blue-700 transition-colors">차량/동산</span>
+              <p className="text-xs text-gray-500 font-medium tracking-wide">승용차, 특수차, 장비</p>
             </Link>
+
             <Link
               href="/category/bonds"
-              className="bg-amber-50 rounded-xl p-6 text-center hover:bg-amber-100 transition-colors group"
+              className="relative overflow-hidden bg-white border border-amber-100/60 rounded-2xl p-6 text-center hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1.5 transition-all duration-300 group z-10"
             >
-              <span className="text-4xl block mb-2">📄</span>
-              <span className="font-bold text-gray-900 group-hover:text-amber-700 transition-colors">채권/주식</span>
-              <p className="text-xs text-gray-500 mt-1">매출채권, 비상장주식</p>
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-50/50 to-orange-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
+              <div className="w-16 h-16 mx-auto bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center text-3xl mb-5 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-sm border border-amber-100">
+                📄
+              </div>
+              <span className="block font-bold text-gray-900 text-lg mb-1 group-hover:text-amber-700 transition-colors">채권/주식</span>
+              <p className="text-xs text-gray-500 font-medium tracking-wide">매출채권, 비상장주식</p>
             </Link>
+
             <Link
               href="/category/ip"
-              className="bg-purple-50 rounded-xl p-6 text-center hover:bg-purple-100 transition-colors group"
+              className="relative overflow-hidden bg-white border border-purple-100/60 rounded-2xl p-6 text-center hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1.5 transition-all duration-300 group z-10"
             >
-              <span className="text-4xl block mb-2">💡</span>
-              <span className="font-bold text-gray-900 group-hover:text-purple-700 transition-colors">특허/상표</span>
-              <p className="text-xs text-gray-500 mt-1">지식재산권</p>
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-50/50 to-fuchsia-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
+              <div className="w-16 h-16 mx-auto bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center text-3xl mb-5 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300 shadow-sm border border-purple-100">
+                💡
+              </div>
+              <span className="block font-bold text-gray-900 text-lg mb-1 group-hover:text-purple-700 transition-colors">특허/상표</span>
+              <p className="text-xs text-gray-500 font-medium tracking-wide">특허권, 실용신안</p>
             </Link>
           </div>
         </div>
       </div>
+
+      {/* Right Sidebar */}
+      <Sidebar />
     </div>
   );
 }
