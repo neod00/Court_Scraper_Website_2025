@@ -64,14 +64,56 @@ export default async function Home({ searchParams }: HomeProps) {
     }
   }
 
-  // Calculate dates for weekly notices (last 7 days)
+  // Calculate dates for weekly notices
   const today = new Date();
   const weekAgo = new Date(today);
   weekAgo.setDate(today.getDate() - 7);
+  const twoWeeksAgo = new Date(today);
+  twoWeeksAgo.setDate(today.getDate() - 14);
 
   const todayStr = today.toISOString().split('T')[0];
   const weekAgoStr = weekAgo.toISOString().split('T')[0];
+  const twoWeeksAgoStr = twoWeeksAgo.toISOString().split('T')[0];
 
+  // ===== 주간 트렌드 통계 쿼리 =====
+  // 이번 주 전체 공고 (카테고리별 집계용)
+  const { data: thisWeekAll, count: thisWeekCount } = await supabase
+    .from('court_notices')
+    .select('category, department', { count: 'exact' })
+    .gte('date_posted', weekAgoStr)
+    .lte('date_posted', todayStr);
+
+  // 지난 주 전체 공고 수
+  const { count: lastWeekCount } = await supabase
+    .from('court_notices')
+    .select('*', { count: 'exact', head: true })
+    .gte('date_posted', twoWeeksAgoStr)
+    .lt('date_posted', weekAgoStr);
+
+  // 카테고리별 집계
+  const categoryCounts: Record<string, number> = {};
+  const departmentCounts: Record<string, number> = {};
+  if (thisWeekAll) {
+    thisWeekAll.forEach((item: any) => {
+      const cat = item.category || 'other';
+      categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+      const dept = item.department || '기타';
+      departmentCounts[dept] = (departmentCounts[dept] || 0) + 1;
+    });
+  }
+
+  // 전주 대비 증감율 계산
+  const weeklyTotal = thisWeekCount || 0;
+  const lastTotal = lastWeekCount || 0;
+  const changeRate = lastTotal > 0
+    ? Math.round(((weeklyTotal - lastTotal) / lastTotal) * 100)
+    : 0;
+
+  // 가장 활발한 법원 (최다 공고)
+  const topDepartment = Object.entries(departmentCounts)
+    .sort(([, a], [, b]) => b - a)[0];
+
+  // ===== 기존 주간 공고 쿼리 =====
   // Query for weekly real estate notices
   const { data: realEstateNotices } = await supabase
     .from('court_notices')
@@ -119,6 +161,72 @@ export default async function Home({ searchParams }: HomeProps) {
 
         {/* Search Form */}
         <SearchForm />
+
+        {/* 📊 주간 매각 공고 트렌드 */}
+        <div className="mt-8 bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 text-white shadow-xl">
+          <div className="flex items-center gap-2 mb-5">
+            <span className="text-2xl">📊</span>
+            <h2 className="text-lg font-bold">주간 매각 공고 트렌드</h2>
+            <span className="text-xs text-slate-400 ml-auto">
+              {weekAgoStr} ~ {todayStr}
+            </span>
+          </div>
+
+          {/* 상단 통계 카드 */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+            {/* 총 공고 건수 */}
+            <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center">
+              <p className="text-xs text-slate-300 mb-1">이번 주 총 공고</p>
+              <p className="text-2xl font-bold text-white">{weeklyTotal}<span className="text-sm font-normal">건</span></p>
+              {changeRate !== 0 && (
+                <p className={`text-xs mt-1 font-medium ${changeRate > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {changeRate > 0 ? '▲' : '▼'} 전주 대비 {Math.abs(changeRate)}%
+                </p>
+              )}
+              {changeRate === 0 && lastTotal > 0 && (
+                <p className="text-xs mt-1 text-slate-400">전주와 동일</p>
+              )}
+            </div>
+
+            {/* 부동산 */}
+            <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center">
+              <p className="text-xs text-slate-300 mb-1">🏠 부동산</p>
+              <p className="text-2xl font-bold text-emerald-400">{categoryCounts['real_estate'] || 0}<span className="text-sm font-normal text-slate-300">건</span></p>
+            </div>
+
+            {/* 차량/동산 */}
+            <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center">
+              <p className="text-xs text-slate-300 mb-1">🚗 차량/동산</p>
+              <p className="text-2xl font-bold text-blue-400">{categoryCounts['vehicle'] || 0}<span className="text-sm font-normal text-slate-300">건</span></p>
+            </div>
+
+            {/* 기타 (채권, 주식, 특허 등) */}
+            <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center">
+              <p className="text-xs text-slate-300 mb-1">📄 기타 자산</p>
+              <p className="text-2xl font-bold text-amber-400">
+                {weeklyTotal - (categoryCounts['real_estate'] || 0) - (categoryCounts['vehicle'] || 0)}
+                <span className="text-sm font-normal text-slate-300">건</span>
+              </p>
+            </div>
+          </div>
+
+          {/* 하단 정보 */}
+          <div className="flex flex-col sm:flex-row gap-3 text-sm">
+            {topDepartment && (
+              <div className="flex items-center gap-2 bg-white/5 rounded-lg px-4 py-2">
+                <span className="text-yellow-400">🏛️</span>
+                <span className="text-slate-300">최다 공고 법원:</span>
+                <span className="font-semibold text-white">{topDepartment[0]}</span>
+                <span className="text-slate-400">({topDepartment[1]}건)</span>
+              </div>
+            )}
+            <div className="flex items-center gap-2 bg-white/5 rounded-lg px-4 py-2">
+              <span className="text-blue-400">ℹ️</span>
+              <span className="text-slate-300">전주 공고 수:</span>
+              <span className="font-semibold text-white">{lastTotal}건</span>
+            </div>
+          </div>
+        </div>
 
         {/* Result Message / Data List */}
         <div className="mt-8">
