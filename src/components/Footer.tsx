@@ -112,17 +112,30 @@ export default function Footer() {
                         >
                             scourt.go.kr
                         </a>
-                        )에 공개된 회생·파산 자산매각 공고 정보를 수집하여 제공하는 민간 정보 서비스입니다.
+                        )에 공개된 회생·파산 자산매각 공고 정보를 수집·분석·정리하여 제공하는 민간 정보 서비스입니다.
                     </p>
                     <p className="mt-2">
                         정보의 정확성을 위해 매일 자동 업데이트를 실시하고 있으나, 입찰 전에는 반드시 법원 공식 페이지에서 최종 정보를 확인하시기 바랍니다.
                         본 사이트는 법원 또는 법원행정처와 제휴·보증 관계가 없으며, 제공되는 정보는 법적 효력이 없습니다.
                     </p>
+                    <p className="mt-2">
+                        이 사이트는 Google AdSense를 통해 광고를 게재합니다.
+                        Google이 파트너 사이트를 통해 데이터를 사용하는 방식은{' '}
+                        <a
+                            href="https://www.google.com/policies/privacy/partners/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-indigo-400 hover:underline"
+                        >
+                            여기
+                        </a>
+                        에서 확인할 수 있습니다.
+                    </p>
                 </div>
 
                 {/* Copyright */}
                 <p className="text-center text-sm text-gray-600 mt-6">
-                    &copy; {new Date().getFullYear()} 대법원 회생·파산 자산매각 공고 자동조회 시스템
+                    &copy; {new Date().getFullYear()} LawAuction - 프리미엄 법원 자산매각 플랫폼
                 </p>
             </div>
         </footer>
