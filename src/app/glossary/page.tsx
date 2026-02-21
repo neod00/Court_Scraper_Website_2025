@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { glossaryTerms, glossaryByCategory } from '@/data/glossary';
 
 export const metadata: Metadata = {
-    title: '회생·파산 용어사전 | 대법원 회생·파산 자산매각 공고 자동조회 시스템',
+    title: '회생·파산 용어사전 | LawAuction',
     description: '회생절차, 파산, 유치권, 법정지상권, 권리분석 등 법원 경매와 자산매각에 필요한 핵심 용어를 알기 쉽게 설명합니다.',
     keywords: '회생절차, 파산, 유치권, 법정지상권, 권리분석, 경매용어, 법률용어, 부동산경매, 감정가, 최저매각가격',
 };

@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: '문의하기 | 대법원 회생·파산 자산매각 공고 자동조회 시스템',
-    description: '대법원 회생·파산 자산매각 공고 자동조회 시스템에 대한 문의사항을 보내주세요.',
+    title: '문의하기 | LawAuction',
+    description: 'LawAuction에 대한 문의사항을 보내주세요.',
 };
 
 export default function ContactPage() {
@@ -14,7 +14,7 @@ export default function ContactPage() {
                 <section>
                     <h2 className="text-xl font-semibold text-gray-800 mb-3">서비스 관련 문의</h2>
                     <p className="text-gray-600 leading-relaxed mb-4">
-                        대법원 회생·파산 자산매각 공고 자동조회 시스템 이용 중 궁금한 점이나
+                        LawAuction 이용 중 궁금한 점이나
                         건의사항이 있으시면 아래 이메일로 문의해 주세요.
                     </p>
                     <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-6">

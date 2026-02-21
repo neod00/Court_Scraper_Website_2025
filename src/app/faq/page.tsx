@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: '자주 묻는 질문 (FAQ) | 대법원 회생·파산 자산매각 공고 자동조회 시스템',
-    description: '대법원 회생·파산 자산매각 공고 자동조회 시스템 이용에 관한 자주 묻는 질문과 답변입니다.',
+    title: '자주 묻는 질문 (FAQ) | LawAuction',
+    description: 'LawAuction 이용에 관한 자주 묻는 질문과 답변입니다.',
 };
 
 const faqs = [

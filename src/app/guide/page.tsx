@@ -3,7 +3,7 @@ import Image from 'next/image';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: '자산매각 가이드 | 대법원 회생·파산 자산매각 공고 자동조회 시스템',
+    title: '자산매각 가이드 | LawAuction',
     description: '회생·파산 자산 매각 절차, 입찰 방법 및 2025년 최신 법규 가이드를 확인하세요.',
 };
 
