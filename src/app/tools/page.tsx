@@ -2,9 +2,9 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: '투자 계산기 도구 | 대법원 자산매각',
-    description: '회생·파산 자산매각 입찰에 필요한 취득세 계산기, 입찰가 계산기 등 무료 도구를 제공합니다.',
-    keywords: '취득세 계산기, 입찰가 계산기, 경매 계산기, 부동산 취득세, 차량 취득세',
+    title: '투자 계산기 도구 | LawAuction',
+    description: '회생·파산 자산매각 입찰에 필요한 취득세 계산기, 입찰가 계산기, 차량 이전비 계산기, 투자 수익률 계산기 등 무료 도구를 제공합니다.',
+    keywords: '취득세 계산기, 입찰가 계산기, 차량 이전비 계산기, 투자 수익률 계산기, 경매 계산기',
 };
 
 const tools = [
@@ -24,7 +24,24 @@ const tools = [
         features: ['부동산 적정 입찰가', '차량 적정 입찰가', '취득세/수리비/명도비 반영', '수익률 시뮬레이션'],
         color: 'from-green-500 to-emerald-600',
     },
+    {
+        slug: 'vehicle-transfer',
+        title: '차량 이전비 계산기',
+        icon: '🚗',
+        description: '법원 매각 차량의 이전 등록 시 필요한 총 비용을 계산합니다.',
+        features: ['차종별 취득세 자동 계산', '지역별 공채 매입비', '번호판/인지세 포함', '법원 매각 필요 서류 안내'],
+        color: 'from-orange-500 to-red-600',
+    },
+    {
+        slug: 'roi-calculator',
+        title: '투자 수익률 계산기',
+        icon: '📈',
+        description: '매도 차익형과 임대 수익형, 두 가지 방식의 투자 수익률을 분석합니다.',
+        features: ['매도 차익 ROI 분석', '임대 순수익률 계산', '투자 회수 기간 산출', '연 환산 수익률 제공'],
+        color: 'from-violet-500 to-purple-600',
+    },
 ];
+
 
 export default function ToolsPage() {
     return (
@@ -102,7 +119,9 @@ export default function ToolsPage() {
                 <ul className="text-gray-700 space-y-2 text-sm">
                     <li>• <strong>취득세 계산기</strong>를 먼저 사용하여 세금 규모를 파악하세요.</li>
                     <li>• <strong>입찰가 계산기</strong>로 목표 수익률에 맞는 적정 입찰가를 확인하세요.</li>
-                    <li>• 두 계산기를 함께 활용하면 더 정확한 투자 판단이 가능합니다.</li>
+                    <li>• 차량 매각 공고라면 <strong>차량 이전비 계산기</strong>로 총 이전 비용을 미리 확인하세요.</li>
+                    <li>• <strong>투자 수익률 계산기</strong>로 매도 차익 또는 임대 수익률을 시뮬레이션하세요.</li>
+                    <li>• 여러 계산기를 함께 활용하면 더 정확한 투자 판단이 가능합니다.</li>
                 </ul>
             </div>
 

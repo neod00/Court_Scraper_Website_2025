@@ -76,6 +76,20 @@ export default function Sidebar() {
                         <span className="text-xs font-bold text-gray-700 group-hover:text-emerald-700">취득세 계산기</span>
                     </Link>
                     <Link
+                        href="/tools/vehicle-transfer"
+                        className="group flex flex-col items-center gap-2 p-4 rounded-xl bg-gray-50 hover:bg-orange-50 border border-gray-100 hover:border-orange-200 transition-all duration-200 hover:-translate-y-0.5"
+                    >
+                        <span className="text-2xl group-hover:scale-110 transition-transform">🚗</span>
+                        <span className="text-xs font-bold text-gray-700 group-hover:text-orange-700">차량 이전비</span>
+                    </Link>
+                    <Link
+                        href="/tools/roi-calculator"
+                        className="group flex flex-col items-center gap-2 p-4 rounded-xl bg-gray-50 hover:bg-violet-50 border border-gray-100 hover:border-violet-200 transition-all duration-200 hover:-translate-y-0.5"
+                    >
+                        <span className="text-2xl group-hover:scale-110 transition-transform">📈</span>
+                        <span className="text-xs font-bold text-gray-700 group-hover:text-violet-700">수익률 계산기</span>
+                    </Link>
+                    <Link
                         href="/glossary"
                         className="group flex flex-col items-center gap-2 p-4 rounded-xl bg-gray-50 hover:bg-purple-50 border border-gray-100 hover:border-purple-200 transition-all duration-200 hover:-translate-y-0.5"
                     >
