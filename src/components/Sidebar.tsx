@@ -92,36 +92,55 @@ export default function Sidebar() {
                 </div>
             </div>
 
-            {/* 📬 뉴스레터/알림 구독 CTA */}
-            <div className="relative bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 text-white overflow-hidden">
+            {/* 인기 콘텐츠 추천 */}
+            <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 text-white overflow-hidden relative">
                 <div className="absolute -bottom-6 -right-6 w-28 h-28 bg-white rounded-full opacity-10 blur-xl pointer-events-none" />
-                <div className="absolute top-4 right-4">
-                    <span className="bg-white/20 backdrop-blur-sm text-[0.65rem] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
-                        Coming Soon
-                    </span>
-                </div>
-                <div className="text-3xl mb-3">🔔</div>
-                <h3 className="text-base font-bold mb-2">관심 공고 알림 서비스</h3>
-                <p className="text-blue-100 text-sm leading-relaxed mb-4">
-                    원하는 카테고리의 새 매각 공고가 등록되면 이메일로 즉시 알려드립니다.
-                </p>
-                <div className="flex gap-2">
-                    <input
-                        type="email"
-                        placeholder="이메일 주소 입력"
-                        disabled
-                        className="flex-1 px-3 py-2.5 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 text-sm placeholder-blue-200 text-white disabled:opacity-60 disabled:cursor-not-allowed"
-                    />
-                    <button
-                        disabled
-                        className="px-4 py-2.5 rounded-xl bg-white/25 text-sm font-bold hover:bg-white/30 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                    >
-                        구독
-                    </button>
-                </div>
-                <p className="text-[0.65rem] text-blue-200 mt-2 opacity-70">
-                    * 서비스 준비 중입니다. 곧 오픈 예정!
-                </p>
+                <div className="text-3xl mb-3">📚</div>
+                <h3 className="text-base font-bold mb-3">인기 투자 가이드</h3>
+                <ul className="space-y-2.5">
+                    <li>
+                        <Link
+                            href="/blog/beginner-guide-first-bid"
+                            className="flex items-start gap-2 text-blue-100 hover:text-white transition-colors text-sm leading-snug"
+                        >
+                            <span className="text-blue-300 mt-0.5 flex-shrink-0">▸</span>
+                            첫 입찰자를 위한 완벽 가이드
+                        </Link>
+                    </li>
+                    <li>
+                        <Link
+                            href="/blog/understanding-registry-for-rights-analysis"
+                            className="flex items-start gap-2 text-blue-100 hover:text-white transition-colors text-sm leading-snug"
+                        >
+                            <span className="text-blue-300 mt-0.5 flex-shrink-0">▸</span>
+                            등기부등본 읽는 법: 권리분석 핵심
+                        </Link>
+                    </li>
+                    <li>
+                        <Link
+                            href="/blog/acquisition-tax-guide-2026"
+                            className="flex items-start gap-2 text-blue-100 hover:text-white transition-colors text-sm leading-snug"
+                        >
+                            <span className="text-blue-300 mt-0.5 flex-shrink-0">▸</span>
+                            2026년 취득세 완벽 정리
+                        </Link>
+                    </li>
+                    <li>
+                        <Link
+                            href="/blog/what-is-lien-and-why-important"
+                            className="flex items-start gap-2 text-blue-100 hover:text-white transition-colors text-sm leading-snug"
+                        >
+                            <span className="text-blue-300 mt-0.5 flex-shrink-0">▸</span>
+                            유치권이란? 반드시 확인해야 하는 이유
+                        </Link>
+                    </li>
+                </ul>
+                <Link
+                    href="/blog"
+                    className="inline-block mt-4 text-xs font-bold bg-white/20 backdrop-blur-sm px-4 py-2 rounded-lg hover:bg-white/30 transition-colors"
+                >
+                    전체 블로그 보기 →
+                </Link>
             </div>
         </div>
     );
