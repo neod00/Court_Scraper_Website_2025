@@ -1,9 +1,74 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 
 type InvestmentType = 'resale' | 'rental';
+
+const formatNumber = (value: string) => {
+    const num = value.replace(/[^0-9]/g, '');
+    return num ? parseInt(num).toLocaleString() : '';
+};
+
+const parseNumber = (value: string) => {
+    return parseInt(value.replace(/,/g, '')) || 0;
+};
+
+// InputField를 외부 컴포넌트로 분리하여 리렌더 시 재생성 방지
+function InputField({ label, value, onChange, placeholder = '0', unit = '원', hint }: {
+    label: string; value: string; onChange: (v: string) => void; placeholder?: string; unit?: string; hint?: string;
+}) {
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const input = e.target;
+        const cursorPos = input.selectionStart || 0;
+
+        // 커서 위치 전까지의 숫자 개수를 세어 둠
+        const digitsBeforeCursor = input.value.slice(0, cursorPos).replace(/[^0-9]/g, '').length;
+
+        const formatted = formatNumber(input.value);
+        onChange(formatted);
+
+        // 포맷팅 후 커서 위치를 숫자 기준으로 복원
+        requestAnimationFrame(() => {
+            if (inputRef.current) {
+                let digitCount = 0;
+                let newPos = 0;
+                for (let i = 0; i < formatted.length; i++) {
+                    if (/[0-9]/.test(formatted[i])) {
+                        digitCount++;
+                    }
+                    if (digitCount >= digitsBeforeCursor) {
+                        newPos = i + 1;
+                        break;
+                    }
+                }
+                if (digitCount < digitsBeforeCursor) newPos = formatted.length;
+                inputRef.current.setSelectionRange(newPos, newPos);
+            }
+        });
+    }, [onChange]);
+
+    return (
+        <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
+            <div className="relative">
+                <input
+                    ref={inputRef}
+                    type="text"
+                    inputMode="numeric"
+                    value={value}
+                    onChange={handleChange}
+                    placeholder={placeholder}
+                    className="w-full px-4 py-2.5 pr-12 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-right"
+                />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">{unit}</span>
+            </div>
+            {hint && <p className="text-xs text-gray-400 mt-1">{hint}</p>}
+        </div>
+    );
+}
 
 export default function ROICalculatorPage() {
     const [investmentType, setInvestmentType] = useState<InvestmentType>('resale');
@@ -26,15 +91,6 @@ export default function ROICalculatorPage() {
     const [managementFee, setManagementFee] = useState<string>('');
     const [vacancyRate, setVacancyRate] = useState<string>('5');
     const [annualMaintenance, setAnnualMaintenance] = useState<string>('');
-
-    const formatNumber = (value: string) => {
-        const num = value.replace(/[^0-9]/g, '');
-        return num ? parseInt(num).toLocaleString() : '';
-    };
-
-    const parseNumber = (value: string) => {
-        return parseInt(value.replace(/,/g, '')) || 0;
-    };
 
     // 매도 수익률 계산
     const calculateResale = () => {
@@ -116,25 +172,6 @@ export default function ROICalculatorPage() {
 
     const resaleResult = investmentType === 'resale' ? calculateResale() : null;
     const rentalResult = investmentType === 'rental' ? calculateRental() : null;
-
-    const InputField = ({ label, value, onChange, placeholder = '0', unit = '원', hint }: {
-        label: string; value: string; onChange: (v: string) => void; placeholder?: string; unit?: string; hint?: string;
-    }) => (
-        <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">{label}</label>
-            <div className="relative">
-                <input
-                    type="text"
-                    value={value}
-                    onChange={(e) => onChange(formatNumber(e.target.value))}
-                    placeholder={placeholder}
-                    className="w-full px-4 py-2.5 pr-12 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-right"
-                />
-                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">{unit}</span>
-            </div>
-            {hint && <p className="text-xs text-gray-400 mt-1">{hint}</p>}
-        </div>
-    );
 
     return (
         <div className="max-w-5xl mx-auto px-4 py-8">
@@ -260,8 +297,8 @@ export default function ROICalculatorPage() {
                 {/* 결과 */}
                 <div className="lg:col-span-2">
                     <div className={`rounded-2xl shadow-lg p-6 text-white sticky top-4 ${investmentType === 'resale'
-                            ? 'bg-gradient-to-br from-violet-600 to-purple-700'
-                            : 'bg-gradient-to-br from-blue-600 to-indigo-700'
+                        ? 'bg-gradient-to-br from-violet-600 to-purple-700'
+                        : 'bg-gradient-to-br from-blue-600 to-indigo-700'
                         }`}>
                         <h2 className="text-lg font-bold mb-6 flex items-center gap-2">
                             📊 {investmentType === 'resale' ? '매도 수익 분석' : '임대 수익 분석'}
@@ -308,8 +345,8 @@ export default function ROICalculatorPage() {
 
                                 {/* 판정 */}
                                 <div className={`rounded-lg p-3 text-center text-sm font-bold ${resaleResult.annualizedROI >= 15 ? 'bg-green-500/30 text-green-100' :
-                                        resaleResult.annualizedROI >= 5 ? 'bg-yellow-500/30 text-yellow-100' :
-                                            'bg-red-500/30 text-red-100'
+                                    resaleResult.annualizedROI >= 5 ? 'bg-yellow-500/30 text-yellow-100' :
+                                        'bg-red-500/30 text-red-100'
                                     }`}>
                                     {resaleResult.annualizedROI >= 15 ? '🟢 우수한 투자 기회' :
                                         resaleResult.annualizedROI >= 5 ? '🟡 보통 수준의 수익률' :
@@ -362,8 +399,8 @@ export default function ROICalculatorPage() {
 
                                 {/* 판정 */}
                                 <div className={`rounded-lg p-3 text-center text-sm font-bold ${rentalResult.netYield >= 6 ? 'bg-green-500/30 text-green-100' :
-                                        rentalResult.netYield >= 3 ? 'bg-yellow-500/30 text-yellow-100' :
-                                            'bg-red-500/30 text-red-100'
+                                    rentalResult.netYield >= 3 ? 'bg-yellow-500/30 text-yellow-100' :
+                                        'bg-red-500/30 text-red-100'
                                     }`}>
                                     {rentalResult.netYield >= 6 ? '🟢 높은 임대 수익률' :
                                         rentalResult.netYield >= 3 ? '🟡 적정 수준의 수익률' :
