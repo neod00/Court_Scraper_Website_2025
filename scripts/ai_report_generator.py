@@ -46,7 +46,8 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 openai_client = OpenAI(api_key=OPENAI_API_KEY)
 
 # Target categories for AI report generation
-TARGET_CATEGORIES = ['real_estate', 'vehicle']
+# Processing all categories to provide rich data for the weekly trend report
+TARGET_CATEGORIES = ['real_estate', 'vehicle', 'asset', 'bond', 'stock', 'patent', 'electronics', 'etc']
 
 # Minimum text length to consider text extraction successful
 MIN_TEXT_LENGTH = 50
