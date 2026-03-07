@@ -107,6 +107,21 @@ export default function Footer() {
                                 </Link>
                             </li>
                         </ul>
+
+                        {/* 후원 안내 */}
+                        <h3 className="text-white font-bold mt-6 mb-3">☕ 서비스 후원</h3>
+                        <ul className="space-y-2 text-sm">
+                            <li>
+                                <a
+                                    href="https://qr.kakaopay.com/FcVUpCzQr"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="hover:text-white transition-colors inline-flex items-center gap-1"
+                                >
+                                    💛 카카오페이로 후원하기
+                                </a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
 

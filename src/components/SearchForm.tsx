@@ -47,6 +47,9 @@ export default function SearchForm() {
 
         setIsLoading(true);
 
+        // 후원 버튼 노출 조건: 경매 공고 조회 횟수 추적
+        window.dispatchEvent(new CustomEvent('lawauction-search'));
+
         const params = new URLSearchParams();
         if (startDate) params.set('start', startDate);
         if (endDate) params.set('end', endDate);
