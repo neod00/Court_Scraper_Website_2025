@@ -7,6 +7,9 @@ app_icon = r'd:\OneDrive\Business\ai automation\court_scraper\Deploy_StreamlitSh
 app_apple_icon = r'd:\OneDrive\Business\ai automation\court_scraper\Deploy_StreamlitShare\Court_Scraper_Website_2025\src\app\apple-icon.png'
 
 with Image.open(src_img) as img:
+    # Next.js (Turbopack) strictly requires images/favicons to be in RGBA format
+    img = img.convert('RGBA')
+    
     width, height = img.size
     min_dim = min(width, height)
     left = (width - min_dim) / 2
@@ -23,4 +26,4 @@ with Image.open(src_img) as img:
     img_apple = img.resize((180, 180), Image.Resampling.LANCZOS)
     img_apple.save(app_apple_icon, format='PNG')
 
-print('Favicon and icons successfully generated and saved to src/app/!')
+print('Favicon strictly converted to RGBA!')
