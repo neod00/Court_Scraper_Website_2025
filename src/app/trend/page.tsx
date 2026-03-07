@@ -6,9 +6,9 @@ import MarkdownRenderer from '@/components/MarkdownRenderer';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-    title: '주간 시장 동향 리포트 | 법원 자산매각 AI 분석',
-    description: 'AI가 분석한 법원 회생·파산 자산매각 주간 시장 동향 리포트. 매주 업데이트되는 부동산, 차량, 기타 자산의 매각 트렌드를 확인하세요.',
-    keywords: '주간동향, 시장분석, AI분석, 자산매각, 회생파산, 트렌드리포트, 법원경매',
+    title: '주간 매각물건 분석 리포트 | 법원 자산매각 AI 분석',
+    description: 'AI가 분석한 법원 회생·파산 자산매각 주간 매각물건 분석 리포트. 매주 업데이트되는 부동산, 차량, 기타 자산의 매각 트렌드를 확인하세요.',
+    keywords: '주간동향, 시장분석, AI분석, 자산매각, 회생파산, 매각물건분석, 법원경매',
 };
 
 interface TrendingTag {
@@ -68,7 +68,7 @@ export default async function TrendPage() {
                     AI 자동 분석 · 매주 업데이트
                 </div>
                 <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4 leading-tight tracking-tight">
-                    주간 자산매각 시장 동향 리포트
+                    주간 매각물건 분석 리포트
                 </h1>
                 <p className="text-gray-500 max-w-2xl mx-auto leading-relaxed text-sm">
                     매주 수집되는 법원 회생·파산 자산매각 공고의 AI 요약 데이터를 종합 분석하여,
@@ -221,6 +221,66 @@ export default async function TrendPage() {
                         아직 생성된 주간 리포트가 없습니다. 데이터가 충분히 수집되면 AI가 자동으로 분석 리포트를 생성합니다.
                     </p>
                 </div>
+            )}
+
+            {/* 📁 이전 리포트 아카이브 */}
+            {reports && reports.length > 1 && (
+                <section className="mt-16 border-t border-gray-200 pt-10">
+                    <div className="flex items-center gap-3 mb-6">
+                        <span className="text-2xl">📁</span>
+                        <h2 className="text-xl font-bold text-gray-900">이전 리포트 아카이브</h2>
+                        <span className="text-sm text-gray-400 ml-auto">총 {reports.length - 1}건</span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {reports.slice(1).map((report: any, idx: number) => {
+                            const endDate = new Date(report.week_end);
+                            const month = endDate.getMonth() + 1;
+                            const weekOfMonth = Math.ceil(endDate.getDate() / 7);
+                            const weekLabel = `${month}월 ${weekOfMonth}주차`;
+
+                            let cats: Record<string, number> = {};
+                            try {
+                                cats = typeof report.category_breakdown === 'string'
+                                    ? JSON.parse(report.category_breakdown)
+                                    : (report.category_breakdown || {});
+                            } catch { cats = {}; }
+                            const totalNotices = Object.values(cats).reduce((a: number, b: number) => a + b, 0);
+
+                            const slug = `weekly-trend-${report.week_start}-to-${report.week_end}`;
+
+                            return (
+                                <a
+                                    key={report.id || idx}
+                                    href={`/blog/${slug}`}
+                                    className="group block bg-white border border-gray-200 rounded-xl p-5 hover:border-emerald-300 hover:shadow-lg transition-all duration-200"
+                                >
+                                    <div className="flex items-center justify-between mb-3">
+                                        <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold px-2.5 py-1 rounded-full">
+                                            📊 {weekLabel}
+                                        </span>
+                                        <span className="text-xs text-gray-400">
+                                            {totalNotices > 0 ? `${totalNotices}건` : ''}
+                                        </span>
+                                    </div>
+                                    <h3 className="font-bold text-gray-900 text-sm mb-2 group-hover:text-emerald-700 transition-colors">
+                                        {weekLabel} 매각물건 분석 리포트
+                                    </h3>
+                                    <p className="text-xs text-gray-500 leading-relaxed line-clamp-2 mb-3">
+                                        {report.briefing_text || '리포트 요약 정보가 없습니다.'}
+                                    </p>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-xs text-gray-400">
+                                            {report.week_start} ~ {report.week_end}
+                                        </span>
+                                        <span className="text-xs text-emerald-600 font-medium group-hover:translate-x-0.5 transition-transform">
+                                            자세히 보기 →
+                                        </span>
+                                    </div>
+                                </a>
+                            );
+                        })}
+                    </div>
+                </section>
             )}
 
             {/* Schema.org 구조화 데이터 */}

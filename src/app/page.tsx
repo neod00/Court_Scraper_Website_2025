@@ -187,6 +187,42 @@ export default async function Home({ searchParams }: HomeProps) {
         {/* Search Form */}
         <SearchForm />
 
+        {/* Result Message / Data List - right below search button */}
+        <div className="mt-4">
+          {(!notices || notices.length === 0) ? (
+            <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-md">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-blue-700">
+                    수집된 데이터가 없습니다. 위에서 검색 조건을 설정하고 수집(조회)을 시작해주세요.
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <div className="flex items-center justify-between mb-4 border-b border-gray-200 pb-2">
+                <h2 className="text-xl font-bold text-gray-900">
+                  📊 검색 결과
+                </h2>
+                <span className="text-sm text-gray-500">
+                  {count !== null ? `총 ${count}건` : '조회 완료'}
+                </span>
+              </div>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+                {notices.map((notice) => (
+                  <NoticeCard key={notice.id} notice={notice} />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* 📊 주간 매각 공고 트렌드 */}
         <div className="mt-8 bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 text-white shadow-xl">
           <div className="flex items-center gap-2 mb-5">
@@ -294,41 +330,47 @@ export default async function Home({ searchParams }: HomeProps) {
           )}
         </div>
 
-        {/* Result Message / Data List */}
-        <div className="mt-8">
-          {(!notices || notices.length === 0) ? (
-            <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-md">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-blue-700">
-                    수집된 데이터가 없습니다. 위에서 검색 조건을 설정하고 수집(조회)을 시작해주세요.
+        {/* 📊 주간 매각물건 분석 리포트 CTA Banner */}
+        <div className="mt-6">
+          <Link href="/trend" className="group block">
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 p-6 sm:p-8 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-0.5">
+              {/* Background decoration */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4" />
+
+              <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="inline-flex items-center gap-1 bg-white/20 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                      <span className="relative flex h-1.5 w-1.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white"></span>
+                      </span>
+                      NEW
+                    </span>
+                    <span className="text-emerald-100 text-xs font-medium">매주 자동 업데이트</span>
+                  </div>
+                  <h3 className="text-xl sm:text-2xl font-extrabold text-white mb-1 group-hover:translate-x-1 transition-transform duration-200">
+                    📊 주간 매각물건 분석 리포트
+                  </h3>
+                  <p className="text-emerald-100 text-sm leading-relaxed max-w-lg">
+                    AI가 이번 주 부동산·차량·기타 자산 매각 공고를 분석했습니다. 매물 종류, 가격대, 지역 분포를 한눈에 확인하세요.
                   </p>
                 </div>
+                <div className="flex-shrink-0">
+                  <span className="inline-flex items-center gap-2 bg-white text-emerald-700 font-bold px-6 py-3 rounded-xl shadow-md group-hover:shadow-lg group-hover:bg-emerald-50 transition-all duration-200 text-sm">
+                    리포트 보기
+                    <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </span>
+                </div>
               </div>
             </div>
-          ) : (
-            <div>
-              <div className="flex items-center justify-between mb-4 border-b border-gray-200 pb-2">
-                <h2 className="text-xl font-bold text-gray-900">
-                  📊 검색 결과
-                </h2>
-                <span className="text-sm text-gray-500">
-                  {count !== null ? `총 ${count}건` : '조회 완료'}
-                </span>
-              </div>
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-                {notices.map((notice) => (
-                  <NoticeCard key={notice.id} notice={notice} />
-                ))}
-              </div>
-            </div>
-          )}
+          </Link>
         </div>
+
+
 
         {/* Weekly Notices Section - Bottom of Page */}
         <div className="mt-12 border-t border-gray-200 pt-8">

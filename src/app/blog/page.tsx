@@ -154,7 +154,7 @@ export default async function BlogPage() {
             {dynamicPosts.length > 0 && (
                 <section className="mb-16">
                     <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                        📊 AI 주간 시장 리포트
+                        📊 주간 매각물건 분석 리포트
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {dynamicPosts.slice(0, 6).map((post) => (
