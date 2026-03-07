@@ -174,7 +174,7 @@ export default async function Home({ searchParams }: HomeProps) {
               실시간 데이터 연동 중
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight mb-4 leading-tight">
-              법원 자산매각 공고<br className="max-sm:hidden" />
+              대법원 회생 · 파산 자산매각 공고<br className="max-sm:hidden" />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">프리미엄 수집 플랫폼</span>
             </h1>
             <p className="text-slate-300 leading-relaxed text-[0.95rem] max-w-2xl font-light">
