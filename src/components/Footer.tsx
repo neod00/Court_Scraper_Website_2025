@@ -43,8 +43,18 @@ export default function Footer() {
                                 </Link>
                             </li>
                             <li>
+                                <Link href="/tools" className="hover:text-white transition-colors">
+                                    🧮 계산기
+                                </Link>
+                            </li>
+                            <li>
                                 <Link href="/glossary" className="hover:text-white transition-colors">
                                     📖 용어사전
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/trend" className="hover:text-white transition-colors">
+                                    📊 매각분석 리포트
                                 </Link>
                             </li>
                             <li>
