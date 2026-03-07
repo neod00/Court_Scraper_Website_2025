@@ -8,6 +8,7 @@ interface NoticeProps {
     date_posted: string;
     category: string | null;
     site_id: string; // court seq_id
+    ai_summary?: string | null;
 }
 
 export default function NoticeCard({ notice }: { notice: NoticeProps }) {
@@ -37,9 +38,14 @@ export default function NoticeCard({ notice }: { notice: NoticeProps }) {
                             {notice.date_posted}
                         </span>
                     </div>
-                    <h3 className="text-[1.05rem] leading-snug font-bold text-gray-900 line-clamp-2 mb-3 group-hover:text-blue-600 transition-colors">
+                    <h3 className="text-[1.05rem] leading-snug font-bold text-gray-900 line-clamp-2 mb-2 group-hover:text-blue-600 transition-colors">
                         {notice.title}
                     </h3>
+                    {notice.ai_summary && (
+                        <p className="text-xs text-gray-500 line-clamp-2 mb-1 leading-relaxed">
+                            {notice.ai_summary.replace(/[*#\n]/g, ' ').replace(/\s+/g, ' ').substring(0, 120)}
+                        </p>
+                    )}
                     <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
                         <span className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
                             <span className="text-gray-400">🏛️</span> {notice.department || '관할법원 정보 없음'}

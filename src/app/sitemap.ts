@@ -2,8 +2,9 @@ import { MetadataRoute } from 'next';
 import { glossaryTerms } from '@/data/glossary';
 import { blogPosts } from '@/data/blog-posts';
 import { categories } from '@/data/categories';
+import { supabase } from '@/lib/supabase';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = 'https://courtauction.site';
     const lastModified = new Date();
 
@@ -133,5 +134,27 @@ export default function sitemap(): MetadataRoute.Sitemap {
         },
     ];
 
-    return [...staticPages, ...glossaryPages, ...blogPages, ...categoryPages, ...toolPages];
+    // 공고 상세 페이지 (AI 분석 리포트가 있는 페이지 우선)
+    let noticePages: MetadataRoute.Sitemap = [];
+    try {
+        const { data: notices } = await supabase
+            .from('court_notices')
+            .select('id, date_posted')
+            .not('ai_summary', 'is', null)
+            .order('date_posted', { ascending: false })
+            .limit(200);
+
+        if (notices) {
+            noticePages = notices.map((notice) => ({
+                url: `${baseUrl}/notice/${notice.id}`,
+                lastModified: new Date(notice.date_posted),
+                changeFrequency: 'weekly' as const,
+                priority: 0.9,
+            }));
+        }
+    } catch (error) {
+        console.error('Error fetching notices for sitemap:', error);
+    }
+
+    return [...staticPages, ...glossaryPages, ...blogPages, ...categoryPages, ...toolPages, ...noticePages];
 }

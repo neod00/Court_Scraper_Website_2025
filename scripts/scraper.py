@@ -235,4 +235,15 @@ class CourtScraper:
 if __name__ == "__main__":
     scraper = CourtScraper()
     scraper.scrape_and_save(pages_to_scrape=3)
+    
+    # Auto-generate AI analysis reports for new notices
+    print("\n--- Starting AI Report Generation ---")
+    try:
+        from ai_report_generator import process_notices_without_summary
+        process_notices_without_summary()
+    except ImportError:
+        print("Warning: ai_report_generator module not found. Run 'pip install -r requirements.txt' first.")
+    except Exception as e:
+        print(f"Warning: AI report generation failed: {e}")
+
 

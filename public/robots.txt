@@ -5,6 +5,7 @@ User-agent: *
 Allow: /
 Disallow: /auction
 Disallow: /map
+Disallow: /api/
 
 # Sitemap
 Sitemap: https://courtauction.site/sitemap.xml

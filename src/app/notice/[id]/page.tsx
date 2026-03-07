@@ -17,13 +17,16 @@ export async function generateMetadata({ params }: PageProps) {
     const { id } = await params;
     const { data: notice } = await supabase
         .from('court_notices')
-        .select('title, category, department')
+        .select('title, category, department, ai_summary')
         .eq('id', id)
         .single();
 
     const categoryName = notice?.category === 'real_estate' ? '부동산' : (notice?.category === 'vehicle' ? '차량/동산' : '기타');
     const title = notice ? `${notice.title} | [${categoryName}] ${notice.department || ''}` : '공고 상세 정보';
-    const description = notice ? `${notice.title} - ${notice.department || ''} 관할 회생·파산 자산매각 공고 상세 정보입니다.` : '대법원 회생·파산 자산매각 공고 상세 정보입니다.';
+
+    // Use AI summary for better SEO description if available
+    const aiDesc = notice?.ai_summary ? notice.ai_summary.replace(/[*#\n]/g, ' ').substring(0, 200) + '...' : '';
+    const description = aiDesc || (notice ? `${notice.title} - ${notice.department || ''} 관할 회생·파산 자산매각 공고 상세 정보입니다.` : '대법원 회생·파산 자산매각 공고 상세 정보입니다.');
 
     return {
         title,
@@ -31,7 +34,9 @@ export async function generateMetadata({ params }: PageProps) {
         openGraph: {
             title,
             description,
-        }
+        },
+        // noindex pages without AI summary to prevent thin content indexing
+        ...(!notice?.ai_summary ? { robots: { index: false, follow: true } } : {}),
     };
 }
 
@@ -151,36 +156,137 @@ export default async function NoticeDetail({ params }: PageProps) {
                 </dl>
             </div>
 
-            {/* Bidding Guide Section - Enhanced Content for AdSense */}
-            <div className="mt-8 bg-indigo-50 rounded-lg p-6 border border-indigo-100 mb-8">
-                <h3 className="text-xl font-bold text-indigo-900 mb-4 flex items-center gap-2">
-                    📊 회생·파산 자산 입찰 가이드 및 주의사항
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-700 leading-relaxed">
-                    <div>
-                        <h4 className="font-bold text-indigo-800 mb-2">1. 입찰 전 필수 체크리스트</h4>
-                        <ul className="list-disc list-inside space-y-1">
-                            <li><strong>현장 답사 권장</strong>: 공고문의 사진과 실제 현장 상태가 다를 수 있습니다. 반드시 현장을 방문하여 보존 상태를 확인하세요.</li>
-                            <li><strong>등기사항증명서 확인</strong>: 매각 물건의 권리 관계(근저당, 가압류 등)를 대법원 인터넷등기소를 통해 직접 열람하여 최종 확인하시기 바랍니다.</li>
-                            <li><strong>체납 관리비/공과금</strong>: 부동산의 경우 체납된 관리비나 공과금의 승계 여부를 관리사무소 등을 통해 미리 파악해야 합니다.</li>
-                        </ul>
+            {/* AI Analysis Report Section */}
+            {notice.ai_summary && (
+                <article className="mt-8 relative overflow-hidden rounded-2xl border border-indigo-200/80 shadow-lg">
+                    {/* Gradient Background */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-white to-blue-50 -z-10" />
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-100/30 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl -z-10" />
+
+                    {/* Header */}
+                    <div className="px-6 py-4 bg-gradient-to-r from-indigo-600 to-blue-600 flex items-center gap-3">
+                        <span className="text-2xl">📋</span>
+                        <div>
+                            <h2 className="text-lg font-bold text-white">공고 내용 요약</h2>
+                            <p className="text-indigo-200 text-xs">첨부파일 기반 자동 정리</p>
+                        </div>
+                        <span className="ml-auto inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-white/20 text-white border border-white/30 backdrop-blur-sm">
+                            AI 요약
+                        </span>
                     </div>
+
+                    {/* Content */}
+                    <div className="p-6 sm:p-8">
+                        <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed
+                            prose-strong:text-gray-900 prose-strong:font-bold
+                            prose-li:my-0.5
+                            prose-p:my-2
+                            prose-ul:my-2">
+                            {notice.ai_summary.split('\n').map((line: string, idx: number) => {
+                                const trimmed = line.trim();
+                                if (!trimmed) return <br key={idx} />;
+
+                                // Bold text handling (**text**)
+                                const parts = trimmed.split(/(\*\*[^*]+\*\*)/g);
+                                const rendered = parts.map((part: string, pIdx: number) => {
+                                    if (part.startsWith('**') && part.endsWith('**')) {
+                                        return <strong key={pIdx}>{part.slice(2, -2)}</strong>;
+                                    }
+                                    return part;
+                                });
+
+                                // List items
+                                if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
+                                    return (
+                                        <div key={idx} className="flex gap-2 my-1 pl-2">
+                                            <span className="text-indigo-400 mt-0.5 flex-shrink-0">•</span>
+                                            <span>{rendered.slice(0).map((r: any, i: number) => typeof r === 'string' ? r.replace(/^[-•]\s*/, '') : r)}</span>
+                                        </div>
+                                    );
+                                }
+
+                                // Numbered items
+                                if (/^\d+\./.test(trimmed)) {
+                                    return (
+                                        <div key={idx} className="flex gap-2 my-1.5">
+                                            <span className="text-indigo-500 font-bold flex-shrink-0">{trimmed.match(/^\d+/)?.[0]}.</span>
+                                            <span>{rendered.map((r: any, i: number) => typeof r === 'string' ? r.replace(/^\d+\.\s*/, '') : r)}</span>
+                                        </div>
+                                    );
+                                }
+
+                                return <p key={idx} className="my-2">{rendered}</p>;
+                            })}
+                        </div>
+
+                        {/* Disclaimer */}
+                        <div className="mt-6 pt-4 border-t border-indigo-100">
+                            <p className="text-xs text-gray-400 flex items-start gap-1.5">
+                                <span className="mt-0.5">ℹ️</span>
+                                <span>
+                                    본 요약은 AI가 첨부파일 원문을 기반으로 자동 정리한 참고 자료입니다.
+                                    정확한 매각 조건은 반드시 원본 공고 및 첨부파일을 직접 확인하시기 바랍니다.
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </article>
+            )}
+
+            {/* Guide Link Banner (replaces duplicate bidding guide text) */}
+            <div className="mt-8 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl p-5 border border-indigo-100 mb-8 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                    <span className="text-2xl">📊</span>
                     <div>
-                        <h4 className="font-bold text-indigo-800 mb-2">2. 입찰 당일 준비사항</h4>
-                        <ul className="list-disc list-inside space-y-1">
-                            <li><strong>준비물</strong>: 본인 신분증, 도장(사인 가능 여부 확인 필요), 입찰보증금(통상 최저매각가격의 10%)을 준비하세요.</li>
-                            <li><strong>대리 입찰 시</strong>: 인감증명서가 첨부된 위임장과 대리인의 신분증이 추가로 필요합니다.</li>
-                            <li><strong>시간 엄수</strong>: 입찰 마감 시간 이후에는 서류 제출이 절대 불가하므로 최소 30분 전 도착을 권장합니다.</li>
-                        </ul>
+                        <h3 className="text-sm font-bold text-indigo-900">입찰 전 꼭 확인하세요!</h3>
+                        <p className="text-xs text-gray-600 mt-0.5">입찰 체크리스트, 준비물, 법적 유의사항 안내</p>
                     </div>
                 </div>
-                <div className="mt-6 pt-6 border-t border-indigo-200">
-                    <h4 className="font-bold text-indigo-800 mb-2">3. 법적 고지 및 면책 조항</h4>
-                    <p className="text-xs text-gray-600">
-                        본 사이트에서 제공하는 정보는 대한민국 법원 대국민서비스에 공개된 공고문을 수집하여 제공하는 참고용 자료입니다. 정보의 입력 시점과 열람 시점 간의 차이로 인해 최신 정보와 다를 수 있으며, 오기입 또는 누락이 있을 수 있습니다. 이용자는 반드시 법원 사이트의 원본 공고문과 비치된 관련 서류(매각물건명세서 등)를 최종적으로 확인해야 하며, 본 서비스 제공 정보에 의존하여 발생한 어떠한 투자 손실이나 법적 책임에 대해서도 서비스 제공자는 책임을 지지 않습니다.
-                    </p>
-                </div>
+                <Link
+                    href="/guide"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700 transition-colors whitespace-nowrap"
+                >
+                    입찰 가이드 보기 →
+                </Link>
             </div>
+
+            {/* Legal Disclaimer */}
+            <div className="mb-8 px-4">
+                <p className="text-xs text-gray-400 leading-relaxed">
+                    본 사이트에서 제공하는 정보는 대한민국 법원 대국민서비스에 공개된 공고문을 수집하여 제공하는 참고용 자료입니다. 이용자는 반드시 법원 사이트의 원본 공고문을 최종적으로 확인해야 하며, 제공 정보에 의존하여 발생한 어떠한 손실이나 법적 책임에 대해서도 서비스 제공자는 책임을 지지 않습니다.
+                </p>
+            </div>
+
+            {/* JSON-LD Article Schema for SEO */}
+            {notice.ai_summary && (
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{
+                        __html: JSON.stringify({
+                            '@context': 'https://schema.org',
+                            '@type': 'Article',
+                            headline: notice.title,
+                            description: notice.ai_summary.replace(/[*#\n]/g, ' ').substring(0, 200),
+                            datePublished: notice.date_posted,
+                            author: {
+                                '@type': 'Organization',
+                                name: '로옥션(LawAuction)',
+                                url: 'https://courtauction.site',
+                            },
+                            publisher: {
+                                '@type': 'Organization',
+                                name: '로옥션(LawAuction)',
+                            },
+                            mainEntityOfPage: {
+                                '@type': 'WebPage',
+                                '@id': `https://courtauction.site/notice/${notice.id}`,
+                            },
+                            articleSection: notice.category === 'real_estate' ? '부동산' : '차량/동산',
+                            inLanguage: 'ko-KR',
+                        })
+                    }}
+                />
+            )}
 
             {/* Latest Notices for Internal Linking - AdSense Enhancement */}
             <div className="mt-12 border-t border-gray-200 pt-8">
