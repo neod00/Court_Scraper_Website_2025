@@ -6,9 +6,15 @@ import crypto from 'crypto';
 
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
-    const region = searchParams.get('region') || '서울특별시';
-    const category = searchParams.get('category') || '아파트';
-    const days = parseInt(searchParams.get('days') || '7');
+    const rawRegion = searchParams.get('region') || '서울특별시';
+    const rawCategory = searchParams.get('category') || '아파트';
+
+    // Command Injection 방지를 위한 허용 문자만 필터링
+    const region = rawRegion.replace(/[^가-힣a-zA-Z0-9\s-]/g, '');
+    const category = rawCategory.replace(/[^가-힣a-zA-Z0-9\s-]/g, '');
+
+    const parsedDays = parseInt(searchParams.get('days') || '7', 10);
+    const days = isNaN(parsedDays) ? 7 : Math.min(Math.max(parsedDays, 1), 30);
 
     const pythonPath = process.env.PYTHON_PATH || 'python';
     const scriptPath = path.join(process.cwd(), 'scripts_auction', 'auction_search_scraper.py');

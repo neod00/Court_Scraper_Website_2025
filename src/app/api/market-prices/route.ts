@@ -9,7 +9,10 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
     }
 
-    const serviceKey = '3d5ffc75a14cccb5038feb87bbf1b03f36591801bd4469fbfaf1d39f90a62ff8';
+    const serviceKey = process.env.DATA_GO_KR_SERVICE_KEY;
+    if (!serviceKey) {
+        return NextResponse.json({ error: 'Server configuration error: Missing API Key' }, { status: 500 });
+    }
     const url = `http://apis.data.go.kr/1613000/RTMSDataSvcAptTrade/getRTMSDataSvcAptTrade?LAWD_CD=${lawdCd}&DEAL_YMD=${dealYmd}&serviceKey=${encodeURIComponent(serviceKey)}`;
 
     try {

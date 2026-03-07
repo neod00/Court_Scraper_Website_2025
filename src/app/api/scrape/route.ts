@@ -4,11 +4,16 @@ import path from 'path';
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
-    const region = searchParams.get('region');
-    const page = searchParams.get('page') || '1';
-    const start = searchParams.get('start');
-    const end = searchParams.get('end');
-    const max = searchParams.get('max') || '9';
+
+    const sanitizeStr = (str: string | null) => str ? str.replace(/[^가-힣a-zA-Z0-9\s-]/g, '') : null;
+    const sanitizeNum = (str: string | null, defaultVal: string) => (str ? str.replace(/[^0-9]/g, '') : defaultVal) || defaultVal;
+
+    // 파라미터 유효성 검증 및 화이트리스트 필터링 (명령어 주입 방지)
+    const region = sanitizeStr(searchParams.get('region'));
+    const page = sanitizeNum(searchParams.get('page'), '1');
+    const start = sanitizeNum(searchParams.get('start'), '');
+    const end = sanitizeNum(searchParams.get('end'), '');
+    const max = sanitizeNum(searchParams.get('max'), '9');
 
     const pythonPath = process.env.PYTHON_PATH || 'python';
     const scriptPath = path.join(process.cwd(), 'scripts_auction', 'auction_scraper.py');

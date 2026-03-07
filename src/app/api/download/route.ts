@@ -7,6 +7,14 @@ export async function GET(request: NextRequest) {
     const originalFilename = searchParams.get('name');
     const path = searchParams.get('path') || '011';
 
+    // Validate path parameter to prevent Open Redirect/SSRF
+    if (!/^[a-zA-Z0-9_/-]+$/.test(path)) {
+        return NextResponse.json(
+            { error: 'Invalid path parameter' },
+            { status: 400 }
+        );
+    }
+
     if (!serverFilename || !originalFilename) {
         return NextResponse.json(
             { error: 'Missing required parameters: file and name' },

@@ -4,9 +4,13 @@ import path from 'path';
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
-    const saNo = searchParams.get('saNo');
-    const boCd = searchParams.get('boCd');
-    const maemulSer = searchParams.get('maemulSer') || '1';
+
+    const sanitizeAlphaNum = (str: string | null) => str ? str.replace(/[^a-zA-Z0-9]/g, '') : null;
+
+    // 식별자 검증 및 필터링 (명령어 주입 방지)
+    const saNo = sanitizeAlphaNum(searchParams.get('saNo'));
+    const boCd = sanitizeAlphaNum(searchParams.get('boCd'));
+    const maemulSer = sanitizeAlphaNum(searchParams.get('maemulSer')) || '1';
 
     if (!saNo || !boCd) {
         return NextResponse.json({
