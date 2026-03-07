@@ -246,4 +246,14 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Warning: AI report generation failed: {e}")
 
+    # Generate weekly trend report (briefing + full report + trending tags)
+    print("\n--- Starting Weekly Trend Report Generation ---")
+    try:
+        from weekly_trend_generator import generate_weekly_trend
+        generate_weekly_trend()
+    except ImportError:
+        print("Warning: weekly_trend_generator module not found.")
+    except Exception as e:
+        print(f"Warning: Weekly trend report generation failed: {e}")
+
 

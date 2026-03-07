@@ -113,6 +113,24 @@ export default async function Home({ searchParams }: HomeProps) {
   const topDepartment = Object.entries(departmentCounts)
     .sort(([, a], [, b]) => b - a)[0];
 
+  // ===== 주간 AI 트렌드 리포트 조회 =====
+  const { data: weeklyReport } = await supabase
+    .from('weekly_reports')
+    .select('briefing_text, trending_tags, full_report, week_start, week_end')
+    .order('week_end', { ascending: false })
+    .limit(1)
+    .single();
+
+  // Parse trending tags
+  let trendingTags: { tag: string; count: number }[] = [];
+  if (weeklyReport?.trending_tags) {
+    try {
+      trendingTags = typeof weeklyReport.trending_tags === 'string'
+        ? JSON.parse(weeklyReport.trending_tags)
+        : weeklyReport.trending_tags;
+    } catch { trendingTags = []; }
+  }
+
 
   // ===== 기존 주간 공고 쿼리 =====
   // Query for weekly real estate notices
@@ -233,6 +251,47 @@ export default async function Home({ searchParams }: HomeProps) {
               <span className="font-semibold text-white">{lastTotal}건</span>
             </div>
           </div>
+
+          {/* ✨ AI 시장 동향 브리핑 (방법 1) */}
+          {weeklyReport?.briefing_text && (
+            <div className="mt-5 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-400/20 rounded-xl p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-lg">✨</span>
+                <h3 className="text-sm font-bold text-cyan-300 tracking-wide">AI 시장 동향 분석</h3>
+                <span className="ml-auto text-xs text-slate-500">{weeklyReport.week_start} ~ {weeklyReport.week_end}</span>
+              </div>
+              <p className="text-slate-200 text-sm leading-relaxed">
+                {weeklyReport.briefing_text}
+              </p>
+              <div className="mt-3 text-right">
+                <Link href="/trend" className="text-xs text-cyan-400 hover:text-cyan-300 font-medium transition-colors">
+                  전체 리포트 보기 →
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {/* 🔥 트렌딩 키워드 태그 (방법 3) */}
+          {trendingTags.length > 0 && (
+            <div className="mt-4">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-sm">🔥</span>
+                <h3 className="text-xs font-bold text-slate-400 tracking-wider uppercase">이번 주 트렌딩 키워드</h3>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {trendingTags.map((item: { tag: string; count: number }) => (
+                  <Link
+                    key={item.tag}
+                    href={`/?q=${encodeURIComponent(item.tag)}`}
+                    className="inline-flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-cyan-400/30 text-slate-300 hover:text-cyan-300 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200"
+                  >
+                    <span>#{item.tag}</span>
+                    <span className="bg-white/10 text-slate-400 px-1.5 py-0.5 rounded-full text-[10px]">{item.count}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Result Message / Data List */}
