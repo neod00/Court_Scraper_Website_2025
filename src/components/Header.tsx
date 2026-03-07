@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -22,8 +23,16 @@ export default function Header() {
         <div className="flex justify-between items-center h-16">
           {/* Logo Area */}
           <div className="flex-shrink-0 flex items-center">
-            <Link href="/" className="flex items-center gap-2 group">
-              <span className="text-2xl group-hover:scale-110 transition-transform duration-300">🏛️</span>
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <div className="relative w-8 h-8 group-hover:scale-110 transition-transform duration-300">
+                <Image
+                  src="/logo.png"
+                  alt="LawAuction Logo"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
               <span className="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-700">
                 LawAuction
               </span>
