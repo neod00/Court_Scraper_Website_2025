@@ -108,7 +108,7 @@ export default function Footer() {
                             </li>
                         </ul>
 
-                        {/* 후원 안내 */}
+                        {/* 후원 안내 (임시 홀딩)
                         <h3 className="text-white font-bold mt-6 mb-3">☕ 서비스 후원</h3>
                         <ul className="space-y-2 text-sm">
                             <li>
@@ -122,6 +122,7 @@ export default function Footer() {
                                 </a>
                             </li>
                         </ul>
+                        */}
                     </div>
                 </div>
 
