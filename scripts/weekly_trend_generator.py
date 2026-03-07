@@ -343,6 +343,66 @@ def save_report(data: Dict, report: Dict) -> bool:
         return False
 
 
+def save_as_blog_post(data: Dict, report: Dict) -> bool:
+    """
+    Saves the weekly report as a blog post in the blog_posts table.
+    This enables auto-publishing weekly reports to the /blog page.
+    """
+    try:
+        week_start = data['week_start']
+        week_end = data['week_end']
+        
+        # Generate slug from dates
+        slug = f"weekly-trend-{week_start}-to-{week_end}"
+        
+        # Generate blog title and description
+        total = data['total']
+        title = f"📊 {week_start} ~ {week_end} 주간 자산매각 시장 동향 리포트"
+        description = report['briefing'][:200]
+        
+        # Calculate reading time (approx 500 chars/min for Korean)
+        reading_time = max(3, len(report['full_report']) // 500)
+        
+        # Extract tags
+        tags = []
+        for t in report.get('trending_tags', []):
+            if isinstance(t, dict) and 'tag' in t:
+                tags.append(t['tag'])
+            elif isinstance(t, str):
+                tags.append(t)
+        tags = tags[:8]  # Limit to 8 tags
+        
+        record = {
+            "slug": slug,
+            "title": title,
+            "description": description,
+            "content": report['full_report'],
+            "author": "AI 애널리스트",
+            "published_at": week_end,
+            "category": "시장분석",
+            "tags": tags,
+            "reading_time": reading_time,
+            "featured": False,
+            "source": "weekly_report",
+            "is_published": True,
+        }
+        
+        result = supabase.table('blog_posts') \
+            .upsert(record, on_conflict='slug') \
+            .execute()
+        
+        if result.data:
+            print(f"✅ Blog post published: {slug}")
+            return True
+        else:
+            print(f"❌ Failed to publish blog post")
+            return False
+            
+    except Exception as e:
+        print(f"⚠️ Blog post save skipped (table may not exist yet): {e}")
+        return False
+
+
 # ── 4. Main Pipeline ─────────────────────────────────────────────
 
 def generate_weekly_trend():
@@ -383,6 +443,10 @@ def generate_weekly_trend():
     # Step 3: Save to DB
     print("\n💾 Step 3: Saving to database...")
     save_report(data, report)
+
+    # Step 4: Auto-publish as blog post
+    print("\n📝 Step 4: Publishing as blog post...")
+    save_as_blog_post(data, report)
 
     print("\n✅ Weekly trend report generation complete!")
 

@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { blogPosts, blogCategories, getFeaturedPosts, getRecentPosts } from '@/data/blog-posts';
+import { blogPosts, blogCategories, getFeaturedPosts } from '@/data/blog-posts';
+import { supabase } from '@/lib/supabase';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
     title: '블로그 | 회생·파산 자산매각 전문 가이드',
@@ -8,9 +11,76 @@ export const metadata: Metadata = {
     keywords: '경매가이드, 회생자산, 파산매각, 입찰전략, 권리분석, 부동산경매, 취득세',
 };
 
-export default function BlogPage() {
+// Unified post type for both static and dynamic posts
+interface UnifiedPost {
+    slug: string;
+    title: string;
+    description: string;
+    author: string;
+    publishedAt: string;
+    category: string;
+    tags: string[];
+    readingTime: number;
+    featured: boolean;
+    source: 'static' | 'dynamic';
+}
+
+export default async function BlogPage() {
     const featuredPosts = getFeaturedPosts();
-    const recentPosts = getRecentPosts(10);
+
+    // Fetch dynamic blog posts from Supabase
+    let dynamicPosts: UnifiedPost[] = [];
+    try {
+        const { data } = await supabase
+            .from('blog_posts')
+            .select('slug, title, description, author, published_at, category, tags, reading_time, featured')
+            .eq('is_published', true)
+            .order('published_at', { ascending: false })
+            .limit(50);
+
+        if (data) {
+            dynamicPosts = data.map(p => ({
+                slug: p.slug,
+                title: p.title,
+                description: p.description,
+                author: p.author || 'AI 애널리스트',
+                publishedAt: p.published_at,
+                category: p.category || '시장분석',
+                tags: p.tags || [],
+                readingTime: p.reading_time || 5,
+                featured: p.featured || false,
+                source: 'dynamic' as const,
+            }));
+        }
+    } catch {
+        // blog_posts table may not exist yet, continue with static only
+    }
+
+    // Convert static posts to unified format
+    const staticPosts: UnifiedPost[] = blogPosts.map(p => ({
+        slug: p.slug,
+        title: p.title,
+        description: p.description,
+        author: p.author,
+        publishedAt: p.publishedAt,
+        category: p.category,
+        tags: p.tags,
+        readingTime: p.readingTime,
+        featured: p.featured,
+        source: 'static' as const,
+    }));
+
+    // Merge and sort by date (newest first)
+    const allPosts = [...dynamicPosts, ...staticPosts]
+        .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+
+    // Extended categories with 시장분석
+    const allCategories = [
+        ...blogCategories,
+        ...(dynamicPosts.length > 0 && !blogCategories.find(c => c.name === '시장분석')
+            ? [{ name: '시장분석', label: '시장분석', icon: '📊' }]
+            : []),
+    ];
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
@@ -33,7 +103,7 @@ export default function BlogPage() {
                 >
                     전체
                 </Link>
-                {blogCategories.map((cat) => (
+                {allCategories.map((cat) => (
                     <Link
                         key={cat.name}
                         href={`/blog?category=${cat.name}`}
@@ -80,25 +150,71 @@ export default function BlogPage() {
                 </section>
             )}
 
+            {/* 주간 리포트 섹션 (동적 글이 있을 때만) */}
+            {dynamicPosts.length > 0 && (
+                <section className="mb-16">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                        📊 AI 주간 시장 리포트
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {dynamicPosts.slice(0, 6).map((post) => (
+                            <Link
+                                key={post.slug}
+                                href={`/blog/${post.slug}`}
+                                className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:border-emerald-200 transition-all duration-300"
+                            >
+                                <div className="h-2 bg-gradient-to-r from-emerald-500 to-teal-500" />
+                                <div className="p-6">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-1 rounded">
+                                            📊 {post.category}
+                                        </span>
+                                        <span className="text-xs text-gray-400">
+                                            {post.readingTime}분
+                                        </span>
+                                    </div>
+                                    <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors line-clamp-2">
+                                        {post.title}
+                                    </h3>
+                                    <p className="text-gray-600 text-sm line-clamp-2 mb-4">
+                                        {post.description}
+                                    </p>
+                                    <div className="flex items-center justify-between text-xs text-gray-400">
+                                        <span>{post.publishedAt}</span>
+                                        <div className="flex gap-1">
+                                            {post.tags.slice(0, 2).map(tag => (
+                                                <span key={tag} className="bg-gray-100 px-2 py-0.5 rounded">
+                                                    #{tag}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </section>
+            )}
+
             {/* 전체 글 목록 */}
             <section>
                 <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                     📚 전체 글 목록
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {recentPosts.map((post) => (
+                    {allPosts.map((post) => (
                         <Link
                             key={post.slug}
                             href={`/blog/${post.slug}`}
                             className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:border-indigo-200 transition-all duration-300"
                         >
                             {/* 카드 상단 컬러 바 */}
-                            <div className="h-2 bg-gradient-to-r from-indigo-500 to-blue-500" />
+                            <div className={`h-2 ${post.source === 'dynamic' ? 'bg-gradient-to-r from-emerald-500 to-teal-500' : 'bg-gradient-to-r from-indigo-500 to-blue-500'}`} />
 
                             <div className="p-6">
                                 <div className="flex items-center justify-between mb-3">
-                                    <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-1 rounded">
-                                        {blogCategories.find(c => c.name === post.category)?.icon} {post.category}
+                                    <span className={`text-xs font-bold px-2 py-1 rounded ${post.source === 'dynamic' ? 'bg-emerald-100 text-emerald-700' : 'bg-indigo-100 text-indigo-700'}`}>
+                                        {post.source === 'dynamic' ? '📊' : (allCategories.find(c => c.name === post.category)?.icon || '📝')} {post.category}
                                     </span>
                                     <span className="text-xs text-gray-400">
                                         {post.readingTime}분
