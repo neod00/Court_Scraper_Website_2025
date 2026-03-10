@@ -67,18 +67,17 @@ export async function GET(request: NextRequest) {
                         items: data
                     }));
                 } catch (err) {
+                    console.error('Failed to parse scraper output:', err);
                     resolve(NextResponse.json({
                         success: false,
-                        message: 'Failed to parse scraper output',
-                        error: err instanceof Error ? err.message : String(err)
+                        message: 'Failed to process scraper output. Please check server logs.'
                     }, { status: 500 }));
                 }
             } else {
                 console.error('Scraper error:', errorOutput);
                 resolve(NextResponse.json({
                     success: false,
-                    message: 'Scraping failed or no output produced',
-                    error: errorOutput,
+                    message: 'Scraping failed or no output produced. Please check server logs.',
                     code: code
                 }, { status: 500 }));
             }

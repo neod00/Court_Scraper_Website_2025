@@ -49,8 +49,7 @@ export async function GET(request: Request) {
                 console.error('Scraper error:', errorOutput);
                 resolve(NextResponse.json({
                     success: false,
-                    message: 'Scraping failed',
-                    error: errorOutput
+                    message: 'Scraping failed. Please check server logs.'
                 }, { status: 500 }));
             }
         });

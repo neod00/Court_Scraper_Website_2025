@@ -29,19 +29,18 @@ export async function GET() {
                         success: true,
                         items: data
                     }));
-                } catch {
+                } catch (err) {
+                    console.error('Popular auctions parser error:', err);
                     resolve(NextResponse.json({
                         success: false,
-                        message: 'Failed to parse output',
-                        raw: output
+                        message: 'Failed to parse output. Please check server logs.'
                     }, { status: 500 }));
                 }
             } else {
                 console.error('Scraper error:', errorOutput);
                 resolve(NextResponse.json({
                     success: false,
-                    message: 'Scraping failed',
-                    error: errorOutput
+                    message: 'Scraping failed. Please check server logs.'
                 }, { status: 500 }));
             }
         });

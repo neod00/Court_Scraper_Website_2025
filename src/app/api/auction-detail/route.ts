@@ -43,19 +43,18 @@ export async function GET(request: Request) {
                 try {
                     const data = JSON.parse(output);
                     resolve(NextResponse.json(data));
-                } catch {
+                } catch (err) {
+                    console.error('Auction detail parser error:', err);
                     resolve(NextResponse.json({
                         success: false,
-                        message: 'Failed to parse output',
-                        raw: output
+                        message: 'Failed to parse output. Please check server logs.'
                     }, { status: 500 }));
                 }
             } else {
                 console.error('Detail scraper error:', errorOutput);
                 resolve(NextResponse.json({
                     success: false,
-                    message: 'Scraping failed',
-                    error: errorOutput
+                    message: 'Scraping failed. Please check server logs.'
                 }, { status: 500 }));
             }
         });
