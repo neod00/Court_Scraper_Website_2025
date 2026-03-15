@@ -31,5 +31,5 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           START_DATE=$(TZ='Asia/Seoul' date -d "tomorrow" +%Y-%m-%d)
-          END_DATE=$(TZ='Asia/Seoul' date -d "+31 days" +%Y-%m-%d)
+          END_DATE=$(TZ='Asia/Seoul' date -d "+14 days" +%Y-%m-%d)
           python scripts_auction/auction_scraper.py --start $START_DATE --end $END_DATE --max 30
