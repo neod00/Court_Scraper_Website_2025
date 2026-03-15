@@ -395,17 +395,17 @@ def process_notices_without_summary(limit: int = 50):
     print("=" * 60)
     
     try:
-        # Query notices that need AI summary
+        # Query notices that need AI summary or are missing structured dates
         result = supabase.table("court_notices") \
             .select("id, title, category, department, file_info") \
-            .is_("ai_summary", "null") \
+            .is_("auction_date", "null") \
             .in_("category", TARGET_CATEGORIES) \
             .order("date_posted", desc=True) \
             .limit(limit) \
             .execute()
         
         notices = result.data or []
-        print(f"\n📊 Found {len(notices)} notices without AI summary")
+        print(f"\n📊 Found {len(notices)} notices needing structured data (missing auction_date)")
         
         if not notices:
             print("✅ All target notices already have AI summaries!")
