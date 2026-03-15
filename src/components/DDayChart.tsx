@@ -27,10 +27,11 @@ const CATEGORY_COLORS: Record<string, string> = {
     '주거용': '#3b82f6', // blue
     '상업용': '#8b5cf6', // purple
     '토지': '#10b981',   // emerald
+    '차량': '#f59e0b',   // amber
     '기타': '#9ca3af'    // gray
 };
 
-const FILTERS = ['전체', '주거용', '상업용', '토지', '기타'];
+const FILTERS = ['전체', '주거용', '상업용', '토지', '차량', '기타'];
 
 export default function DDayChart({ rawItems }: DDayChartProps) {
   const [activeFilter, setActiveFilter] = useState('전체');
@@ -58,7 +59,7 @@ export default function DDayChart({ rawItems }: DDayChartProps) {
     // Group by date
     const grouped = filteredItems.reduce((acc, item) => {
         if (!acc[item.date]) {
-            acc[item.date] = { date: item.date, '주거용': 0, '상업용': 0, '토지': 0, '기타': 0, total_vol: 0, count: 0 };
+            acc[item.date] = { date: item.date, '주거용': 0, '상업용': 0, '토지': 0, '차량': 0, '기타': 0, total_vol: 0, count: 0 };
         }
         acc[item.date][item.type] += 1;
         acc[item.date].count += 1;
@@ -69,7 +70,7 @@ export default function DDayChart({ rawItems }: DDayChartProps) {
     const filledData = [];
     for (let d = new Date(startObj); d <= endObj; d.setDate(d.getDate() + 1)) {
         const dStr = d.toISOString().split('T')[0];
-        const dayData = grouped[dStr] || { date: dStr, '주거용': 0, '상업용': 0, '토지': 0, '기타': 0, total_vol: 0, count: 0 };
+        const dayData = grouped[dStr] || { date: dStr, '주거용': 0, '상업용': 0, '토지': 0, '차량': 0, '기타': 0, total_vol: 0, count: 0 };
         
         // Convert volume to 억원
         const vol_uk = Math.round(dayData.total_vol / 100000000);
@@ -185,6 +186,9 @@ export default function DDayChart({ rawItems }: DDayChartProps) {
                     }
                     {(activeFilter === '전체' || activeFilter === '토지') && 
                         <Bar yAxisId="left" dataKey="토지" stackId="a" fill={CATEGORY_COLORS['토지']} maxBarSize={50} />
+                    }
+                    {(activeFilter === '전체' || activeFilter === '차량') && 
+                        <Bar yAxisId="left" dataKey="차량" stackId="a" fill={CATEGORY_COLORS['차량']} maxBarSize={50} />
                     }
                     {(activeFilter === '전체' || activeFilter === '기타') && 
                         <Bar yAxisId="left" dataKey="기타" stackId="a" fill={CATEGORY_COLORS['기타']} radius={[4,4,0,0]} maxBarSize={50} />
