@@ -23,23 +23,23 @@ export default async function DataLabPage() {
     // 1. D-Day 분포 데이터 (오늘 ~ +30일 물건)
     const { data: dDayData } = await supabase
         .from('court_notices')
-        .select('auction_date')
+        .select('id, title, auction_date, minimum_price')
         .gte('auction_date', todayStr)
         .lte('auction_date', future30DaysStr);
 
-    let dDayChartData: { date: string, count: number }[] = [];
-    if (dDayData) {
-        const counts: Record<string, number> = {};
-        dDayData.forEach(item => {
-            if (item.auction_date) {
-                counts[item.auction_date] = (counts[item.auction_date] || 0) + 1;
-            }
-        });
+    const rawChartItems = (dDayData || []).map(item => {
+        const title = item.title || '';
+        let type = '기타';
+        if (title.match(/아파트|다세대|빌라|주택|오피스텔|도시형|연립/)) type = '주거용';
+        else if (title.match(/상가|근린|공장|숙박|오피스|지식산업|창고/)) type = '상업용';
+        else if (title.match(/토지|대지|임야|전|답|과수원|잡종지/)) type = '토지';
         
-        dDayChartData = Object.entries(counts)
-            .map(([date, count]) => ({ date, count }))
-            .sort((a, b) => a.date.localeCompare(b.date));
-    }
+        return {
+            date: item.auction_date,
+            type,
+            min_price: parseInt(item.minimum_price || '0', 10)
+        };
+    });
 
     // 2. 최근 한 달 기준 최저가/최고가 물건 데이터
     const thirtyDaysAgo = new Date(today);
@@ -101,8 +101,8 @@ export default async function DataLabPage() {
                         </p>
                     </div>
                     <div className="p-6 sm:p-8">
-                        {dDayChartData.length > 0 ? (
-                            <DDayChart rawData={dDayChartData} />
+                        {rawChartItems.length > 0 ? (
+                            <DDayChart rawItems={rawChartItems} />
                         ) : (
                             <div className="h-64 flex items-center justify-center bg-gray-50 rounded-xl text-gray-400">
                                 데이터가 부족합니다.
