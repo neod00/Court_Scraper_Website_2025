@@ -139,6 +139,7 @@ export default async function Home({ searchParams }: HomeProps) {
     .gte('date_posted', weekAgoStr)
     .lte('date_posted', todayStr)
     .eq('category', 'real_estate')
+    .eq('source_type', 'notice')
     .order('date_posted', { ascending: false })
     .limit(10);
 
@@ -149,6 +150,7 @@ export default async function Home({ searchParams }: HomeProps) {
     .gte('date_posted', weekAgoStr)
     .lte('date_posted', todayStr)
     .eq('category', 'vehicle')
+    .eq('source_type', 'notice')
     .order('date_posted', { ascending: false })
     .limit(10);
 
