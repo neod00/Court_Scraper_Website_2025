@@ -23,17 +23,17 @@ export default async function DataLabPage() {
     // 1. D-Day 분포 데이터 (오늘 ~ +30일 물건)
     const { data: dDayData } = await supabase
         .from('court_notices')
-        .select('id, title, auction_date, minimum_price')
+        .select('id, title, auction_date, minimum_price, ai_summary')
         .eq('source_type', 'notice')
         .gte('auction_date', todayStr)
         .lte('auction_date', future30DaysStr);
 
     const rawChartItems = (dDayData || []).map(item => {
-        const title = item.title || '';
+        const fullText = (item.title || '') + ' ' + (item.ai_summary || '');
         let type = '기타';
-        if (title.match(/아파트|다세대|빌라|주택|오피스텔|도시형|연립/)) type = '주거용';
-        else if (title.match(/상가|근린|공장|숙박|오피스|지식산업|창고/)) type = '상업용';
-        else if (title.match(/토지|대지|임야|전|답|과수원|잡종지/)) type = '토지';
+        if (fullText.match(/아파트|다세대|빌라|주택|오피스텔|도시형|연립/)) type = '주거용';
+        else if (fullText.match(/상가|근린|공장|숙박|오피스|지식산업|창고/)) type = '상업용';
+        else if (fullText.match(/토지|대지|임야|전|답|과수원|잡종지/)) type = '토지';
         
         return {
             date: item.auction_date,

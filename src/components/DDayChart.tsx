@@ -30,7 +30,7 @@ const CATEGORY_COLORS: Record<string, string> = {
     '기타': '#9ca3af'    // gray
 };
 
-const FILTERS = ['전체', '주거용', '상업용', '토지'];
+const FILTERS = ['전체', '주거용', '상업용', '토지', '기타'];
 
 export default function DDayChart({ rawItems }: DDayChartProps) {
   const [activeFilter, setActiveFilter] = useState('전체');
@@ -186,7 +186,7 @@ export default function DDayChart({ rawItems }: DDayChartProps) {
                     {(activeFilter === '전체' || activeFilter === '토지') && 
                         <Bar yAxisId="left" dataKey="토지" stackId="a" fill={CATEGORY_COLORS['토지']} maxBarSize={50} />
                     }
-                    {(activeFilter === '전체') && 
+                    {(activeFilter === '전체' || activeFilter === '기타') && 
                         <Bar yAxisId="left" dataKey="기타" stackId="a" fill={CATEGORY_COLORS['기타']} radius={[4,4,0,0]} maxBarSize={50} />
                     }
 
