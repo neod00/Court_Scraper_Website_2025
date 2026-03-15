@@ -1,10 +1,9 @@
 name: Daily Auction Scrape
 
-# on:
-#   schedule:
-#     # Run at 3:00 AM KST (18:00 UTC previous day) - Different time from notice scraper
-#     - cron: '0 18 * * *'
 on:
+  schedule:
+    # Run at 3:00 AM KST (18:00 UTC previous day)
+    - cron: '0 18 * * *'
   workflow_dispatch: # Allow manual trigger
 
 jobs:
@@ -31,4 +30,6 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
-          python scripts_auction/auction_scraper.py
+          START_DATE=$(TZ='Asia/Seoul' date -d "tomorrow" +%Y-%m-%d)
+          END_DATE=$(TZ='Asia/Seoul' date -d "+31 days" +%Y-%m-%d)
+          python scripts_auction/auction_scraper.py --start $START_DATE --end $END_DATE --max 30
