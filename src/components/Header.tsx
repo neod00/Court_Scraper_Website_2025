@@ -11,6 +11,7 @@ export default function Header() {
     { href: '/', label: '홈' },
     { href: '/guide', label: '가이드' },
     { href: '/tools', label: '계산기' },
+    { href: '/datalab', label: '데이터랩' },
     { href: '/glossary', label: '용어사전' },
     { href: '/blog', label: '블로그' },
     { href: '/faq', label: 'FAQ' },

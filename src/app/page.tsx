@@ -131,6 +131,33 @@ export default async function Home({ searchParams }: HomeProps) {
     } catch { trendingTags = []; }
   }
 
+  // ===== TOP 3 최대 할인율 매물 (최근 30일) =====
+  const thirtyDaysAgo = new Date(today);
+  thirtyDaysAgo.setDate(today.getDate() - 30);
+  const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split('T')[0];
+
+  const { data: discountCandidates } = await supabase
+    .from('court_notices')
+    .select('id, title, minimum_price, appraised_price, category, thumbnail_url, department, status')
+    .gte('date_posted', thirtyDaysAgoStr)
+    .not('minimum_price', 'is', null)
+    .not('appraised_price', 'is', null)
+    .neq('appraised_price', '0')
+    .limit(150);
+
+  let topDiscountedItems: any[] = [];
+  if (discountCandidates) {
+    topDiscountedItems = discountCandidates
+      .map(item => {
+        const min = parseInt(item.minimum_price || '0', 10);
+        const app = parseInt(item.appraised_price || '0', 10);
+        const discountRate = (min > 0 && app > 0 && min < app) ? Math.round((1 - min / app) * 100) : 0;
+        return { ...item, discountRate, min, app };
+      })
+      .filter(item => item.discountRate >= 20) // 최소 20% 이상 할인된 물건만
+      .sort((a, b) => b.discountRate - a.discountRate)
+      .slice(0, 3);
+  }
 
   // ===== 기존 주간 공고 쿼리 =====
   // Query for weekly real estate notices
@@ -186,6 +213,85 @@ export default async function Home({ searchParams }: HomeProps) {
 
         {/* Search Form */}
         <SearchForm />
+
+        {/* 🔥 AI 트렌드 워드 플로우 (해시태그) */}
+        {trendingTags.length > 0 && (!hasSearchParams) && (
+          <div className="mt-6 mb-8 px-2">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-sm">🔥</span>
+              <h3 className="text-xs font-bold text-gray-500 tracking-wider flex-1">지금 뜨고 있는 AI 키워드</h3>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {trendingTags.slice(0, 10).map((item) => (
+                <Link
+                  key={item.tag}
+                  href={`/?q=${encodeURIComponent(item.tag)}`}
+                  className="inline-flex items-center gap-1.5 bg-white hover:bg-indigo-50 border border-gray-200 hover:border-indigo-300 text-gray-600 hover:text-indigo-700 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 shadow-sm"
+                >
+                  <span className="text-indigo-400">#</span>
+                  <span>{item.tag}</span>
+                  <span className="bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full text-[10px] ml-1">{item.count}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 📉 최대 할인율 반값 경매 Top 3 (가로 스크롤) */}
+        {topDiscountedItems.length > 0 && (!hasSearchParams) && (
+          <div className="mt-8 mb-10">
+            <div className="flex items-center justify-between mb-4 px-2">
+              <div className="flex items-center gap-2.5">
+                <span className="text-xl">📉</span>
+                <h2 className="text-lg font-extrabold text-gray-900 tracking-tight">이번 주 최대 할인 매물</h2>
+                <span className="hidden sm:inline-block bg-red-100 text-red-600 text-[10px] font-bold px-2 py-0.5 rounded-full">HOT</span>
+              </div>
+              <Link href="/datalab" className="text-xs font-bold text-indigo-600 hover:text-indigo-700 transition-colors mr-2">
+                더 많은 랭킹 보기 →
+              </Link>
+            </div>
+            
+            {/* 가로 스와이프 컨테이너 */}
+            <div className="flex overflow-x-auto gap-4 pb-6 pt-2 px-2 snap-x snap-mandatory scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+              {topDiscountedItems.map((item, idx) => (
+                <Link 
+                  href={`/auction/${item.id}`} 
+                  key={item.id}
+                  className="snap-start flex-shrink-0 w-72 sm:w-80 group bg-white rounded-2xl border border-red-100 shadow-[0_4px_20px_rgb(0,0,0,0.05)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:border-red-300 transition-all duration-300 overflow-hidden flex flex-col relative"
+                >
+                  {/* 할인율 뱃지 */}
+                  <div className="absolute top-4 right-4 z-10 bg-red-500 text-white font-black text-sm px-3 py-1.5 rounded-full shadow-lg transform rotate-3 group-hover:scale-110 transition-transform">
+                    {item.discountRate}% ↓
+                  </div>
+                  
+                  <div className="p-5 flex-grow">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                        {item.department?.split(' ')[0] || '법원'}
+                      </span>
+                      <span className="text-[10px] text-red-500 font-bold border border-red-200 bg-red-50 px-2 py-1 rounded">
+                        {item.status || '상태 없음'}
+                      </span>
+                    </div>
+                    <h3 className="font-bold text-gray-900 leading-snug line-clamp-2 mb-4 group-hover:text-red-600 transition-colors h-11">
+                      {item.title}
+                    </h3>
+                    <div className="space-y-1.5 mt-auto">
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-gray-400">감정가</span>
+                        <span className="text-gray-500 line-through">{(item.app).toLocaleString()}원</span>
+                      </div>
+                      <div className="flex justify-between items-end">
+                        <span className="text-xs font-bold text-gray-900">최저가</span>
+                        <span className="text-xl font-black text-red-600">{(item.min).toLocaleString()}원</span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Result Message / Data List - right below search button */}
         <div className="mt-4">
@@ -307,27 +413,7 @@ export default async function Home({ searchParams }: HomeProps) {
             </div>
           )}
 
-          {/* 🔥 트렌딩 키워드 태그 (방법 3) */}
-          {trendingTags.length > 0 && (
-            <div className="mt-4">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-sm">🔥</span>
-                <h3 className="text-xs font-bold text-slate-400 tracking-wider uppercase">이번 주 트렌딩 키워드</h3>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {trendingTags.map((item: { tag: string; count: number }) => (
-                  <Link
-                    key={item.tag}
-                    href={`/?q=${encodeURIComponent(item.tag)}`}
-                    className="inline-flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-cyan-400/30 text-slate-300 hover:text-cyan-300 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200"
-                  >
-                    <span>#{item.tag}</span>
-                    <span className="bg-white/10 text-slate-400 px-1.5 py-0.5 rounded-full text-[10px]">{item.count}</span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
+
         </div>
 
         {/* 📊 주간 매각물건 분석 리포트 CTA Banner */}
