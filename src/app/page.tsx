@@ -255,7 +255,7 @@ export default async function Home({ searchParams }: HomeProps) {
             <div className="flex overflow-x-auto gap-4 pb-6 pt-2 px-2 snap-x snap-mandatory scrollbar-hide" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
               {topDiscountedItems.map((item, idx) => (
                 <Link 
-                  href={`/auction/${item.id}`} 
+                  href={`/notice/${item.id}`} 
                   key={item.id}
                   className="snap-start flex-shrink-0 w-72 sm:w-80 group bg-white rounded-2xl border border-red-100 shadow-[0_4px_20px_rgb(0,0,0,0.05)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:border-red-300 transition-all duration-300 overflow-hidden flex flex-col relative"
                 >
