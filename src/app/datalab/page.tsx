@@ -24,6 +24,7 @@ export default async function DataLabPage() {
     const { data: dDayData } = await supabase
         .from('court_notices')
         .select('id, title, auction_date, minimum_price')
+        .eq('source_type', 'notice')
         .gte('auction_date', todayStr)
         .lte('auction_date', future30DaysStr);
 
@@ -49,6 +50,7 @@ export default async function DataLabPage() {
     const { data: allPricedNotices } = await supabase
         .from('court_notices')
         .select('id, title, minimum_price, appraised_price, department, status')
+        .eq('source_type', 'notice')
         .gte('date_posted', thirtyDaysAgoStr)
         .not('minimum_price', 'is', null)
         .neq('minimum_price', '0')
