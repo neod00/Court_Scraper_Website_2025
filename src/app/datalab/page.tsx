@@ -34,6 +34,7 @@ export default async function DataLabPage() {
         if (fullText.match(/아파트|다세대|빌라|주택|오피스텔|도시형|연립/)) type = '주거용';
         else if (fullText.match(/상가|근린|공장|숙박|오피스|지식산업|창고/)) type = '상업용';
         else if (fullText.match(/토지|대지|임야|전|답|과수원|잡종지/)) type = '토지';
+        else if (fullText.match(/차량|자동차|승용차|트럭|버스|중기|덤프|굴삭기|화물차/)) type = '차량';
         
         return {
             date: item.auction_date,
