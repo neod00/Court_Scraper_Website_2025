@@ -186,34 +186,7 @@ export default async function TrendPage() {
                         </div>
                     </article>
 
-                    {/* 이전 리포트 아카이브 */}
-                    {reports && reports.length > 1 && (
-                        <section className="mb-12">
-                            <h2 className="text-xl font-extrabold text-gray-900 mb-6 flex items-center gap-2">
-                                📁 이전 주간 리포트 아카이브
-                            </h2>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {reports.slice(1).map((report) => (
-                                    <div
-                                        key={report.id}
-                                        className="bg-white rounded-xl border border-gray-100 p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
-                                    >
-                                        <div className="flex items-center justify-between mb-3">
-                                            <span className="text-sm font-bold text-gray-800">
-                                                {report.week_start} ~ {report.week_end}
-                                            </span>
-                                            <span className="bg-gray-100 text-gray-500 text-xs font-bold px-2 py-1 rounded">
-                                                {report.total_notices}건
-                                            </span>
-                                        </div>
-                                        <p className="text-gray-500 text-sm line-clamp-2 leading-relaxed">
-                                            {report.briefing_text}
-                                        </p>
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
-                    )}
+
                 </>
             ) : (
                 <div className="bg-blue-50 border-l-4 border-blue-400 p-6 rounded-r-lg">
@@ -223,12 +196,12 @@ export default async function TrendPage() {
                 </div>
             )}
 
-            {/* 📁 이전 리포트 아카이브 */}
+            {/* 📁 이전 주간 리포트 아카이브 */}
             {reports && reports.length > 1 && (
                 <section className="mt-16 border-t border-gray-200 pt-10">
                     <div className="flex items-center gap-3 mb-6">
                         <span className="text-2xl">📁</span>
-                        <h2 className="text-xl font-bold text-gray-900">이전 리포트 아카이브</h2>
+                        <h2 className="text-xl font-bold text-gray-900">이전 주간 리포트 아카이브</h2>
                         <span className="text-sm text-gray-400 ml-auto">총 {reports.length - 1}건</span>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
