@@ -126,7 +126,7 @@ export default async function DataLabPage() {
                         </p>
                         <div className="space-y-4">
                             {highestPriceItems.map((item, idx) => (
-                                <Link href={`/auction/${item.id}`} key={item.id} className="block group">
+                                <Link href={`/notice/${item.id}`} key={item.id} className="block group">
                                     <div className="flex flex-col p-4 rounded-xl border border-gray-100 bg-gray-50/30 group-hover:border-blue-300 group-hover:bg-blue-50/30 transition-all">
                                         <div className="flex justify-between items-start mb-2">
                                             <span className="font-black text-gray-400 text-lg italic pr-3">{idx + 1}</span>
@@ -161,7 +161,7 @@ export default async function DataLabPage() {
                         </p>
                         <div className="space-y-4">
                             {lowestPriceItems.map((item, idx) => (
-                                <Link href={`/auction/${item.id}`} key={item.id} className="block group">
+                                <Link href={`/notice/${item.id}`} key={item.id} className="block group">
                                     <div className="flex flex-col p-4 rounded-xl border border-gray-100 bg-gray-50/30 group-hover:border-emerald-300 group-hover:bg-emerald-50/30 transition-all">
                                         <div className="flex justify-between items-start mb-2">
                                             <span className="font-black text-gray-400 text-lg italic pr-3">{idx + 1}</span>
