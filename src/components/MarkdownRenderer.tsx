@@ -11,6 +11,7 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
     return (
         <ReactMarkdown
             remarkPlugins={[remarkGfm]}
+            children={content}
             components={{
                 // Headings
                 h2: ({ children }) => (
@@ -128,8 +129,6 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
                     </code>
                 ),
             }}
-        >
-            {content}
-        </ReactMarkdown>
+        />
     );
 }
