@@ -1,17 +1,15 @@
-name: Daily Court Scraper
+name: Daily Court Scraper & Analytics
 
 on:
   schedule:
-    # Run at 03:00 UTC (12:00 KST) everyday
+    # 한국 시간(KST) 기준 매일 12:00, 18:00, 21:00에 실행
     - cron: '0 3 * * *'
-    # Run at 09:00 UTC (18:00 KST) everyday
     - cron: '0 9 * * *'
-    # Run at 12:00 UTC (21:00 KST) everyday
     - cron: '0 12 * * *'
-  workflow_dispatch:  # Manual trigger
+  workflow_dispatch:  # 수동 실행 가능
 
 jobs:
-  scrape:
+  scrape_and_stats:
     runs-on: ubuntu-latest
     
     steps:
@@ -28,7 +26,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r scripts/requirements.txt
 
-      - name: Run Scraper
+      - name: 1. Run Scraper
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
@@ -36,7 +34,7 @@ jobs:
         run: |
           python scripts/scraper.py
 
-      - name: Run AI Report Generator
+      - name: 2. Run AI Report Generator
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
@@ -44,14 +42,14 @@ jobs:
         run: |
           python scripts/ai_report_generator.py --limit 200
 
-      - name: Run Daily Stats Aggregator
+      - name: 3. Run Daily Stats Aggregator
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
           python scripts/daily_stats_aggregator.py
 
-      - name: Generate Periodic Reports
+      - name: 4. Generate Periodic Reports (Monthly/Quarterly)
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
