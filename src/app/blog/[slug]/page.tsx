@@ -31,17 +31,22 @@ async function getDynamicPost(slug: string) {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
     const { slug } = await params;
+    const siteUrl = 'https://courtauction.site';
 
     // Try static first, then dynamic
     const staticPost = getPostBySlug(slug);
     if (staticPost) {
         return {
-            title: `${staticPost.title} | 회생·파산 자산매각 블로그`,
+            title: `${staticPost.title} | 로옥션 블로그`,
             description: staticPost.description,
             keywords: staticPost.tags.join(', '),
+            alternates: {
+                canonical: `${siteUrl}/blog/${slug}`,
+            },
             openGraph: {
                 title: staticPost.title,
                 description: staticPost.description,
+                url: `${siteUrl}/blog/${slug}`,
                 type: 'article',
                 publishedTime: staticPost.publishedAt,
                 modifiedTime: staticPost.updatedAt,
@@ -54,12 +59,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const dynamicPost = await getDynamicPost(slug);
     if (dynamicPost) {
         return {
-            title: `${dynamicPost.title} | 회생·파산 자산매각 블로그`,
+            title: `${dynamicPost.title} | 로옥션 블로그`,
             description: dynamicPost.description,
             keywords: (dynamicPost.tags || []).join(', '),
+            alternates: {
+                canonical: `${siteUrl}/blog/${slug}`,
+            },
             openGraph: {
                 title: dynamicPost.title,
                 description: dynamicPost.description,
+                url: `${siteUrl}/blog/${slug}`,
                 type: 'article',
                 publishedTime: dynamicPost.published_at,
                 authors: [dynamicPost.author],

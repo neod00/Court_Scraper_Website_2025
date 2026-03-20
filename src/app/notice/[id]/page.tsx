@@ -29,12 +29,18 @@ export async function generateMetadata({ params }: PageProps) {
     const aiDesc = notice?.ai_summary ? notice.ai_summary.replace(/[*#\n]/g, ' ').substring(0, 200) + '...' : '';
     const description = aiDesc || (notice ? `${notice.title} - ${notice.department || ''} 관할 회생·파산 자산매각 공고 상세 정보입니다.` : '대법원 회생·파산 자산매각 공고 상세 정보입니다.');
 
+    const siteUrl = 'https://courtauction.site';
+
     return {
         title,
         description,
+        alternates: {
+            canonical: `${siteUrl}/notice/${id}`,
+        },
         openGraph: {
             title,
             description,
+            url: `${siteUrl}/notice/${id}`,
         },
         // noindex pages without AI summary to prevent thin content indexing
         ...(!notice?.ai_summary ? { robots: { index: false, follow: true } } : {}),

@@ -47,7 +47,9 @@ export const metadata: Metadata = {
     description: siteDescription,
   },
   alternates: {
-    canonical: siteUrl,
+    languages: {
+      'ko-KR': '/',
+    },
   },
 };
 
