@@ -118,8 +118,9 @@ class CourtScraper:
 
     def scrape_and_save(self, pages_to_scrape=3):
         # 1. Cleanup old records and expired notices
-        self.delete_old_records(90)
-        self.delete_expired_records()
+        # [STOPPED] 장기 통계 데이터 축적을 위해 자동 삭제 중단 (2026-03-20)
+        # self.delete_old_records(90)
+        # self.delete_expired_records()
         
         print(f"Starting Scraper... Target Pages: {pages_to_scrape}")
         count_new = 0
@@ -219,6 +220,12 @@ class CourtScraper:
                         }
                         
                         result = supabase.table("court_notices").upsert(data, on_conflict="site_id,source_type").execute()
+                        
+                        # Archive Double-write (영구 보관용 통계 테이블)
+                        try:
+                            supabase.table("court_notices_history").upsert(data, on_conflict="site_id,source_type").execute()
+                        except Exception:
+                            pass  # 아카이브 테이블 미생성 시 무시
                         
                         if result.data:
                             count_new += 1

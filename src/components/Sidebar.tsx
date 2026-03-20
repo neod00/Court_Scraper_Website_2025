@@ -46,8 +46,8 @@ export default function Sidebar() {
                         <span>조회 결과는 세션 한정으로 출력되나, 데이터 자체는 내부 DB에 안전하게 적재됩니다.</span>
                     </li>
                     <li className="flex items-start gap-2">
-                        <span className="mt-1 text-red-500">•</span>
-                        <span className="font-semibold text-red-700">공고일 기준 90일이 지난 데이터는 정책상 자동 파기됩니다.</span>
+                        <span className="mt-1 text-green-500">•</span>
+                        <span className="font-semibold text-green-700">수집된 공고 데이터는 전문 통계 분석을 위해 영구 보관됩니다.</span>
                     </li>
                 </ul>
             </div>

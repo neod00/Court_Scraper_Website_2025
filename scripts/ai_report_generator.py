@@ -374,6 +374,16 @@ def process_single_notice(notice: Dict) -> bool:
     try:
         result = supabase.table("court_notices").update(update_data).eq("id", notice_id).execute()
         
+        # Archive Double-write (영구 보관용 통계 테이블 동기화)
+        if notice.get("site_id"):
+            try:
+                supabase.table("court_notices_history").update(update_data) \
+                    .eq("site_id", notice["site_id"]) \
+                    .eq("source_type", notice.get("source_type", "notice")) \
+                    .execute()
+            except Exception:
+                pass  # 아카이브 테이블 미생성 시 무시
+        
         if result.data:
             print(f"  💾 Saved AI summary & structured data to DB for notice {notice_id}")
             return True
@@ -395,17 +405,18 @@ def process_notices_without_summary(limit: int = 50):
     print("=" * 60)
     
     try:
-        # Query notices that need AI summary or are missing structured dates
+        # 오늘 새로 들어온 공고만 처리 (ai_summary가 없는 것만)
         result = supabase.table("court_notices") \
-            .select("id, title, category, department, file_info") \
-            .is_("auction_date", "null") \
+            .select("id, site_id, source_type, title, category, department, file_info") \
+            .is_("ai_summary", "null") \
             .in_("category", TARGET_CATEGORIES) \
             .order("date_posted", desc=True) \
+            .order("created_at", desc=True) \
             .limit(limit) \
             .execute()
         
         notices = result.data or []
-        print(f"\n📊 Found {len(notices)} notices needing structured data (missing auction_date)")
+        print(f"\n📊 Found {len(notices)} new notices needing AI summary")
         
         if not notices:
             print("✅ All target notices already have AI summaries!")

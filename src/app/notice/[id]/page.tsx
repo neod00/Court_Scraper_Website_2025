@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import Badge from '@/components/Badge';
 import DownloadFiles from '@/components/DownloadFiles';
+import ViewTracker from '@/components/ViewTracker';
 
 // Revalidate every hour
 export const revalidate = 3600;
@@ -74,9 +75,12 @@ export default async function NoticeDetail({ params }: PageProps) {
         <div className="bg-white shadow overflow-hidden sm:rounded-lg border border-gray-200">
             <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
                 <div>
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">
-                        공고 상세 정보
-                    </h3>
+                    <div className="flex items-center gap-3">
+                        <h3 className="text-lg leading-6 font-medium text-gray-900">
+                            공고 상세 정보
+                        </h3>
+                        <ViewTracker noticeId={id} initialCount={notice.view_count || 0} />
+                    </div>
                     <p className="mt-1 max-w-2xl text-sm text-gray-500">
                         {notice.site_id}
                     </p>
