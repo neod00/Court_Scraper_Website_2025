@@ -51,3 +51,10 @@ jobs:
         run: |
           python scripts/daily_stats_aggregator.py
 
+      - name: Generate Periodic Reports
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python scripts/periodic_report_generator.py
