@@ -19,7 +19,7 @@ if not all([SUPABASE_URL, SUPABASE_KEY, OPENAI_API_KEY]):
     exit(1)
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-openai.api_key = OPENAI_API_KEY
+client = openai.OpenAI(api_key=OPENAI_API_KEY)
 
 def get_stats_for_period(start_date: str, end_date: str) -> Dict:
     """주어진 기간 동안의 통계를 daily_stats 테이블에서 집계합니다."""
@@ -90,7 +90,7 @@ def generate_report_with_ai(period_name: str, stats: Dict, start_date: str, end_
 JSON 형식으로 결과를 반환하세요: {{ "title": "제목", "description": "메타 설명(짧은 요약)", "content": "본문 Markdown" }}
 """
 
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-4-turbo-preview",
         messages=[{"role": "system", "content": "You are a professional market analyst expert."}, {"role": "user", "content": prompt}],
         response_format={ "type": "json_object" }

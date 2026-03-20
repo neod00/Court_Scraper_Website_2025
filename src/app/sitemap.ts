@@ -94,7 +94,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         })),
     ];
 
-    // 블로그 페이지
+    // 블로그 페이지 (정적 및 동적DB 통합)
+    let dynamicBlogPages: MetadataRoute.Sitemap = [];
+    try {
+        const { data: dbPosts } = await supabase
+            .from('blog_posts')
+            .select('slug, published_at')
+            .eq('is_published', true)
+            .order('published_at', { ascending: false });
+
+        if (dbPosts) {
+            dynamicBlogPages = dbPosts.map((post) => ({
+                url: `${baseUrl}/blog/${post.slug}`,
+                lastModified: new Date(post.published_at),
+                changeFrequency: 'weekly' as const,
+                priority: 0.8,
+            }));
+        }
+    } catch (e) {
+        console.error('Error fetching dynamic blog posts for sitemap:', e);
+    }
+
     const blogPages: MetadataRoute.Sitemap = [
         {
             url: `${baseUrl}/blog`,
@@ -108,6 +128,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             changeFrequency: 'monthly' as const,
             priority: 0.8,
         })),
+        ...dynamicBlogPages,
     ];
 
     // 카테고리 페이지

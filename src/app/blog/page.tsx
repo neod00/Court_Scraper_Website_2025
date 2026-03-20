@@ -153,40 +153,35 @@ export default async function BlogPage() {
                 </section>
             )}
 
-            {/* 주간 리포트 섹션 (동적 글이 있을 때만) */}
-            {dynamicPosts.length > 0 && (
+            {/* 📊 AI 시장 데이터 분석 리포트 섹션 */}
+            {dynamicPosts.filter(p => p.category === '시장분석').length > 0 && (
                 <section className="mb-16">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                        📊 주간 매각물건 분석 리포트
-                    </h2>
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                            📊 AI 시장 데이터 분석 리포트
+                        </h2>
+                        <span className="text-xs text-emerald-600 font-bold bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">Market Insight</span>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {dynamicPosts.slice(0, 6).map((post) => (
+                        {dynamicPosts.filter(p => p.category === '시장분석').slice(0, 6).map((post) => (
                             <Link
                                 key={post.slug}
                                 href={`/blog/${post.slug}`}
                                 className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:border-emerald-200 transition-all duration-300"
                             >
-                                <div className="h-2 bg-gradient-to-r from-emerald-500 to-teal-500" />
+                                <div className="h-1.5 bg-gradient-to-r from-emerald-500 to-teal-500" />
                                 <div className="p-6">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-1 rounded">
-                                            📊 {post.category}
-                                        </span>
-                                        <span className="text-xs text-gray-400">
-                                            {post.readingTime}분
-                                        </span>
-                                    </div>
-                                    <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors line-clamp-2">
+                                    <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors line-clamp-2 leading-snug">
                                         {post.title}
                                     </h3>
-                                    <p className="text-gray-600 text-sm line-clamp-2 mb-4">
+                                    <p className="text-gray-500 text-sm line-clamp-2 mb-4 leading-relaxed">
                                         {post.description}
                                     </p>
-                                    <div className="flex items-center justify-between text-xs text-gray-400">
+                                    <div className="flex items-center justify-between text-[11px] text-gray-400 font-medium">
                                         <div className="flex items-center gap-3">
                                             <span>{post.publishedAt}</span>
                                             <span className="flex items-center gap-1">
-                                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                                 </svg>
@@ -195,12 +190,56 @@ export default async function BlogPage() {
                                         </div>
                                         <div className="flex gap-1">
                                             {post.tags.slice(0, 2).map(tag => (
-                                                <span key={tag} className="bg-gray-100 px-2 py-0.5 rounded">
+                                                <span key={tag} className="bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">
                                                     #{tag}
                                                 </span>
                                             ))}
                                         </div>
                                     </div>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {/* 💡 전문가 입찰 전략 가이드 섹션 */}
+            {dynamicPosts.filter(p => p.category === '입찰가이드').length > 0 && (
+                <section className="mb-16">
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                            💡 전문가 입찰 전략 가이드
+                        </h2>
+                        <span className="text-xs text-indigo-600 font-bold bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">Expert Guide</span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {dynamicPosts.filter(p => p.category === '입찰가이드').slice(0, 6).map((post) => (
+                            <Link
+                                key={post.slug}
+                                href={`/blog/${post.slug}`}
+                                className="group bg-slate-50 rounded-2xl border border-dashed border-slate-200 p-6 hover:bg-white hover:border-solid hover:border-indigo-300 hover:shadow-xl transition-all duration-300"
+                            >
+                                <div className="flex items-start justify-between mb-4">
+                                    <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
+                                        📌
+                                    </div>
+                                    <span className="text-[10px] font-bold text-slate-400 bg-white px-2 py-1 rounded-md shadow-sm uppercase tracking-tighter italic">Recommended</span>
+                                </div>
+                                <h3 className="text-lg font-bold text-slate-900 mb-3 group-hover:text-indigo-600 transition-colors leading-snug">
+                                    {post.title}
+                                </h3>
+                                <p className="text-slate-500 text-sm line-clamp-2 mb-4 leading-relaxed">
+                                    {post.description}
+                                </p>
+                                <div className="flex items-center gap-2 mt-auto">
+                                    <div className="flex -space-x-2">
+                                        {[1, 2].map(i => (
+                                            <div key={i} className="w-6 h-6 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-[8px] font-bold text-slate-400">
+                                                AI
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <span className="text-[11px] text-slate-400 font-medium">전문 애널리스트팀</span>
                                 </div>
                             </Link>
                         ))}
