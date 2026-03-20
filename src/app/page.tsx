@@ -5,6 +5,7 @@ import Sidebar from '@/components/Sidebar';
 import Link from 'next/link';
 import { getRecentPosts, blogCategories } from '@/data/blog-posts';
 import { glossaryTerms } from '@/data/glossary';
+import ViewTracker from '@/components/ViewTracker';
 
 // Force dynamic rendering to handle searchParams correctly
 export const dynamic = 'force-dynamic';
@@ -116,7 +117,7 @@ export default async function Home({ searchParams }: HomeProps) {
   // ===== 주간 AI 트렌드 리포트 조회 =====
   const { data: weeklyReport } = await supabase
     .from('weekly_reports')
-    .select('briefing_text, trending_tags, full_report, week_start, week_end')
+    .select('briefing_text, trending_tags, full_report, week_start, week_end, view_count')
     .order('week_end', { ascending: false })
     .limit(1)
     .single();
@@ -318,7 +319,16 @@ export default async function Home({ searchParams }: HomeProps) {
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-lg">✨</span>
                 <h3 className="text-sm font-bold text-cyan-300 tracking-wide">AI 시장 동향 분석</h3>
-                <span className="ml-auto text-xs text-slate-500">{weeklyReport.week_start} ~ {weeklyReport.week_end}</span>
+                <div className="ml-auto flex items-center gap-2">
+                  <ViewTracker 
+                    tableName="weekly_reports" 
+                    idColumn="week_end" 
+                    idValue={weeklyReport.week_end} 
+                    initialCount={weeklyReport.view_count || 0}
+                    className="text-slate-400 bg-slate-800/50 px-2 py-0.5 rounded-full text-[10px]"
+                  />
+                  <span className="text-xs text-slate-500">{weeklyReport.week_start} ~ {weeklyReport.week_end}</span>
+                </div>
               </div>
               <p className="text-slate-200 text-sm leading-relaxed">
                 {weeklyReport.briefing_text}
@@ -352,7 +362,7 @@ export default async function Home({ searchParams }: HomeProps) {
                       </span>
                       NEW
                     </span>
-                    <span className="text-emerald-100 text-xs font-medium">매주 자동 업데이트</span>
+                    <span className="text-emerald-100 text-xs font-medium">매주 자동 업데이트 • 조회 {(weeklyReport?.view_count || 0).toLocaleString()}회</span>
                   </div>
                   <h3 className="text-xl sm:text-2xl font-extrabold text-white mb-1 group-hover:translate-x-1 transition-transform duration-200">
                     📊 주간 매각물건 분석 리포트

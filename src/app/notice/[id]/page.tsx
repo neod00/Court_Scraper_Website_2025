@@ -79,7 +79,12 @@ export default async function NoticeDetail({ params }: PageProps) {
                         <h3 className="text-lg leading-6 font-medium text-gray-900">
                             공고 상세 정보
                         </h3>
-                        <ViewTracker noticeId={id} initialCount={notice.view_count || 0} />
+                        <ViewTracker 
+                            tableName="court_notices" 
+                            idColumn="id" 
+                            idValue={id} 
+                            initialCount={notice.view_count || 0} 
+                        />
                     </div>
                     <p className="mt-1 max-w-2xl text-sm text-gray-500">
                         {notice.site_id}

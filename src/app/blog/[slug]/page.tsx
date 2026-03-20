@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { blogPosts, getPostBySlug, getRelatedPosts, blogCategories } from '@/data/blog-posts';
 import { supabase } from '@/lib/supabase';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
+import ViewTracker from '@/components/ViewTracker';
 
 export const dynamic = 'force-dynamic';
 
@@ -334,6 +335,13 @@ export default async function BlogPostPage({ params }: PageProps) {
                     <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-1 rounded">
                         🤖 AI 자동 생성
                     </span>
+                    <ViewTracker 
+                        tableName="blog_posts" 
+                        idColumn="slug" 
+                        idValue={slug} 
+                        initialCount={dynamicPost.view_count || 0}
+                        className="text-gray-400 bg-gray-50 px-2.5 py-1 rounded-full border border-gray-100"
+                    />
                 </div>
                 <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 leading-tight mb-4">
                     {dynamicPost.title}
