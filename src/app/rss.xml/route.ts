@@ -1,7 +1,7 @@
 import { blogPosts } from '@/data/blog-posts';
 
 export async function GET() {
-    const baseUrl = 'https://courtauction.site';
+    const baseUrl = 'https://www.courtauction.site';
     const siteName = 'LawAuction';
     const siteDescription = '대법원 회생·파산 자산매각 공고를 자동으로 수집하여 제공합니다. 부동산, 차량, 채권, 주식, 특허 등 다양한 매각 자산 정보를 쉽고 빠르게 검색하세요.';
 

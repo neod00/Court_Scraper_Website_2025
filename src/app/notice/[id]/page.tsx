@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: PageProps) {
     const aiDesc = notice?.ai_summary ? notice.ai_summary.replace(/[*#\n]/g, ' ').substring(0, 200) + '...' : '';
     const description = aiDesc || (notice ? `${notice.title} - ${notice.department || ''} 관할 회생·파산 자산매각 공고 상세 정보입니다.` : '대법원 회생·파산 자산매각 공고 상세 정보입니다.');
 
-    const siteUrl = 'https://courtauction.site';
+    const siteUrl = 'https://www.courtauction.site';
 
     return {
         title,
@@ -286,7 +286,7 @@ export default async function NoticeDetail({ params }: PageProps) {
                             author: {
                                 '@type': 'Organization',
                                 name: '로옥션(LawAuction)',
-                                url: 'https://courtauction.site',
+                                url: 'https://www.courtauction.site',
                             },
                             publisher: {
                                 '@type': 'Organization',
@@ -294,7 +294,7 @@ export default async function NoticeDetail({ params }: PageProps) {
                             },
                             mainEntityOfPage: {
                                 '@type': 'WebPage',
-                                '@id': `https://courtauction.site/notice/${notice.id}`,
+                                '@id': `https://www.courtauction.site/notice/${notice.id}`,
                             },
                             articleSection: notice.category === 'real_estate' ? '부동산' : '차량/동산',
                             inLanguage: 'ko-KR',

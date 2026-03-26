@@ -5,7 +5,7 @@ import { categories } from '@/data/categories';
 import { supabase } from '@/lib/supabase';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = 'https://courtauction.site';
+    const baseUrl = 'https://www.courtauction.site';
     const lastModified = new Date();
 
     // 정적 페이지

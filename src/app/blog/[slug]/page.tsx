@@ -31,7 +31,7 @@ async function getDynamicPost(slug: string) {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
     const { slug } = await params;
-    const siteUrl = 'https://courtauction.site';
+    const siteUrl = 'https://www.courtauction.site';
 
     // Try static first, then dynamic
     const staticPost = getPostBySlug(slug);

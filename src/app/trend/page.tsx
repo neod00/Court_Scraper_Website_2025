@@ -278,7 +278,7 @@ export default async function TrendPage() {
                             },
                             "mainEntityOfPage": {
                                 "@type": "WebPage",
-                                "@id": "https://courtauction.site/trend"
+                                "@id": "https://www.courtauction.site/trend"
                             }
                         })
                     }}
