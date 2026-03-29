@@ -1112,4 +1112,8 @@ export const blogCategories: { name: BlogPost['category']; label: string; icon: 
     { name: '세금가이드', label: '세금 가이드', icon: '💰' },
     { name: '시장분석', label: '시장 분석', icon: '📊' },
     { name: '사례연구', label: '사례 연구', icon: '📝' },
+,
+
+,
+
 ];
