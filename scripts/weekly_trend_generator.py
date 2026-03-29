@@ -8,14 +8,20 @@ and generates:
   3. Trending tags extracted from summaries
 
 Usage:
-    python scripts/weekly_trend_generator.py
+    python scripts/weekly_trend_generator.py              # Current week
+    python scripts/weekly_trend_generator.py --backfill   # Generate all missing weeks
+    python scripts/weekly_trend_generator.py --date 2026-03-10  # Specific week containing that date
+    python scripts/weekly_trend_generator.py --cleanup    # Remove duplicate reports
 """
 
 import os
 import sys
 import json
-from datetime import datetime, timedelta
-from typing import Optional, Dict, List
+import math
+import calendar
+import argparse
+from datetime import datetime, timedelta, date
+from typing import Optional, Dict, List, Tuple
 
 from openai import OpenAI
 from supabase import create_client, Client
@@ -41,35 +47,83 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 openai_client = OpenAI(api_key=OPENAI_API_KEY)
 
 
+# ── 0. Fixed Week Boundaries (Mon~Fri) ────────────────────────────
+
+def get_fixed_week_dates(target_date: date = None) -> Tuple[date, date, str]:
+    """
+    Returns Monday~Friday boundaries for the week containing target_date.
+    
+    Rules:
+    - week_start = Monday, week_end = Friday (weekdays only)
+    - Month label is determined by Monday's date (earlier month wins
+      when a week spans two months, e.g. Mon Mar 30 ~ Fri Apr 3 = 3월)
+    - Week number = Monday's position in its month:
+      day 1-7 → 1주차, 8-14 → 2주차, 15-21 → 3주차, 22-28 → 4주차, 29+ → 5주차
+    
+    Returns: (week_start: date, week_end: date, week_label: str)
+    """
+    if target_date is None:
+        target_date = date.today()
+
+    # Find Monday of this week (weekday(): Mon=0 ... Sun=6)
+    monday = target_date - timedelta(days=target_date.weekday())
+    friday = monday + timedelta(days=4)
+
+    # Month & week number based on Monday
+    month = monday.month
+    day = monday.day
+
+    if day <= 7:
+        week_num = 1
+    elif day <= 14:
+        week_num = 2
+    elif day <= 21:
+        week_num = 3
+    elif day <= 28:
+        week_num = 4
+    else:
+        week_num = 5
+
+    week_label = f"{month}월 {week_num}주차"
+
+    return monday, friday, week_label
+
+
 # ── 1. Data Collection ────────────────────────────────────────────
 
-def get_weekly_data() -> Dict:
+def get_weekly_data(target_date: date = None) -> Dict:
     """
-    Collects this week's notice data and AI summaries from Supabase.
+    Collects notice data for the fixed week containing target_date.
+    Uses fixed week boundaries to prevent duplicate reports.
     Returns a dict with counts, categories, summaries, etc.
     """
-    today = datetime.now()
-    week_ago = today - timedelta(days=7)
-    two_weeks_ago = today - timedelta(days=14)
+    week_start, week_end, week_label = get_fixed_week_dates(target_date)
 
-    today_str = today.strftime('%Y-%m-%d')
-    week_ago_str = week_ago.strftime('%Y-%m-%d')
-    two_weeks_ago_str = two_weeks_ago.strftime('%Y-%m-%d')
+    week_start_str = week_start.strftime('%Y-%m-%d')
+    week_end_str = week_end.strftime('%Y-%m-%d')
+
+    print(f"   📅 Week range: {week_start_str} ~ {week_end_str} ({week_label})")
+
+    # Calculate previous week's boundaries for comparison
+    prev_date = week_start - timedelta(days=1)
+    prev_start, prev_end, _ = get_fixed_week_dates(prev_date)
+    prev_start_str = prev_start.strftime('%Y-%m-%d')
+    prev_end_str = prev_end.strftime('%Y-%m-%d')
 
     # This week's notices with AI summaries
     result = supabase.table('court_notices') \
         .select('title, category, department, ai_summary, date_posted') \
-        .gte('date_posted', week_ago_str) \
-        .lte('date_posted', today_str) \
+        .gte('date_posted', week_start_str) \
+        .lte('date_posted', week_end_str) \
         .execute()
 
     this_week = result.data or []
 
-    # Last week's count for comparison
+    # Previous week's count for comparison
     last_result = supabase.table('court_notices') \
         .select('id', count='exact') \
-        .gte('date_posted', two_weeks_ago_str) \
-        .lt('date_posted', week_ago_str) \
+        .gte('date_posted', prev_start_str) \
+        .lte('date_posted', prev_end_str) \
         .execute()
 
     last_week_count = last_result.count or 0
@@ -108,15 +162,9 @@ def get_weekly_data() -> Dict:
     # Combine: all real_estate + all vehicle + limited others
     all_summaries = re_summaries + veh_summaries + other_summaries[:15]
 
-    # Calculate week label (e.g., "3월 1주차")
-    end_date = today
-    month = end_date.month
-    week_of_month = (end_date.day - 1) // 7 + 1
-    week_label = f"{month}월 {week_of_month}주차"
-
     return {
-        'week_start': week_ago_str,
-        'week_end': today_str,
+        'week_start': week_start_str,
+        'week_end': week_end_str,
         'week_label': week_label,
         'total': len(this_week),
         'last_week_total': last_week_count,
@@ -430,9 +478,10 @@ def save_as_blog_post(data: Dict, report: Dict) -> bool:
 
 # ── 4. Main Pipeline ─────────────────────────────────────────────
 
-def generate_weekly_trend():
+def generate_weekly_trend(target_date: date = None):
     """
     Main entry point: collects data, generates report, saves to DB.
+    If target_date is provided, generates report for the week containing that date.
     """
     print("\n" + "=" * 60)
     print("📊 Weekly Trend Report Generator")
@@ -440,7 +489,7 @@ def generate_weekly_trend():
 
     # Step 1: Collect data
     print("\n📥 Step 1: Collecting weekly data...")
-    data = get_weekly_data()
+    data = get_weekly_data(target_date)
     print(f"   Total notices this week: {data['total']}")
     print(f"   Notices with AI summary: {len(data['summaries'])}")
     print(f"   Category breakdown: {data['category_counts']}")
@@ -476,6 +525,172 @@ def generate_weekly_trend():
     print("\n✅ Weekly trend report generation complete!")
 
 
+# ── 5. Cleanup Duplicates ────────────────────────────────────────
+
+def cleanup_duplicates():
+    """
+    Removes duplicate weekly reports caused by the old rolling-window bug.
+    For each week label (e.g., "3월 4주차"), keeps only the report with the
+    most data (highest total_notices), and deletes the rest.
+    Also cleans up corresponding duplicate blog posts.
+    """
+    print("\n" + "=" * 60)
+    print("🧹 Cleanup Duplicate Reports")
+    print("=" * 60)
+
+    # Fetch all weekly reports
+    result = supabase.table('weekly_reports').select('*').order('week_end', desc=True).execute()
+    all_reports = result.data or []
+
+    if not all_reports:
+        print("No reports found.")
+        return
+
+    print(f"\n📊 Total reports in DB: {len(all_reports)}")
+
+    # Group by week label (determined by week_end date)
+    from collections import defaultdict
+    week_groups = defaultdict(list)
+
+    for report in all_reports:
+        end_date = datetime.strptime(report['week_end'], '%Y-%m-%d').date()
+        _, _, label = get_fixed_week_dates(end_date)
+        week_groups[label].append(report)
+
+    ids_to_delete = []
+    slugs_to_delete = []
+
+    for label, reports in week_groups.items():
+        if len(reports) > 1:
+            print(f"\n⚠️  {label}: {len(reports)} duplicates found")
+            # Sort by total_notices descending, keep the best one
+            reports.sort(key=lambda r: r.get('total_notices', 0) or 0, reverse=True)
+            keep = reports[0]
+            print(f"   ✅ Keeping: {keep['week_start']} ~ {keep['week_end']} ({keep.get('total_notices', 0)}건)")
+
+            for dup in reports[1:]:
+                print(f"   🗑️  Deleting: {dup['week_start']} ~ {dup['week_end']} ({dup.get('total_notices', 0)}건)")
+                ids_to_delete.append(dup['id'])
+                slugs_to_delete.append(f"weekly-trend-{dup['week_start']}-to-{dup['week_end']}")
+        else:
+            print(f"\n✅ {label}: 1 report (OK)")
+
+    if not ids_to_delete:
+        print("\n✅ No duplicates to clean up!")
+        return
+
+    print(f"\n🗑️  Will delete {len(ids_to_delete)} duplicate report(s)...")
+    confirm = input("Proceed? (y/N): ").strip().lower()
+
+    if confirm != 'y':
+        print("❌ Cancelled.")
+        return
+
+    # Delete from weekly_reports
+    for rid in ids_to_delete:
+        try:
+            supabase.table('weekly_reports').delete().eq('id', rid).execute()
+            print(f"   🗑️  Deleted weekly_report id={rid}")
+        except Exception as e:
+            print(f"   ❌ Failed to delete id={rid}: {e}")
+
+    # Delete corresponding blog posts
+    for slug in slugs_to_delete:
+        try:
+            supabase.table('blog_posts').delete().eq('slug', slug).execute()
+            print(f"   🗑️  Deleted blog_post slug={slug}")
+        except Exception as e:
+            pass  # Blog post may not exist
+
+    print(f"\n✅ Cleanup complete! Deleted {len(ids_to_delete)} duplicate(s).")
+
+
+# ── 6. Backfill Missing Weeks ────────────────────────────────────
+
+def backfill_missing_weeks():
+    """
+    Finds all weeks that have court notices but no weekly report,
+    and generates reports for them.
+    """
+    print("\n" + "=" * 60)
+    print("📦 Backfill Missing Weekly Reports")
+    print("=" * 60)
+
+    # Find earliest notice date
+    earliest = supabase.table('court_notices') \
+        .select('date_posted') \
+        .order('date_posted') \
+        .limit(1) \
+        .execute()
+
+    if not earliest.data:
+        print("No notices found in database.")
+        return
+
+    start_date = datetime.strptime(earliest.data[0]['date_posted'], '%Y-%m-%d').date()
+    today = date.today()
+
+    print(f"   📅 Notice range: {start_date} ~ {today}")
+
+    # Get all existing reports
+    existing = supabase.table('weekly_reports').select('week_start,week_end').execute()
+    existing_keys = set()
+    for r in (existing.data or []):
+        existing_keys.add(f"{r['week_start']}_{r['week_end']}")
+
+    # Iterate through all weeks from start to today
+    current = start_date
+    missing_weeks = []
+
+    while current <= today:
+        ws, we, wl = get_fixed_week_dates(current)
+        key = f"{ws.strftime('%Y-%m-%d')}_{we.strftime('%Y-%m-%d')}"
+
+        if key not in existing_keys and we <= today:
+            missing_weeks.append((ws, we, wl))
+            existing_keys.add(key)  # Prevent duplicates in iteration
+
+        # Move to next week
+        current = we + timedelta(days=1)
+
+    if not missing_weeks:
+        print("\n✅ No missing weeks found!")
+        return
+
+    print(f"\n📋 Missing weeks ({len(missing_weeks)}):")
+    for ws, we, wl in missing_weeks:
+        print(f"   - {wl}: {ws} ~ {we}")
+
+    confirm = input(f"\nGenerate reports for {len(missing_weeks)} missing week(s)? (y/N): ").strip().lower()
+    if confirm != 'y':
+        print("❌ Cancelled.")
+        return
+
+    for ws, we, wl in missing_weeks:
+        print(f"\n{'─' * 40}")
+        print(f"📊 Generating: {wl} ({ws} ~ {we})")
+        try:
+            generate_weekly_trend(ws)
+        except Exception as e:
+            print(f"❌ Failed for {wl}: {e}")
+            continue
+
+
 # ── CLI Entry Point ───────────────────────────────────────────────
 if __name__ == "__main__":
-    generate_weekly_trend()
+    parser = argparse.ArgumentParser(description="Weekly Trend Report Generator")
+    parser.add_argument('--date', type=str, help='Generate report for the week containing this date (YYYY-MM-DD)')
+    parser.add_argument('--backfill', action='store_true', help='Generate reports for all missing weeks')
+    parser.add_argument('--cleanup', action='store_true', help='Remove duplicate reports from the old rolling-window bug')
+    args = parser.parse_args()
+
+    if args.cleanup:
+        cleanup_duplicates()
+    elif args.backfill:
+        backfill_missing_weeks()
+    elif args.date:
+        target = datetime.strptime(args.date, '%Y-%m-%d').date()
+        generate_weekly_trend(target)
+    else:
+        generate_weekly_trend()
+

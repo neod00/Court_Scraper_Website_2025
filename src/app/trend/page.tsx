@@ -206,9 +206,12 @@ export default async function TrendPage() {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {reports.slice(1).map((report: any, idx: number) => {
-                            const endDate = new Date(report.week_end);
-                            const month = endDate.getMonth() + 1;
-                            const weekOfMonth = Math.ceil(endDate.getDate() / 7);
+                            // Use week_start (Monday) for month label
+                            const startDate = new Date(report.week_start);
+                            const month = startDate.getMonth() + 1;
+                            const day = startDate.getDate();
+                            // Week number based on Monday's position in month
+                            const weekOfMonth = day <= 7 ? 1 : day <= 14 ? 2 : day <= 21 ? 3 : day <= 28 ? 4 : 5;
                             const weekLabel = `${month}월 ${weekOfMonth}주차`;
 
                             let cats: Record<string, number> = {};
