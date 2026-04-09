@@ -155,6 +155,19 @@ export default async function Home({ searchParams }: HomeProps) {
     .order('date_posted', { ascending: false })
     .limit(10);
 
+  // Query for past notices (1-2 months ago) for compact list
+  const twoMonthsAgo = new Date(today);
+  twoMonthsAgo.setDate(today.getDate() - 60);
+  const twoMonthsAgoStr = twoMonthsAgo.toISOString().split('T')[0];
+
+  const { data: pastNotices } = await supabase
+    .from('court_notices')
+    .select('id, title, category, department, date_posted')
+    .gte('date_posted', twoMonthsAgoStr)
+    .lt('date_posted', weekAgoStr)
+    .order('date_posted', { ascending: false })
+    .limit(30);
+
   return (
     <div className="flex flex-col xl:flex-row gap-8 xl:gap-12">
       {/* Main Content Area */}
@@ -444,6 +457,57 @@ export default async function Home({ searchParams }: HomeProps) {
             )}
           </div>
         </div>
+
+        {/* Past 1-2 Months Compact List Section */}
+        {pastNotices && pastNotices.length > 0 && (
+          <div className="mt-12 border-t border-gray-200 pt-8">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">⏳</span>
+                <h2 className="text-xl font-bold text-gray-900">
+                  최근 1~2개월 주요 공고 (마감 임박)
+                </h2>
+                <span className="text-sm text-gray-500 ml-2 hidden sm:inline">
+                  ({twoMonthsAgoStr} ~ {weekAgoStr})
+                </span>
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <ul className="divide-y divide-gray-100">
+                {pastNotices.map((notice) => (
+                  <li key={notice.id} className="hover:bg-indigo-50/40 transition-colors group">
+                    <Link href={`/notice/${notice.id}`} className="block px-4 py-3.5 sm:px-6">
+                      <div className="flex items-center gap-3">
+                        <span className={`flex-shrink-0 inline-flex items-center justify-center px-2 py-0.5 rounded text-[11px] font-bold tracking-wide ${
+                          notice.category === 'real_estate' 
+                            ? 'bg-green-100 text-green-700' 
+                            : notice.category === 'vehicle' 
+                              ? 'bg-blue-100 text-blue-700' 
+                              : 'bg-amber-100 text-amber-700'
+                        }`}>
+                          {notice.category === 'real_estate' ? '부동산' : notice.category === 'vehicle' ? '차량/동산' : '기타'}
+                        </span>
+                        <p className="flex-1 text-sm font-medium text-gray-800 truncate group-hover:text-indigo-700 transition-colors">
+                          {notice.title}
+                        </p>
+                        <div className="hidden sm:flex flex-shrink-0 items-center gap-6 text-[13px] text-gray-500 font-medium">
+                          <span className="w-24 truncate text-right">{notice.department || '-'}</span>
+                          <span className="w-20 text-right">{notice.date_posted}</span>
+                        </div>
+                      </div>
+                      <div className="sm:hidden flex items-center gap-3 mt-2 text-[12px] text-gray-500 font-medium pl-14">
+                        <span className="truncate">{notice.department || '-'}</span>
+                        <span className="text-gray-300">|</span>
+                        <span>{notice.date_posted}</span>
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
 
         {/* 블로그 & 가이드 섹션 */}
         <div className="mt-16 border-t border-gray-100 pt-10">
