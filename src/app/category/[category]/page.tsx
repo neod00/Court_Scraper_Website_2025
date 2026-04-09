@@ -173,6 +173,17 @@ export default async function CategoryPage({ params }: PageProps) {
                 </div>
             </header>
 
+            {/* SEO 최적화 전문 서론 블록 (애드센스 승인 및 검색 노출 강화용) */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-8 border border-blue-100 text-gray-700 leading-relaxed text-[15px] shadow-sm">
+                <p>
+                    대법원 <strong>{categoryInfo.name}</strong> 자산매각(회생/파산) 공고는 법원을 통해 유치권, 점유 등 복잡한 사항을 해결하고 안전하게 취득할 수 있는 공식 매각 절차 시장 중 하나입니다. 
+                    특히 {categoryInfo.name} 물건의 경우 일반 경매시장 대비 대중의 인지도가 낮아 경쟁률이 상대적으로 적으며, 결과적으로 시세 대비 대폭 합리적인 가격에 낙찰받을 가능성이 높습니다.
+                    <br/><br/>
+                    본 페이지에서는 실시간으로 업데이트되는 <strong>전국의 {categoryInfo.name} 매각 공고</strong> 최신 정보를 제공하며, 복잡한 첨부파일에 기반한 AI 권리분석 요약본까지 무료로 확인하실 수 있습니다. 
+                    입찰을 준비 중이시라면 아래의 공고 목록과 함께 가장 하단에 제공되는 투자 전 주의사항 팁과 가이드를 반드시 꼼꼼히 체크해 보시기 바랍니다.
+                </p>
+            </div>
+
             {/* 최근 공고 */}
             {notices.length > 0 && (
                 <section className="mb-12">

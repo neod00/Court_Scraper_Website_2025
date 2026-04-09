@@ -248,20 +248,49 @@ export default async function NoticeDetail({ params }: PageProps) {
                 </article>
             )}
 
-            {/* Guide Link Banner (replaces duplicate bidding guide text) */}
-            <div className="mt-8 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl p-5 border border-indigo-100 mb-8 flex items-center justify-between gap-4">
+            {/* Value-Add Checklist Section (오리지널 콘텐츠 강화용) */}
+            <div className="mt-8 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                    <span className="text-xl">💡</span>
+                    <h3 className="text-lg font-bold text-gray-900">입찰 전 필수 체크리스트</h3>
+                </div>
+                {notice.category === 'real_estate' ? (
+                    <ul className="space-y-3 text-sm text-gray-700">
+                        <li className="flex items-start gap-2"><span className="text-green-500 font-bold">✓</span> 등기부등본 확인 (말소기준권리 및 인수되는 권리 파악)</li>
+                        <li className="flex items-start gap-2"><span className="text-green-500 font-bold">✓</span> 현장 임장 (건축물 대장 불일치, 불법건축물 여부 등 확인)</li>
+                        <li className="flex items-start gap-2"><span className="text-green-500 font-bold">✓</span> 점유자 확인 (대항력 있는 임차인, 유치권 등 명도 분쟁 요소)</li>
+                        <li className="flex items-start gap-2"><span className="text-green-500 font-bold">✓</span> 시세 파악 (최근 실거래가 및 주변 부동산 호가 대조)</li>
+                    </ul>
+                ) : notice.category === 'vehicle' ? (
+                    <ul className="space-y-3 text-sm text-gray-700">
+                        <li className="flex items-start gap-2"><span className="text-green-500 font-bold">✓</span> 자동차 등록원부 확인 (압류, 저당권 등 낙찰자 인수 조건)</li>
+                        <li className="flex items-start gap-2"><span className="text-green-500 font-bold">✓</span> 보관소 방문 (현장 상태 점검, 방전 여부 및 부품 누락 확인)</li>
+                        <li className="flex items-start gap-2"><span className="text-green-500 font-bold">✓</span> 사고 이력 확인 (카히스토리 조회로 뼈대 손상 등 체크)</li>
+                        <li className="flex items-start gap-2"><span className="text-green-500 font-bold">✓</span> 체납 과태료 및 환경개선부담금 (지자체별 낙찰자 인수 여부 확인)</li>
+                    </ul>
+                ) : (
+                    <ul className="space-y-3 text-sm text-gray-700">
+                        <li className="flex items-start gap-2"><span className="text-green-500 font-bold">✓</span> 매각물건명세서의 매각 조건 및 특이사항 꼼꼼히 확인</li>
+                        <li className="flex items-start gap-2"><span className="text-green-500 font-bold">✓</span> 기각/취하/변경 절차가 진행 중인지 대법원 사이트 재확인</li>
+                        <li className="flex items-start gap-2"><span className="text-green-500 font-bold">✓</span> 정확한 입찰 보증금 준비 (일반적으로 최저 매각가격의 10% 또는 지정 금액)</li>
+                    </ul>
+                )}
+            </div>
+
+            {/* Guide Link Banner - 내부 그물망 연동 (이탈률 방어) */}
+            <div className="mt-6 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl p-5 border border-indigo-100 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                    <span className="text-2xl">📊</span>
+                    <span className="text-2xl">⚠️</span>
                     <div>
-                        <h3 className="text-sm font-bold text-indigo-900">입찰 전 꼭 확인하세요!</h3>
-                        <p className="text-xs text-gray-600 mt-0.5">입찰 체크리스트, 준비물, 법적 유의사항 안내</p>
+                        <h3 className="text-sm font-bold text-indigo-900">잠깐, 아직 입찰 가이드를 안 읽어보셨나요?</h3>
+                        <p className="text-xs text-gray-600 mt-0.5">실패 없는 투자를 위해 초보자용 가이드를 반드시 확인하세요.</p>
                     </div>
                 </div>
                 <Link
-                    href="/guide"
-                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700 transition-colors whitespace-nowrap"
+                    href={'/blog/beginner-guide-first-bid'}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700 shadow-sm transition-colors whitespace-nowrap w-full sm:w-auto justify-center"
                 >
-                    입찰 가이드 보기 →
+                    필독 가이드 바로가기 →
                 </Link>
             </div>
 
