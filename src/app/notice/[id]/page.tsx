@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { notFound } from 'next/navigation';
+import { permanentRedirect } from 'next/navigation';
 import Link from 'next/link';
 import Badge from '@/components/Badge';
 import DownloadFiles from '@/components/DownloadFiles';
@@ -22,12 +22,20 @@ export async function generateMetadata({ params }: PageProps) {
         .eq('id', id)
         .single();
 
-    const categoryName = notice?.category === 'real_estate' ? '부동산' : (notice?.category === 'vehicle' ? '차량/동산' : '기타');
-    const title = notice ? `${notice.title} | [${categoryName}] ${notice.department || ''}` : '공고 상세 정보';
+    if (!notice) {
+        return {
+            title: '종료되거나 삭제된 공고 | 로옥션(LawAuction)',
+            description: '요청하신 법원 경매/공매 공고는 종료되었거나 삭제되었습니다. 홈에서 최신 공고를 확인해보세요.',
+            robots: { index: false, follow: true },
+        };
+    }
+
+    const categoryName = notice.category === 'real_estate' ? '부동산' : (notice.category === 'vehicle' ? '차량/동산' : '기타');
+    const title = `${notice.title} | [${categoryName}] ${notice.department || ''}`;
 
     // Use AI summary for better SEO description if available
-    const aiDesc = notice?.ai_summary ? notice.ai_summary.replace(/[*#\n]/g, ' ').substring(0, 200) + '...' : '';
-    const description = aiDesc || (notice ? `${notice.title} - ${notice.department || ''} 관할 회생·파산 자산매각 공고 상세 정보입니다.` : '대법원 회생·파산 자산매각 공고 상세 정보입니다.');
+    const aiDesc = notice.ai_summary ? notice.ai_summary.replace(/[*#\n]/g, ' ').substring(0, 200) + '...' : '';
+    const description = aiDesc || `${notice.title} - ${notice.department || ''} 관할 회생·파산 자산매각 공고 상세 정보입니다.`;
 
     const siteUrl = 'https://www.courtauction.site';
 
@@ -43,7 +51,7 @@ export async function generateMetadata({ params }: PageProps) {
             url: `${siteUrl}/notice/${id}`,
         },
         // noindex pages without AI summary to prevent thin content indexing
-        ...(!notice?.ai_summary ? { robots: { index: false, follow: true } } : {}),
+        ...(!notice.ai_summary ? { robots: { index: false, follow: true } } : {}),
     };
 }
 
@@ -51,7 +59,7 @@ export default async function NoticeDetail({ params }: PageProps) {
     const { id } = await params;
 
     if (!id) {
-        notFound();
+        permanentRedirect('/');
     }
 
     const { data: notice, error } = await supabase
@@ -62,7 +70,7 @@ export default async function NoticeDetail({ params }: PageProps) {
 
     if (error || !notice) {
         console.error('Error fetching notice:', error);
-        notFound();
+        permanentRedirect('/');
     }
 
     // Helper for category
