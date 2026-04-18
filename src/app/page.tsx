@@ -36,7 +36,8 @@ export default async function Home({ searchParams }: HomeProps) {
     // Build Query for search results
     let query = supabase
       .from('court_notices')
-      .select('*', { count: 'exact' });
+      .select('*', { count: 'exact' })
+      .eq('source_type', 'notice');
 
     // Apply Filters
     if (start) {
@@ -81,6 +82,7 @@ export default async function Home({ searchParams }: HomeProps) {
   const { data: thisWeekAll, count: thisWeekCount } = await supabase
     .from('court_notices')
     .select('category, department', { count: 'exact' })
+    .eq('source_type', 'notice')
     .gte('date_posted', weekAgoStr)
     .lte('date_posted', todayStr);
 
@@ -88,6 +90,7 @@ export default async function Home({ searchParams }: HomeProps) {
   const { count: lastWeekCount } = await supabase
     .from('court_notices')
     .select('*', { count: 'exact', head: true })
+    .eq('source_type', 'notice')
     .gte('date_posted', twoWeeksAgoStr)
     .lt('date_posted', weekAgoStr);
 
@@ -163,6 +166,7 @@ export default async function Home({ searchParams }: HomeProps) {
   const { data: pastNotices } = await supabase
     .from('court_notices')
     .select('id, title, category, department, date_posted')
+    .eq('source_type', 'notice')
     .gte('date_posted', twoMonthsAgoStr)
     .lt('date_posted', weekAgoStr)
     .order('date_posted', { ascending: false })

@@ -374,6 +374,7 @@ export default async function NoticeDetail({ params }: PageProps) {
                         const { data: others } = await supabase
                             .from('court_notices')
                             .select('id, title, date_posted, category')
+                            .eq('source_type', 'notice')
                             .neq('id', notice.id)
                             .order('date_posted', { ascending: false })
                             .limit(6);

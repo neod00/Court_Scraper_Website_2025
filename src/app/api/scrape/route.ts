@@ -16,12 +16,9 @@ export async function GET(request: Request) {
     const max = sanitizeNum(searchParams.get('max'), '9');
 
     const pythonPath = process.env.PYTHON_PATH || 'python';
-    const scriptPath = path.join(process.cwd(), 'scripts_auction', 'auction_scraper.py');
+    const scriptPath = path.join(process.cwd(), 'scripts', 'scraper.py');
 
-    const args = [scriptPath, '--max', max, '--page', page];
-    if (region) args.push('--region', region);
-    if (start) args.push('--start', start);
-    if (end) args.push('--end', end);
+    const args = [scriptPath, '--pages', page];
 
     console.log(`Executing: ${pythonPath} ${args.join(' ')}`);
 

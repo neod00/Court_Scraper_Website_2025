@@ -50,6 +50,7 @@ export default async function CategoryPage({ params }: PageProps) {
             .from('court_notices')
             .select('*')
             .eq('category', categoryInfo.dbCategory)
+            .eq('source_type', 'notice')
             .order('date_posted', { ascending: false })
             .limit(12);
         notices = data || [];

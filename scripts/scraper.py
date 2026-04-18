@@ -240,8 +240,13 @@ class CourtScraper:
         print(f"Scraping Finished. Processed successfully.")
 
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--pages", type=int, default=3)
+    args = parser.parse_args()
+
     scraper = CourtScraper()
-    scraper.scrape_and_save(pages_to_scrape=3)
+    scraper.scrape_and_save(pages_to_scrape=args.pages)
     
     # Auto-generate AI analysis reports for new notices
     print("\n--- Starting AI Report Generation ---")
