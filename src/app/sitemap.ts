@@ -183,5 +183,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         console.error('Error fetching notices for sitemap:', error);
     }
 
-    return [...staticPages, ...glossaryPages, ...blogPages, ...categoryPages, ...toolPages, ...noticePages];
+    return [...staticPages, ...glossaryPages, ...blogPages, ...categoryPages, ...toolPages];
 }

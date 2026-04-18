@@ -199,6 +199,8 @@ export default async function Home({ searchParams }: HomeProps) {
           </div>
         </div>
 
+        {/* TEMPORARY HIDDEN FOR ADSENSE */}
+        {false && (<>
         {/* Search Form */}
         <SearchForm />
 
@@ -509,6 +511,8 @@ export default async function Home({ searchParams }: HomeProps) {
           </div>
         )}
 
+        </>)}
+
         {/* 블로그 & 가이드 섹션 */}
         <div className="mt-16 border-t border-gray-100 pt-10">
           <div className="flex flex-col items-center justify-center mb-10 text-center">
@@ -522,7 +526,7 @@ export default async function Home({ searchParams }: HomeProps) {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {getRecentPosts(3).map((post) => (
+            {getRecentPosts(9).map((post) => (
               <Link
                 key={post.slug}
                 href={`/blog/${post.slug}`}
@@ -598,6 +602,8 @@ export default async function Home({ searchParams }: HomeProps) {
           </div>
         </div>
 
+        {/* TEMPORARY HIDDEN FOR ADSENSE */}
+        {false && (<>
         {/* 카테고리 바로가기 */}
         <div className="mt-16 mb-8 pt-8 border-t border-gray-100">
           <div className="flex flex-col items-center justify-center mb-10 text-center">
@@ -660,6 +666,8 @@ export default async function Home({ searchParams }: HomeProps) {
             </Link>
           </div>
         </div>
+
+        </>)}
 
         {/* SEO Text Block for AdSense Approval */}
         <div className="mt-16 mb-8 bg-white rounded-2xl p-8 border border-gray-200 text-[14px] leading-[1.8] text-gray-600 shadow-sm">
