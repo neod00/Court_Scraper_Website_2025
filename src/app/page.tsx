@@ -199,8 +199,6 @@ export default async function Home({ searchParams }: HomeProps) {
           </div>
         </div>
 
-        {/* TEMPORARY HIDDEN FOR ADSENSE */}
-        {false && (<>
         {/* Search Form */}
         <SearchForm />
 
@@ -401,6 +399,8 @@ export default async function Home({ searchParams }: HomeProps) {
 
 
 
+        {/* TEMPORARY HIDDEN FOR ADSENSE */}
+        {false && (<>
         {/* Weekly Notices Section - Bottom of Page */}
         <div className="mt-12 border-t border-gray-200 pt-8">
           <div className="flex items-center gap-2 mb-6">
@@ -511,6 +511,7 @@ export default async function Home({ searchParams }: HomeProps) {
           </div>
         )}
 
+        
         </>)}
 
         {/* 블로그 & 가이드 섹션 */}
@@ -602,8 +603,6 @@ export default async function Home({ searchParams }: HomeProps) {
           </div>
         </div>
 
-        {/* TEMPORARY HIDDEN FOR ADSENSE */}
-        {false && (<>
         {/* 카테고리 바로가기 */}
         <div className="mt-16 mb-8 pt-8 border-t border-gray-100">
           <div className="flex flex-col items-center justify-center mb-10 text-center">
@@ -667,8 +666,7 @@ export default async function Home({ searchParams }: HomeProps) {
           </div>
         </div>
 
-        </>)}
-
+        
         {/* SEO Text Block for AdSense Approval */}
         <div className="mt-16 mb-8 bg-white rounded-2xl p-8 border border-gray-200 text-[14px] leading-[1.8] text-gray-600 shadow-sm">
             <h2 className="text-xl font-bold text-gray-900 mb-4 tracking-tight">
