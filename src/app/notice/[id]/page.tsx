@@ -6,6 +6,10 @@ import DownloadFiles from '@/components/DownloadFiles';
 import ViewTracker from '@/components/ViewTracker';
 import CourtCostCalculator from '@/components/CourtCostCalculator';
 import { getRecentPosts } from '@/data/blog-posts';
+import { glossaryTerms } from '@/data/glossary';
+import Breadcrumbs from '@/components/Breadcrumbs';
+import NoticeFAQ from '@/components/NoticeFAQ';
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 // Revalidate every hour
 export const revalidate = 3600;
@@ -88,7 +92,16 @@ export default async function NoticeDetail({ params }: PageProps) {
     };
 
     return (
-        <div className="bg-white shadow overflow-hidden sm:rounded-lg border border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4 md:py-8">
+            <Breadcrumbs 
+                items={[
+                    { label: '공고 검색', href: '/' },
+                    { label: getCategoryName(notice.category), href: `/category/${notice.category}` },
+                    { label: notice.title, href: `/notice/${notice.id}` }
+                ]} 
+            />
+            
+            <div className="bg-white shadow overflow-hidden sm:rounded-lg border border-gray-200">
             <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
                 <div>
                     <div className="flex items-center gap-3">
@@ -207,41 +220,94 @@ export default async function NoticeDetail({ params }: PageProps) {
                             prose-li:my-1
                             prose-p:my-3
                             prose-ul:my-3">
-                            {notice.ai_summary.split('\n').map((line: string, idx: number) => {
-                                const trimmed = line.trim();
-                                if (!trimmed) return <br key={idx} />;
+                            {(() => {
+                                // Function to link technical terms to glossary
+                                const linkify = (content: any[]) => {
+                                    return content.map((part, pIdx) => {
+                                        if (typeof part !== 'string') return part;
+                                        
+                                        let segments: (string | React.ReactNode)[] = [part];
+                                        
+                                        // Sort terms by length (longest first) to avoid partial matching (e.g., '회생절차' matching '회생')
+                                        const sortedTerms = [...glossaryTerms].sort((a, b) => b.term.length - a.term.length);
+                                        
+                                        for (const item of sortedTerms) {
+                                            const newSegments: (string | React.ReactNode)[] = [];
+                                            for (const seg of segments) {
+                                                if (typeof seg !== 'string') {
+                                                    newSegments.push(seg);
+                                                    continue;
+                                                }
+                                                
+                                                const parts = seg.split(new RegExp(`(${item.term})`, 'g'));
+                                                parts.forEach((p, i) => {
+                                                    if (p === item.term) {
+                                                        newSegments.push(
+                                                            <Link 
+                                                                key={`${pIdx}-${item.slug}-${i}`} 
+                                                                href={`/glossary/${item.slug}`}
+                                                                className="text-indigo-600 font-medium border-b border-dotted border-indigo-300 hover:bg-indigo-50 transition-colors"
+                                                                title={item.shortDescription}
+                                                            >
+                                                                {p}
+                                                            </Link>
+                                                        );
+                                                    } else if (p) {
+                                                        newSegments.push(p);
+                                                    }
+                                                });
+                                            }
+                                            segments = newSegments;
+                                        }
+                                        return segments;
+                                    });
+                                };
 
-                                // Bold text handling (**text**)
-                                const parts = trimmed.split(/(\*\*[^*]+\*\*)/g);
-                                const rendered = parts.map((part: string, pIdx: number) => {
-                                    if (part.startsWith('**') && part.endsWith('**')) {
-                                        return <strong key={pIdx}>{part.slice(2, -2)}</strong>;
+                                return notice.ai_summary.split('\n').map((line: string, idx: number) => {
+                                    const trimmed = line.trim();
+                                    if (!trimmed) return <br key={idx} />;
+
+                                    // Bold text handling (**text**)
+                                    const parts = trimmed.split(/(\*\*[^*]+\*\*)/g);
+                                    const rendered = parts.map((part: string, pIdx: number) => {
+                                        if (part.startsWith('**') && part.endsWith('**')) {
+                                            return <strong key={pIdx}>{part.slice(2, -2)}</strong>;
+                                        }
+                                        return part;
+                                    });
+
+                                    // Apply linkify to the rendered parts
+                                    const linkedRendered = linkify(rendered);
+
+                                    // List items
+                                    if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
+                                        return (
+                                            <div key={idx} className="flex gap-2 my-1 pl-2">
+                                                <span className="text-indigo-400 mt-0.5 flex-shrink-0">•</span>
+                                                <span>{linkedRendered.map((r: any, i: number) => {
+                                                    if (typeof r === 'string') return r.replace(/^[-•]\s*/, '');
+                                                    return r;
+                                                })}</span>
+                                            </div>
+                                        );
                                     }
-                                    return part;
+
+                                    // Numbered items
+                                    if (/^\d+\./.test(trimmed)) {
+                                        return (
+                                            <div key={idx} className="flex gap-2 my-1.5">
+                                                <span className="text-indigo-500 font-bold flex-shrink-0">{trimmed.match(/^\d+/)?.[0]}.</span>
+                                                <span>{linkedRendered.map((r: any, i: number) => {
+                                                    if (typeof r === 'string') return r.replace(/^\d+\.\s*/, '');
+                                                    return r;
+                                                })}</span>
+                                            </div>
+                                        );
+                                    }
+
+                                    return <p key={idx} className="my-2">{linkedRendered}</p>;
                                 });
-
-                                // List items
-                                if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
-                                    return (
-                                        <div key={idx} className="flex gap-2 my-1 pl-2">
-                                            <span className="text-indigo-400 mt-0.5 flex-shrink-0">•</span>
-                                            <span>{rendered.slice(0).map((r: any, i: number) => typeof r === 'string' ? r.replace(/^[-•]\s*/, '') : r)}</span>
-                                        </div>
-                                    );
-                                }
-
-                                // Numbered items
-                                if (/^\d+\./.test(trimmed)) {
-                                    return (
-                                        <div key={idx} className="flex gap-2 my-1.5">
-                                            <span className="text-indigo-500 font-bold flex-shrink-0">{trimmed.match(/^\d+/)?.[0]}.</span>
-                                            <span>{rendered.map((r: any, i: number) => typeof r === 'string' ? r.replace(/^\d+\.\s*/, '') : r)}</span>
-                                        </div>
-                                    );
-                                }
-
-                                return <p key={idx} className="my-2">{rendered}</p>;
-                            })}
+                            })()}
                         </div>
 
                         {/* References and Sources for E-E-A-T */}
@@ -366,6 +432,14 @@ export default async function NoticeDetail({ params }: PageProps) {
                     }}
                 />
             )}
+
+            {/* FAQ Section for SEO */}
+            <NoticeFAQ notice={{
+                title: notice.title,
+                category: notice.category || '기타',
+                court_name: notice.court_name || notice.department || '대한민국 법원',
+                date_posted: notice.date_posted || ''
+            }} />
 
             {/* CTA: Related Blog Posts for Internal Links & Dwell Time */}
             <div className="mt-12 bg-indigo-50/50 border border-indigo-100 rounded-xl p-6 md:p-8">
