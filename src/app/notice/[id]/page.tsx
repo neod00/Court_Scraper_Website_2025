@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Badge from '@/components/Badge';
 import DownloadFiles from '@/components/DownloadFiles';
 import ViewTracker from '@/components/ViewTracker';
+import CourtCostCalculator from '@/components/CourtCostCalculator';
 
 // Revalidate every hour
 export const revalidate = 3600;
@@ -93,11 +94,11 @@ export default async function NoticeDetail({ params }: PageProps) {
                         <h3 className="text-lg leading-6 font-medium text-gray-900">
                             공고 상세 정보
                         </h3>
-                        <ViewTracker 
-                            tableName="court_notices" 
-                            idColumn="id" 
-                            idValue={id} 
-                            initialCount={notice.view_count || 0} 
+                        <ViewTracker
+                            tableName="court_notices"
+                            idColumn="id"
+                            idValue={id}
+                            initialCount={notice.view_count || 0}
                         />
                     </div>
                     <p className="mt-1 max-w-2xl text-sm text-gray-500">
@@ -255,6 +256,27 @@ export default async function NoticeDetail({ params }: PageProps) {
                     </div>
                 </article>
             )}
+
+            {/* Expert Commentary Section */}
+            <div className="mt-8 bg-blue-50 border-l-4 border-blue-500 rounded-r-xl p-6 shadow-sm">
+                <div className="flex items-center gap-3 mb-3">
+                    <img src="https://ui-avatars.com/api/?name=Ed&background=0D8ABC&color=fff" alt="Editor" className="w-10 h-10 rounded-full shadow-sm" />
+                    <div>
+                        <h3 className="text-sm font-bold text-gray-900">로옥션 수석 에디터 코멘트</h3>
+                        <p className="text-xs text-gray-500">관할: {notice.department || '법원'} | 분류: {getCategoryName(notice.category)}</p>
+                    </div>
+                </div>
+                <p className="text-gray-700 text-sm leading-relaxed mt-2 italic">
+                    {notice.category === 'real_estate' 
+                        ? `"대법원 부동산 매각공고는 일반 경매보다 경쟁이 덜해 시세 차익을 남기기 좋은 숨은 진주입니다. 다만, 유치권 등 비등기 권리가 남아있을 확률을 완전히 배제할 수 없으므로, 위 AI 요약본의 첨부파일 내용을 꼼꼼히 대조하고 반드시 현장 임장에 나서시길 권해드립니다. 낙찰가뿐만 아니라 아래 계산기에서 명도 비용의 여유분까지 충분히 감안하여 산정하세요."`
+                        : notice.category === 'vehicle'
+                        ? `"차량 및 동산 매각은 물리적 상태(방전, 파손, 부품 분실) 파악이 수익률의 90%를 결정합니다. 공고문에 압류/체납 과태료의 매수자 인수 여부 문구가 있는지 다시 한번 체크하시고, 배터리 교체 및 탁송 비용까지 포함하여 아래의 계산기로 예산을 짜보시기 바랍니다."`
+                        : `"회생 법원의 일반 자산 매각(채권, 특허, 시설 등)은 아는 사람만 아는 블루오션입니다. 매각물건명세서의 특이사항을 반드시 점검하여 부대 조건이 나에게 유리한지 따져보세요. 일반 경매의 인도명령 제도가 없으므로 소유권 이전과 물리적 이전 절차를 사전에 관재인 측과 조율하는 것이 핵심입니다."`}
+                </p>
+            </div>
+
+            {/* Cost Calculator Section */}
+            <CourtCostCalculator category={notice.category} />
 
             {/* Value-Add Checklist Section (오리지널 콘텐츠 강화용) */}
             <div className="mt-8 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
