@@ -274,6 +274,25 @@ export default async function BlogPostPage({ params }: PageProps) {
                     {renderContent(staticPost.content)}
                 </div>
 
+                {/* References and Sources for E-E-A-T */}
+                <div className="mt-12 pt-6 border-t border-gray-100">
+                    <details className="cursor-pointer group bg-gray-50 rounded-xl p-4 border border-gray-100">
+                        <summary className="text-base font-bold text-gray-800 flex items-center gap-2 hover:text-indigo-600 transition-colors">
+                            📚 본문 자료 출처 및 분석 방법론
+                        </summary>
+                        <div className="mt-4 space-y-3 text-sm text-gray-600 leading-relaxed">
+                            <p>본 칼럼은 다음과 같은 공신력 있는 자료를 바탕으로 <strong>로옥션 전문 분석팀</strong>에서 작성되었습니다:</p>
+                            <ul className="list-disc pl-5 space-y-1">
+                                <li>대한민국 법원경매정보시스템(Courtauction) 공고 데이터</li>
+                                  <li>국토교통부 실거래가 공개시스템 시세 데이터</li>
+                                <li>대법원 판례 및 민사집행법 관련 법령 자료</li>
+                                <li>주요 은행별 NPL(부실채권) 매각 통계 및 시장 리포트</li>
+                            </ul>
+                            <p className="text-xs text-gray-500 mt-2 italic">※ 본 콘텐츠의 저작권은 로옥션(LawAuction)에 있으며, 무단 전재 및 재배포를 금합니다.</p>
+                        </div>
+                    </details>
+                </div>
+
                 {relatedPosts.length > 0 && (
                     <section className="mt-16 pt-8 border-t border-gray-200">
                         <h2 className="text-2xl font-bold text-gray-900 mb-6">📖 관련 글</h2>
@@ -376,6 +395,24 @@ export default async function BlogPostPage({ params }: PageProps) {
             {/* Dynamic posts use MarkdownRenderer for rich formatting */}
             <div className="prose prose-lg max-w-none">
                 <MarkdownRenderer content={dynamicPost.content} />
+            </div>
+
+            {/* References and Sources for E-E-A-T */}
+            <div className="mt-12 pt-6 border-t border-gray-100">
+                <details className="cursor-pointer group bg-gray-50 rounded-xl p-4 border border-gray-100">
+                    <summary className="text-base font-bold text-gray-800 flex items-center gap-2 hover:text-indigo-600 transition-colors">
+                        📚 본문 자료 출처 및 분석 방법론
+                    </summary>
+                    <div className="mt-4 space-y-3 text-sm text-gray-600 leading-relaxed">
+                        <p>본 칼럼은 <strong>로옥션 AI 분석 엔진</strong>을 통해 최신 시장 통계 및 법원 데이터를 종합하여 생성되었습니다:</p>
+                        <ul className="list-disc pl-5 space-y-1">
+                            <li>대한민국 법원 실시간 경매 공고 데이터 (Grounding Data)</li>
+                            <li>실시간 지역별 낙찰가율 및 경쟁률 통계</li>
+                            <li>정부 부처 보도자료 및 부동산 정책 데이터베이스</li>
+                        </ul>
+                        <p className="text-xs text-gray-500 mt-2">본 정보는 AI 생성 정보이므로 입찰 등 실무 적용 시 법원 원문 확인이 필수적입니다.</p>
+                    </div>
+                </details>
             </div>
 
             <div className="mt-12 pt-8 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4">

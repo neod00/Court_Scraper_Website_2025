@@ -5,6 +5,7 @@ import Badge from '@/components/Badge';
 import DownloadFiles from '@/components/DownloadFiles';
 import ViewTracker from '@/components/ViewTracker';
 import CourtCostCalculator from '@/components/CourtCostCalculator';
+import { getRecentPosts } from '@/data/blog-posts';
 
 // Revalidate every hour
 export const revalidate = 3600;
@@ -201,11 +202,11 @@ export default async function NoticeDetail({ params }: PageProps) {
 
                     {/* Content */}
                     <div className="p-6 sm:p-8">
-                        <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed
+                        <div className="prose prose-sm md:prose-base max-w-none text-gray-700 leading-[1.8]
                             prose-strong:text-gray-900 prose-strong:font-bold
-                            prose-li:my-0.5
-                            prose-p:my-2
-                            prose-ul:my-2">
+                            prose-li:my-1
+                            prose-p:my-3
+                            prose-ul:my-3">
                             {notice.ai_summary.split('\n').map((line: string, idx: number) => {
                                 const trimmed = line.trim();
                                 if (!trimmed) return <br key={idx} />;
@@ -243,15 +244,19 @@ export default async function NoticeDetail({ params }: PageProps) {
                             })}
                         </div>
 
-                        {/* Disclaimer */}
+                        {/* References and Sources for E-E-A-T */}
                         <div className="mt-6 pt-4 border-t border-indigo-100">
-                            <p className="text-xs text-gray-400 flex items-start gap-1.5">
-                                <span className="mt-0.5">ℹ️</span>
-                                <span>
-                                    본 요약은 AI가 첨부파일 원문을 기반으로 자동 정리한 참고 자료입니다.
-                                    정확한 매각 조건은 반드시 원본 공고 및 첨부파일을 직접 확인하시기 바랍니다.
-                                </span>
-                            </p>
+                            <details className="cursor-pointer group">
+                                <summary className="text-sm font-bold text-gray-700 flex items-center gap-2 hover:text-indigo-600 transition-colors">
+                                    📚 본문 출처 및 참고자료 (클릭하여 펼치기)
+                                </summary>
+                                <ul className="list-disc pl-6 mt-3 space-y-1.5 text-xs text-gray-600">
+                                    <li>대한민국 법원 법원경매정보 (<a href="https://www.courtauction.go.kr" target="_blank" rel="noopener noreferrer" className="text-indigo-500 hover:underline">바로가기</a>)</li>
+                                    <li>국토교통부 실거래가 공개시스템 (<a href="https://rt.molit.go.kr" target="_blank" rel="noopener noreferrer" className="text-indigo-500 hover:underline">바로가기</a>)</li>
+                                    <li>본 리포트는 인공지능(AI) 시스템에 의해 대한민국 법원 공고문 및 감정평가서를 바탕으로 요약되었습니다.</li>
+                                    <li>상기 정보는 면책 조건으로 제공되며, 실제 입찰 시에는 반드시 법원에 비치된 물건명세서 및 감정평가서를 직접 확인하시기 바랍니다.</li>
+                                </ul>
+                            </details>
                         </div>
                     </div>
                 </article>
@@ -361,6 +366,28 @@ export default async function NoticeDetail({ params }: PageProps) {
                     }}
                 />
             )}
+
+            {/* CTA: Related Blog Posts for Internal Links & Dwell Time */}
+            <div className="mt-12 bg-indigo-50/50 border border-indigo-100 rounded-xl p-6 md:p-8">
+                <h3 className="text-lg md:text-xl font-bold text-indigo-900 border-b-2 border-indigo-200 pb-3 mb-6 flex items-center gap-2">
+                    🌟 로옥션의 핵심 투자 인사이트
+                </h3>
+                <ul className="space-y-4">
+                    {getRecentPosts(3).map((post) => (
+                        <li key={post.slug} className="flex items-start gap-3">
+                            <span className="text-indigo-500 mt-0.5 whitespace-nowrap">👉</span>
+                            <Link href={`/blog/${post.slug}`} className="text-indigo-700 hover:text-indigo-900 font-medium text-base hover:underline transition-colors leading-relaxed">
+                                {post.title}
+                            </Link>
+                        </li>
+                    ))}
+                </ul>
+                <div className="mt-6 text-right">
+                     <Link href="/blog" className="text-sm text-indigo-600 hover:text-indigo-800 font-bold transition-colors">
+                         블로그 칼럼 전체보기 &rarr;
+                     </Link>
+                </div>
+            </div>
 
             {/* Latest Notices for Internal Linking - AdSense Enhancement */}
             <div className="mt-12 border-t border-gray-200 pt-8">
