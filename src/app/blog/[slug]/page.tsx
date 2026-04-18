@@ -5,6 +5,8 @@ import { blogPosts, getPostBySlug, getRelatedPosts, blogCategories } from '@/dat
 import { supabase } from '@/lib/supabase';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import ViewTracker from '@/components/ViewTracker';
+import RelatedNoticesRSS from '@/components/RelatedNoticesRSS';
+import NoticeHero from '@/components/NoticeHero';
 
 export const dynamic = 'force-dynamic';
 
@@ -228,7 +230,9 @@ export default async function BlogPostPage({ params }: PageProps) {
         };
 
         return (
-            <article className="max-w-4xl mx-auto px-4 py-8">
+            <div className="max-w-7xl mx-auto px-4 py-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                    <article className="lg:col-span-2">
                 <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8">
                     <Link href="/" className="hover:text-indigo-600">홈</Link>
                     <span>/</span>
@@ -328,7 +332,26 @@ export default async function BlogPostPage({ params }: PageProps) {
                         </Link>
                     </div>
                 </div>
-            </article>
+                    </article>
+
+                    <aside className="space-y-8 sticky top-6">
+                        <RelatedNoticesRSS 
+                            currentId="blog-static" 
+                            category="real_estate" 
+                            courtName="로옥션 분석팀" 
+                        />
+                        <div className="bg-indigo-600 rounded-2xl p-6 text-white shadow-xl">
+                            <h4 className="font-bold text-lg mb-2">🚀 투자 초보자라면?</h4>
+                            <p className="text-xs text-indigo-100 mb-4 leading-relaxed">
+                                로옥션이 제공하는 실시간 공고 요약과 수익률 계산기를 활용해 스마트한 투자를 시작하세요.
+                            </p>
+                            <Link href="/" className="inline-block bg-white text-indigo-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-50 transition-colors">
+                                공고 검색하기 &rarr;
+                            </Link>
+                        </div>
+                    </aside>
+                </div>
+            </div>
         );
     }
 
@@ -343,7 +366,9 @@ export default async function BlogPostPage({ params }: PageProps) {
     const readingTime = dynamicPost.reading_time || 5;
 
     return (
-        <article className="max-w-4xl mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                <article className="lg:col-span-2">
             <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8">
                 <Link href="/" className="hover:text-indigo-600">홈</Link>
                 <span>/</span>
@@ -428,6 +453,25 @@ export default async function BlogPostPage({ params }: PageProps) {
                     </Link>
                 </div>
             </div>
-        </article>
+                </article>
+
+                <aside className="space-y-8 sticky top-6">
+                    <RelatedNoticesRSS 
+                        currentId="blog-dynamic" 
+                        category="real_estate" 
+                        courtName="AI 애널리스트" 
+                    />
+                    <div className="bg-emerald-600 rounded-2xl p-6 text-white shadow-xl">
+                        <h4 className="font-bold text-lg mb-2">📊 AI 리포트 활용법</h4>
+                        <p className="text-xs text-emerald-100 mb-4 leading-relaxed">
+                            매일 아침 업데이트되는 AI 분석 리포트로 경매 시장의 흐름을 한눈에 파악하세요.
+                        </p>
+                        <Link href="/trend" className="inline-block bg-white text-emerald-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-emerald-50 transition-colors">
+                            트렌드 확인하기 &rarr;
+                        </Link>
+                    </div>
+                </aside>
+            </div>
+        </div>
     );
 }
