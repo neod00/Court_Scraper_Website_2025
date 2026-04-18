@@ -229,7 +229,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
         {/* Result Message / Data List - right below search button */}
         <div className="mt-4">
-          {(!notices || notices.length === 0) ? (
+          {(!notices || notices?.length === 0) ? (
             <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-md">
               <div className="flex">
                 <div className="flex-shrink-0">
@@ -255,7 +255,7 @@ export default async function Home({ searchParams }: HomeProps) {
                 </span>
               </div>
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-                {notices.map((notice) => (
+                {notices?.map((notice) => (
                   <NoticeCard key={notice.id} notice={notice} />
                 ))}
               </div>
@@ -338,15 +338,15 @@ export default async function Home({ searchParams }: HomeProps) {
                   <ViewTracker 
                     tableName="weekly_reports" 
                     idColumn="week_end" 
-                    idValue={weeklyReport.week_end} 
-                    initialCount={weeklyReport.view_count || 0}
+                    idValue={weeklyReport?.week_end} 
+                    initialCount={weeklyReport?.view_count || 0}
                     className="text-slate-400 bg-slate-800/50 px-2 py-0.5 rounded-full text-[10px]"
                   />
-                  <span className="text-xs text-slate-500">{weeklyReport.week_start} ~ {weeklyReport.week_end}</span>
+                  <span className="text-xs text-slate-500">{weeklyReport?.week_start} ~ {weeklyReport?.week_end}</span>
                 </div>
               </div>
               <p className="text-slate-200 text-sm leading-relaxed">
-                {weeklyReport.briefing_text}
+                {weeklyReport?.briefing_text}
               </p>
               <div className="mt-3 text-right">
                 <Link href="/trend" className="text-xs text-cyan-400 hover:text-cyan-300 font-medium transition-colors">
@@ -423,9 +423,9 @@ export default async function Home({ searchParams }: HomeProps) {
                 {realEstateNotices?.length || 0}건
               </span>
             </div>
-            {realEstateNotices && realEstateNotices.length > 0 ? (
+            {realEstateNotices && (realEstateNotices?.length ?? 0) > 0 ? (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-                {realEstateNotices.map((notice) => (
+                {realEstateNotices?.map((notice) => (
                   <NoticeCard key={notice.id} notice={notice} />
                 ))}
               </div>
@@ -446,9 +446,9 @@ export default async function Home({ searchParams }: HomeProps) {
                 {vehicleNotices?.length || 0}건
               </span>
             </div>
-            {vehicleNotices && vehicleNotices.length > 0 ? (
+            {vehicleNotices && (vehicleNotices?.length ?? 0) > 0 ? (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-                {vehicleNotices.map((notice) => (
+                {vehicleNotices?.map((notice) => (
                   <NoticeCard key={notice.id} notice={notice} />
                 ))}
               </div>
@@ -461,7 +461,7 @@ export default async function Home({ searchParams }: HomeProps) {
         </div>
 
         {/* Past 1-2 Months Compact List Section */}
-        {pastNotices && pastNotices.length > 0 && (
+        {pastNotices && (pastNotices?.length ?? 0) > 0 && (
           <div className="mt-12 border-t border-gray-200 pt-8">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
@@ -477,7 +477,7 @@ export default async function Home({ searchParams }: HomeProps) {
             
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
               <ul className="divide-y divide-gray-100">
-                {pastNotices.map((notice) => (
+                {pastNotices?.map((notice) => (
                   <li key={notice.id} className="hover:bg-indigo-50/40 transition-colors group">
                     <Link href={`/notice/${notice.id}`} className="block px-4 py-3.5 sm:px-6">
                       <div className="flex items-center gap-3">
