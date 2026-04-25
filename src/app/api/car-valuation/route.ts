@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+export const dynamic = 'force-dynamic';
 
 export interface CarValuationResult {
     vehicle_summary: {
@@ -129,6 +127,10 @@ export async function POST(request: NextRequest) {
         }
 
         userPrompt += `\n\n위 정보를 기반으로 KB차차차, 엔카, K Car 등 한국 주요 중고차 플랫폼의 현재 시세를 조사하고, 투자 매력도를 분석해주세요.`;
+
+        const openai = new OpenAI({
+            apiKey: process.env.OPENAI_API_KEY,
+        });
 
         const response = await openai.chat.completions.create({
             model: 'gpt-5.4',
