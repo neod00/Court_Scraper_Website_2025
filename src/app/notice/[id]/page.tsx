@@ -9,6 +9,7 @@ import NoticeFAQ from '@/components/NoticeFAQ';
 import NoticeHero from '@/components/NoticeHero';
 import RelatedNoticesRSS from '@/components/RelatedNoticesRSS';
 import CourtCostCalculator from '@/components/CourtCostCalculator';
+import CarValuation from '@/components/CarValuation';
 import { getRecentPosts } from '@/data/blog-posts';
 import { glossaryTerms } from '@/data/glossary';
 
@@ -242,6 +243,14 @@ export default async function NoticeDetail({ params }: PageProps) {
                             </div>
                         </article>
                     )}
+
+                    {/* AI Car Valuation - only for vehicle category */}
+                    <CarValuation
+                        noticeId={notice.id}
+                        category={notice.category}
+                        aiSummary={notice.ai_summary}
+                        title={notice.title}
+                    />
 
                     <div className="mt-8 bg-blue-50 border-l-4 border-blue-500 rounded-r-xl p-6 shadow-sm">
                         <div className="flex items-center gap-3 mb-3">
