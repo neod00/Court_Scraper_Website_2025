@@ -359,10 +359,6 @@ export default function CarValuation({ noticeId, category, aiSummary, title }: C
                     <h2 className="text-lg font-bold text-white uppercase tracking-tight">AI 중고차 시세 분석</h2>
                 </div>
                 <div className="flex items-center gap-2">
-                    <a href={LITTLY_URL} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-black bg-white text-orange-600 hover:scale-105 transition-all shadow-md animate-bounce-subtle">
-                        ☕ 커피 후원
-                    </a>
                     <span className="inline-flex items-center px-2.5 py-1.5 rounded-full text-[10px] font-black bg-white/20 text-white border border-white/30 backdrop-blur-sm uppercase">
                         Premium
                     </span>
