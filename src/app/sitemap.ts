@@ -166,13 +166,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     try {
         const { data: notices } = await supabase
             .from('court_notices')
-            .select('id, date_posted')
+            .select('id, date_posted, ai_summary')
             .not('ai_summary', 'is', null)
             .order('date_posted', { ascending: false })
-            .limit(200);
+            .limit(400);
 
         if (notices) {
-            noticePages = notices.map((notice) => ({
+            // Filter out fallback/thin summaries (containing "첨부파일" or length < 300)
+            const highQualityNotices = notices.filter(notice => 
+                notice.ai_summary && 
+                !notice.ai_summary.includes("첨부파일") && 
+                notice.ai_summary.length > 300
+            ).slice(0, 200);
+
+            noticePages = highQualityNotices.map((notice) => ({
                 url: `${baseUrl}/notice/${notice.id}`,
                 lastModified: new Date(notice.date_posted),
                 changeFrequency: 'weekly' as const,
@@ -183,5 +190,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         console.error('Error fetching notices for sitemap:', error);
     }
 
-    return [...staticPages, ...glossaryPages, ...blogPages, ...categoryPages, ...toolPages];
+    return [...staticPages, ...glossaryPages, ...blogPages, ...categoryPages, ...toolPages, ...noticePages];
 }

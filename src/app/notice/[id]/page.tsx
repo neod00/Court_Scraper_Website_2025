@@ -47,6 +47,11 @@ export async function generateMetadata({ params }: PageProps) {
 
     const siteUrl = 'https://www.courtauction.site';
 
+    // noindex pages without AI summary or with a fallback/thin AI summary to prevent thin content indexing
+    const isThinContent = !notice.ai_summary || 
+                          notice.ai_summary.includes("첨부파일") || 
+                          notice.ai_summary.length < 300;
+
     return {
         title,
         description,
@@ -58,8 +63,7 @@ export async function generateMetadata({ params }: PageProps) {
             description,
             url: `${siteUrl}/notice/${id}`,
         },
-        // noindex pages without AI summary to prevent thin content indexing
-        ...(!notice.ai_summary ? { robots: { index: false, follow: true } } : {}),
+        ...(isThinContent ? { robots: { index: false, follow: true } } : {}),
     };
 }
 
