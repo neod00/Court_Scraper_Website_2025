@@ -12,6 +12,7 @@ import CourtCostCalculator from '@/components/CourtCostCalculator';
 import CarValuation from '@/components/CarValuation';
 import { getRecentPosts } from '@/data/blog-posts';
 import { glossaryTerms } from '@/data/glossary';
+import { isQualityNotice } from '@/lib/noticeQuality';
 
 // Revalidate every hour
 export const revalidate = 3600;
@@ -47,10 +48,8 @@ export async function generateMetadata({ params }: PageProps) {
 
     const siteUrl = 'https://www.courtauction.site';
 
-    // noindex pages without AI summary or with a fallback/thin AI summary to prevent thin content indexing
-    const isThinContent = !notice.ai_summary || 
-                          notice.ai_summary.includes("첨부파일") || 
-                          notice.ai_summary.length < 300;
+    // noindex pages without a substantive AI summary (shared quality gate) to prevent thin-content indexing
+    const isThinContent = !isQualityNotice(notice);
 
     return {
         title,
@@ -86,11 +85,6 @@ export default async function NoticeDetail({ params }: PageProps) {
     }
 
     // Helpers
-    const getCategoryColor = (cat: string | null) => {
-        if (cat === 'real_estate') return 'blue';
-        if (cat === 'vehicle') return 'green';
-        return 'gray';
-    };
     const getCategoryName = (cat: string | null) => {
         if (cat === 'real_estate') return '부동산';
         if (cat === 'vehicle') return '차량/동산';
@@ -255,21 +249,6 @@ export default async function NoticeDetail({ params }: PageProps) {
                         aiSummary={notice.ai_summary}
                         title={notice.title}
                     />
-
-                    <div className="mt-8 bg-blue-50 border-l-4 border-blue-500 rounded-r-xl p-6 shadow-sm">
-                        <div className="flex items-center gap-3 mb-3">
-                            <img src="https://ui-avatars.com/api/?name=Ed&background=0D8ABC&color=fff" alt="Editor" className="w-10 h-10 rounded-full shadow-sm" />
-                            <div>
-                                <h3 className="text-sm font-bold text-gray-900 text-indigo-900">로옥션 수석 에디터 코멘트</h3>
-                                <p className="text-xs text-gray-500">{getCategoryName(notice.category)} 분야 전문 리포트</p>
-                            </div>
-                        </div>
-                        <p className="text-indigo-950 text-sm leading-relaxed mt-2 italic font-medium">
-                            {notice.category === 'real_estate' 
-                                ? `"대법원 부동산 매각공고는 일반 경매보다 경쟁이 덜해 시세 차익을 남기기 좋은 기회입니다. 다만 권리 분석 시 비등기 권리 파약이 핵심이므로 반드시 입찰 전 현장 임장과 서류 대조를 병행하십시오."`
-                                : `"동산 및 차량 매각은 물리적 상태 파악이 수익률의 핵심입니다. 공고문의 상태 표기만 믿지 말고 보관소 방문을 적극 권장합니다."`}
-                        </p>
-                    </div>
 
                     <div id="calculator"><CourtCostCalculator category={notice.category} /></div>
 

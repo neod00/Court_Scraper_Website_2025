@@ -58,19 +58,15 @@ export default function NoticeHero({ notice }: NoticeHeroProps) {
                             <span className="text-indigo-400">⚖️</span>
                             <span>{notice.department || '관할 법원 정보 없음'}</span>
                         </div>
-                        <div className="hidden md:flex items-center gap-1.5 bg-black/30 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/10">
-                            <span className="text-yellow-400">📊</span>
-                            <span>회생/파산 자산매각 리포트 v1.0</span>
-                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* Status Indicator Area */}
+            {/* Category Indicator */}
             <div className="absolute top-6 right-6 flex flex-col items-end gap-2">
                  <div className="bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl shadow-lg border border-white flex flex-col items-center">
-                     <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">매각상태</span>
-                     <span className="text-indigo-600 font-black text-lg">진행중</span>
+                     <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">자산구분</span>
+                     <span className="text-indigo-600 font-black text-lg">{isRealEstate ? '부동산' : (isVehicle ? '차량/동산' : '기타자산')}</span>
                  </div>
             </div>
         </div>

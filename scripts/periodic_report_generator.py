@@ -117,7 +117,8 @@ def save_report_to_blog(report: Dict, period_name: str, start_date: str, end_dat
         "author": "AI 애널리스트",
         "category": "시장분석",
         "tags": tags,
-        "is_published": True,
+        # 사람 검수 전 자동 발행 금지(AdSense scaled-content 정책). 초안으로 저장 후 검수하여 게시.
+        "is_published": False,
         "published_at": datetime.now().isoformat(),
         "featured": True if "Yearly" in period_name or "Quarterly" in period_name else False
     }

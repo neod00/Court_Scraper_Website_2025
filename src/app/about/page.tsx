@@ -1,3 +1,10 @@
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: 'LawAuction 소개 | 로옥션',
+    description: '로옥션(LawAuction)은 대법원 회생·파산 자산매각 공고를 자동 수집·분석해 제공하는 정보 플랫폼입니다. 서비스 및 운영자 정보를 안내합니다.',
+};
+
 export default function AboutPage() {
     return (
         <div className="max-w-4xl mx-auto">
@@ -39,6 +46,21 @@ export default function AboutPage() {
                         </a>
                         에서 수집됩니다. 본 서비스는 공개된 정보를 정리하여 제공하는 용도로만 사용됩니다.
                     </p>
+                </section>
+
+                <section>
+                    <h2 className="text-xl font-semibold text-gray-800 mb-3">운영 정보</h2>
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-gray-700 text-sm space-y-1">
+                        <p><strong>서비스명:</strong> 로옥션(LawAuction)</p>
+                        <p><strong>대표자:</strong> 김달</p>
+                        <p><strong>사업자등록번호:</strong> 199-06-02412</p>
+                        <p>
+                            <strong>문의 이메일:</strong>{' '}
+                            <a href="mailto:openbrain.main@gmail.com" className="text-indigo-600 hover:underline">
+                                openbrain.main@gmail.com
+                            </a>
+                        </p>
+                    </div>
                 </section>
 
                 <section className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-md">

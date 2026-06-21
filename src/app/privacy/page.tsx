@@ -147,7 +147,9 @@ export default function PrivacyPage() {
                         개인정보 처리에 관한 업무를 총괄하여 책임지고, 개인정보 처리와 관련한 이용자의 불만처리 및
                         피해구제 등을 위해 아래와 같이 개인정보 보호책임자를 지정하고 있습니다.
                     </p>
-                    <div className="bg-gray-50 p-4 rounded-md mt-3">
+                    <div className="bg-gray-50 p-4 rounded-md mt-3 space-y-1">
+                        <p className="text-gray-600"><strong>개인정보 보호책임자:</strong> 김달 (운영자)</p>
+                        <p className="text-gray-600"><strong>사업자등록번호:</strong> 199-06-02412</p>
                         <p className="text-gray-600">
                             <strong>이메일:</strong>{' '}
                             <a href="mailto:openbrain.main@gmail.com" className="text-indigo-600 hover:underline">

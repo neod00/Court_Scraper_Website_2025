@@ -212,7 +212,9 @@ class CourtScraper:
                             "detail_link": detail_url,
                             "file_info": file_info_list if file_info_list else None,
                             "category": category,
-                            "content_text": title,
+                            # content_text는 본문이 아닌 제목 복제였으므로 thin-content 방지를 위해 NULL 처리.
+                            # (실제 공고 본문/PDF 추출은 추후 별도 작업으로 채운다)
+                            "content_text": None,
                             "sale_org": sale_org,
                             "expiry_date": expiry_date,
                             "phone": phone,

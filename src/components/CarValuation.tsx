@@ -21,7 +21,6 @@ const MANUFACTURERS = [
 
 const FUEL_TYPES = ['가솔린', '디젤', '하이브리드', 'LPG', '전기', '기타'];
 
-const LITTLY_URL = 'https://litt.ly/open.brain'; // 후원하기 공개 링크
 const MAX_FREE_USES = 3;
 
 // ── Helpers ──
@@ -61,14 +60,6 @@ function incrementUsage() {
     const today = new Date().toISOString().split('T')[0];
     const current = getDailyUsage();
     localStorage.setItem('car_valuation_usage', JSON.stringify({ date: today, count: current + 1 }));
-}
-
-function resetUsage() {
-    if (typeof window === 'undefined') return;
-    const today = new Date().toISOString().split('T')[0];
-    localStorage.setItem('car_valuation_usage', JSON.stringify({ date: today, count: 0 }));
-    // 새로고침하여 즉시 반영 (선택 사항이지만 명확한 피드백을 위해)
-    window.location.reload();
 }
 
 function formatPrice(val: number): string {
@@ -293,12 +284,21 @@ function ResultView({ data, auctionPrice }: { data: CarValuationResult; auctionP
     );
 }
 
+function LimitReachedNotice() {
+    return (
+        <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200 text-center">
+            <div className="mb-3"><span className="text-3xl">🕒</span></div>
+            <h3 className="text-sm font-bold text-gray-800 mb-2">오늘의 무료 분석을 모두 사용하셨습니다</h3>
+            <p className="text-xs text-gray-500 leading-relaxed">내일 다시 무료로 이용하실 수 있습니다.<br />이용해 주셔서 감사합니다.</p>
+        </div>
+    );
+}
+
 export default function CarValuation({ noticeId, category, aiSummary, title }: CarValuationProps) {
     const [stage, setStage] = useState<Stage>('idle');
     const [loadingStep, setLoadingStep] = useState(0);
     const [result, setResult] = useState<CarValuationResult | null>(null);
     const [errorMsg, setErrorMsg] = useState('');
-    const [showVerify, setShowVerify] = useState(false); // 후원 확인 대기 상태
 
     if (category !== 'vehicle') return null;
 
@@ -388,46 +388,7 @@ export default function CarValuation({ noticeId, category, aiSummary, title }: C
                                     🚀 시세 분석 시작하기
                                 </button>
                             ) : (
-                                <div className="bg-amber-50 rounded-2xl p-6 border-2 border-amber-200 shadow-inner">
-                                    {!showVerify ? (
-                                        <>
-                                            <div className="mb-4">
-                                                <span className="text-3xl">☕</span>
-                                            </div>
-                                            <h3 className="text-sm font-bold text-amber-900 mb-2">오늘의 무료 분석이 완료되었습니다</h3>
-                                            <p className="text-xs text-amber-800 mb-5 leading-relaxed">
-                                                추가 시세 분석이 필요하신가요?<br />
-                                                커피 한 잔 후원 시 분석 기회를 충전해 드립니다.
-                                            </p>
-                                            <a href={LITTLY_URL} target="_blank" rel="noopener noreferrer" 
-                                                onClick={() => setShowVerify(true)}
-                                                className="inline-flex items-center gap-2 px-10 py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black rounded-xl hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg text-sm animate-bounce-subtle">
-                                                ☕ 후원하고 3회권 충전하기
-                                            </a>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <div className="mb-4">
-                                                <span className="text-3xl">✅</span>
-                                            </div>
-                                            <h3 className="text-sm font-bold text-amber-900 mb-2">후원을 완료하셨나요?</h3>
-                                            <p className="text-xs text-amber-800 mb-5 leading-relaxed">
-                                                따뜻한 응원에 진심으로 감사드립니다.<br />
-                                                보내주신 후원금은 더 좋은 정보를 위해 소중히 사용하겠습니다.
-                                            </p>
-                                            <div className="flex flex-col gap-3">
-                                                <button onClick={resetUsage}
-                                                    className="inline-flex items-center justify-center gap-2 px-10 py-4 bg-emerald-600 text-white font-black rounded-xl hover:bg-emerald-700 transition-all shadow-lg text-sm">
-                                                    네, 후원을 완료했습니다
-                                                </button>
-                                                <button onClick={() => setShowVerify(false)}
-                                                    className="text-[10px] text-amber-700/60 underline">
-                                                    아직 하지 않았습니다 (뒤로가기)
-                                                </button>
-                                            </div>
-                                        </>
-                                    )}
-                                </div>
+                                <LimitReachedNotice />
                             )}
                         </div>
                     ) : (
@@ -440,46 +401,7 @@ export default function CarValuation({ noticeId, category, aiSummary, title }: C
                             {getDailyUsage() < MAX_FREE_USES ? (
                                 <ManualInputForm onSubmit={(data) => runAnalysis(data)} loading={false} />
                             ) : (
-                                <div className="text-center bg-amber-50 rounded-2xl p-6 border-2 border-amber-200 shadow-inner">
-                                    {!showVerify ? (
-                                        <>
-                                            <div className="mb-4">
-                                                <span className="text-3xl">☕</span>
-                                            </div>
-                                            <h3 className="text-sm font-bold text-amber-900 mb-2">오늘의 무료 분석이 완료되었습니다</h3>
-                                            <p className="text-xs text-amber-800 mb-5 leading-relaxed">
-                                                상세 정보를 입력하여 더 정밀한 분석을 원하시나요?<br />
-                                                커피 한 잔 후원 시 분석 기회를 충전해 드립니다.
-                                            </p>
-                                            <a href={LITTLY_URL} target="_blank" rel="noopener noreferrer" 
-                                                onClick={() => setShowVerify(true)}
-                                                className="inline-flex items-center gap-2 px-10 py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black rounded-xl hover:from-amber-600 hover:to-orange-600 transition-all shadow-lg text-sm animate-bounce-subtle">
-                                                ☕ 후원하고 3회권 충전하기
-                                            </a>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <div className="mb-4">
-                                                <span className="text-3xl">✅</span>
-                                            </div>
-                                            <h3 className="text-sm font-bold text-amber-900 mb-2">후원을 완료하셨나요?</h3>
-                                            <p className="text-xs text-amber-800 mb-5 leading-relaxed">
-                                                따뜻한 응원에 진심으로 감사드립니다.<br />
-                                                보내주신 소중한 마음, 더 좋은 서비스로 보답하겠습니다.
-                                            </p>
-                                            <div className="flex flex-col gap-3">
-                                                <button onClick={resetUsage}
-                                                    className="inline-flex items-center justify-center gap-2 px-10 py-4 bg-emerald-600 text-white font-black rounded-xl hover:bg-emerald-700 transition-all shadow-lg text-sm">
-                                                    네, 후원을 완료했습니다
-                                                </button>
-                                                <button onClick={() => setShowVerify(false)}
-                                                    className="text-[10px] text-amber-700/60 underline">
-                                                    아직 하지 않았습니다 (뒤로가기)
-                                                </button>
-                                            </div>
-                                        </>
-                                    )}
-                                </div>
+                                <LimitReachedNotice />
                             )}
                         </div>
                     )

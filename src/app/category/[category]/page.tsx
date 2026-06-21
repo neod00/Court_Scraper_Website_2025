@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { categories, getCategoryBySlug } from '@/data/categories';
 import { supabase } from '@/lib/supabase';
 import NoticeCard from '@/components/NoticeCard';
+import { filterQualityNotices } from '@/lib/noticeQuality';
 
 interface PageProps {
     params: Promise<{
@@ -51,9 +52,11 @@ export default async function CategoryPage({ params }: PageProps) {
             .select('*')
             .eq('category', categoryInfo.dbCategory)
             .eq('source_type', 'notice')
+            .not('ai_summary', 'is', null)
             .order('date_posted', { ascending: false })
-            .limit(12);
-        notices = data || [];
+            .limit(40);
+        // 크롤 가능한 페이지이므로 분석이 담긴(색인 가능한) 공고만 노출.
+        notices = filterQualityNotices(data).slice(0, 12);
     }
 
     // 마크다운 스타일 콘텐츠 렌더링

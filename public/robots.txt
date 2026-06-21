@@ -1,11 +1,9 @@
-# 대법원 회생·파산 자산매각 공고 자동조회 시스템
-# https://courtauction.site
+# 로옥션(LawAuction) - 대법원 회생·파산 자산매각 공고
+# https://www.courtauction.site
 
 User-agent: *
 Allow: /
-Disallow: /auction
-Disallow: /map
 Disallow: /api/
 
 # Sitemap
-Sitemap: https://courtauction.site/sitemap.xml
+Sitemap: https://www.courtauction.site/sitemap.xml

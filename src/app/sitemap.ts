@@ -3,6 +3,7 @@ import { glossaryTerms } from '@/data/glossary';
 import { blogPosts } from '@/data/blog-posts';
 import { categories } from '@/data/categories';
 import { supabase } from '@/lib/supabase';
+import { filterQualityNotices } from '@/lib/noticeQuality';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = 'https://www.courtauction.site';
@@ -172,12 +173,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             .limit(400);
 
         if (notices) {
-            // Filter out fallback/thin summaries (containing "첨부파일" or length < 300)
-            const highQualityNotices = notices.filter(notice => 
-                notice.ai_summary && 
-                !notice.ai_summary.includes("첨부파일") && 
-                notice.ai_summary.length > 300
-            ).slice(0, 200);
+            // Filter out fallback/thin summaries via the shared quality gate.
+            const highQualityNotices = filterQualityNotices(notices).slice(0, 200);
 
             noticePages = highQualityNotices.map((notice) => ({
                 url: `${baseUrl}/notice/${notice.id}`,

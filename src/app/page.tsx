@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { supabase } from '@/lib/supabase';
 import NoticeCard from '@/components/NoticeCard';
 import SearchForm from '@/components/SearchForm';
@@ -6,12 +7,27 @@ import Link from 'next/link';
 import { getRecentPosts, blogCategories } from '@/data/blog-posts';
 import { glossaryTerms } from '@/data/glossary';
 import ViewTracker from '@/components/ViewTracker';
+import { filterQualityNotices } from '@/lib/noticeQuality';
 
 // Force dynamic rendering to handle searchParams correctly
 export const dynamic = 'force-dynamic';
 
 interface HomeProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+// 검색 파라미터가 있는 페이지(검색 결과)는 색인 제외 — 무한 파라미터 URL의 thin/doorway 색인 방지.
+// 파라미터 없는 기본 홈(/)만 색인되도록 한다.
+export async function generateMetadata({ searchParams }: HomeProps): Promise<Metadata> {
+  const params = await searchParams;
+  const hasParams = Boolean(params.start || params.end || params.q || params.cat);
+  if (hasParams) {
+    return {
+      robots: { index: false, follow: true },
+      alternates: { canonical: 'https://www.courtauction.site/' },
+    };
+  }
+  return {};
 }
 
 export default async function Home({ searchParams }: HomeProps) {
@@ -64,6 +80,19 @@ export default async function Home({ searchParams }: HomeProps) {
     if (error) {
       console.error('Error fetching notices:', error);
     }
+  }
+
+  // 검색을 하지 않은 기본 방문자에게 보여줄 "분석이 담긴 추천 공고" (크롤 가능한 기본 콘텐츠).
+  let featuredNotices: any[] = [];
+  if (!hasSearchParams) {
+    const { data: featuredRaw } = await supabase
+      .from('court_notices')
+      .select('id, title, department, date_posted, category, site_id, ai_summary, view_count')
+      .eq('source_type', 'notice')
+      .not('ai_summary', 'is', null)
+      .order('date_posted', { ascending: false })
+      .limit(60);
+    featuredNotices = filterQualityNotices(featuredRaw).slice(0, 12);
   }
 
   // Calculate dates for weekly notices
@@ -229,39 +258,53 @@ export default async function Home({ searchParams }: HomeProps) {
           </div>
         )}
 
-        {/* Result Message / Data List - right below search button */}
+        {/* 검색 시: 결과 / 기본 방문 시: 추천 공고 */}
         <div className="mt-4">
-          {(!notices || notices?.length === 0) ? (
-            <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-md">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-blue-700">
-                    수집된 데이터가 없습니다. 위에서 검색 조건을 설정하고 수집(조회)을 시작해주세요.
-                  </p>
+          {hasSearchParams ? (
+            (!notices || notices.length === 0) ? (
+              <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-md">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm text-blue-700">
+                      검색 조건에 맞는 공고가 없습니다. 검색어나 기간을 바꿔 다시 시도해 보세요.
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div>
+                <div className="flex items-center justify-between mb-4 border-b border-gray-200 pb-2">
+                  <h2 className="text-xl font-bold text-gray-900">📊 검색 결과</h2>
+                  <span className="text-sm text-gray-500">
+                    {count !== null ? `총 ${count}건` : '조회 완료'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+                  {notices.map((notice) => (
+                    <NoticeCard key={notice.id} notice={notice} />
+                  ))}
+                </div>
+              </div>
+            )
           ) : (
-            <div>
-              <div className="flex items-center justify-between mb-4 border-b border-gray-200 pb-2">
-                <h2 className="text-xl font-bold text-gray-900">
-                  📊 검색 결과
-                </h2>
-                <span className="text-sm text-gray-500">
-                  {count !== null ? `총 ${count}건` : '조회 완료'}
-                </span>
+            featuredNotices.length > 0 && (
+              <div>
+                <div className="flex items-center justify-between mb-4 border-b border-gray-200 pb-2">
+                  <h2 className="text-xl font-bold text-gray-900">📌 최신 추천 공고</h2>
+                  <span className="text-sm text-gray-500">AI 분석 리포트 제공</span>
+                </div>
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+                  {featuredNotices.map((notice) => (
+                    <NoticeCard key={notice.id} notice={notice} />
+                  ))}
+                </div>
               </div>
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-                {notices?.map((notice) => (
-                  <NoticeCard key={notice.id} notice={notice} />
-                ))}
-              </div>
-            </div>
+            )
           )}
         </div>
 

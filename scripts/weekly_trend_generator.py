@@ -457,7 +457,8 @@ def save_as_blog_post(data: Dict, report: Dict) -> bool:
             "reading_time": reading_time,
             "featured": False,
             "source": "weekly_report",
-            "is_published": True,
+            # 사람 검수 전 자동 발행 금지(AdSense scaled-content 정책). 초안으로 저장 후 검수하여 게시.
+            "is_published": False,
         }
         
         result = supabase.table('blog_posts') \

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { filterQualityNotices } from '@/lib/noticeQuality';
 
 interface RelatedNoticesRSSProps {
     currentId: string;
@@ -9,16 +10,20 @@ interface RelatedNoticesRSSProps {
 
 export default async function RelatedNoticesRSS({ currentId, category, courtName }: RelatedNoticesRSSProps) {
     // Fetch related notices via direct DB query (mimicking RSS logic)
-    const { data: notices } = await supabase
+    const { data: rawNotices } = await supabase
         .from('court_notices')
-        .select('id, title, date_posted, category, department')
+        .select('id, title, date_posted, category, department, ai_summary')
         .eq('source_type', 'notice')
         .eq('category', category)
         .neq('id', currentId)
+        .not('ai_summary', 'is', null)
         .order('date_posted', { ascending: false })
-        .limit(5);
+        .limit(30);
 
-    if (!notices || notices.length === 0) return null;
+    // 분석이 담긴(색인 가능한) 공고만 노출 — thin/fallback 페이지로 크롤러가 새지 않게.
+    const notices = filterQualityNotices(rawNotices).slice(0, 5);
+
+    if (notices.length === 0) return null;
 
     return (
         <aside className="mt-12 bg-gray-900 text-white rounded-2xl overflow-hidden shadow-2xl overflow-hidden">
