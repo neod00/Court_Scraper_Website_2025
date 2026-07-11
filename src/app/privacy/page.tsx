@@ -13,7 +13,7 @@ export default function PrivacyPage() {
 
             <div className="bg-white shadow rounded-lg p-6 space-y-8">
                 <p className="text-gray-600 text-sm">
-                    최종 수정일: 2026년 2월 21일
+                    최종 수정일: 2026년 7월 11일
                 </p>
 
                 <section>
@@ -71,7 +71,7 @@ export default function PrivacyPage() {
                             Google AdSense 광고 및 쿠키 사용 안내
                         </p>
                         <p className="text-blue-700 leading-relaxed text-sm">
-                            본 서비스는 Google AdSense를 통해 광고를 게재하고 있습니다. Google 및 제3자 광고 업체는
+                            본 서비스는 Google AdSense 검토 및 광고 기능을 위해 광고 스크립트를 사용할 수 있습니다. 승인 및 설정에 따라 Google과 제3자 광고 업체는
                             사용자의 이전 방문 기록을 기반으로 관심 기반 광고(개인 맞춤 광고)를 제공하기 위해
                             쿠키(Cookie)를 사용할 수 있습니다.
                         </p>
@@ -170,7 +170,7 @@ export default function PrivacyPage() {
 
                 <section className="border-t border-gray-200 pt-6">
                     <p className="text-sm text-gray-500">
-                        본 개인정보처리방침은 2026년 2월 21일부터 시행됩니다.
+                        본 개인정보처리방침은 2026년 7월 11일부터 시행됩니다.
                     </p>
                 </section>
             </div>

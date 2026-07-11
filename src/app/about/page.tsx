@@ -15,10 +15,10 @@ export default function AboutPage() {
                 <section>
                     <h2 className="text-xl font-semibold text-gray-800 mb-3">LawAuction이란?</h2>
                     <p className="text-gray-600 leading-relaxed">
-                        LawAuction은 대법원 회생·파산 자산매각 공고를 자동으로 수집·분석·정리하여 한눈에 볼 수 있도록 제공하는 프리미엄 정보 플랫폼입니다.
+                        LawAuction은 대법원 회생·파산 자산매각 공고를 자동으로 수집·분석·정리하여 한눈에 볼 수 있도록 제공하는 민간 공고 검색 서비스입니다.
                         부동산, 차량, 채권, 주식, 특허 등 다양한 매각 자산 정보를 카테고리별로 쉽게 검색하고,
                         원하는 조건의 매물을 빠르게 찾을 수 있습니다.
-                        각 공고에 대해 투자 가이드, 권리분석 체크리스트, 세금 안내 등 전문 분석 콘텐츠를 함께 제공합니다.
+                        공고 원문 확인 방법과 AI 요약의 범위를 안내하며, 검수된 편집 글에는 공식 참고자료와 확인일을 표시합니다.
                     </p>
                 </section>
 

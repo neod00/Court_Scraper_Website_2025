@@ -24,6 +24,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         description: term.shortDescription,
         keywords: `${term.term}, ${term.relatedTerms.join(', ')}, 법률용어, 경매용어`,
         alternates: { canonical: `/glossary/${term.slug}` },
+        robots: { index: false, follow: true },
     };
 }
 

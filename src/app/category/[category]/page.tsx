@@ -16,6 +16,18 @@ interface PageProps {
     }>;
 }
 
+interface CategoryNotice {
+    id: string;
+    title: string;
+    department: string | null;
+    date_posted: string;
+    category: string | null;
+    site_id: string;
+    ai_summary: string | null;
+    view_count?: number | null;
+
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
     const { category } = await params;
     const categoryInfo = getCategoryBySlug(category);
@@ -31,6 +43,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         description: categoryInfo.description,
         keywords: `${categoryInfo.name}, 매각공고, 회생, 파산, 경매, ${categoryInfo.relatedTerms.join(', ')}`,
         alternates: { canonical: `/category/${categoryInfo.slug}` },
+        robots: { index: false, follow: true },
     };
 }
 
@@ -49,7 +62,7 @@ export default async function CategoryPage({ params }: PageProps) {
     }
 
     // 해당 카테고리의 최근 공고 가져오기
-    let notices: any[] = [];
+    let notices: CategoryNotice[] = [];
 
     if (categoryInfo.dbCategory) {
         const { data } = await supabase
@@ -168,7 +181,7 @@ export default async function CategoryPage({ params }: PageProps) {
                 {/* 빠른 검색 버튼 */}
                 <div className="flex gap-3 mt-6">
                     <Link
-                        href={categoryInfo.dbCategory ? `/?cat=${categoryInfo.dbCategory}` : '/'}
+                        href={categoryInfo.dbCategory ? `/?cat=${categoryInfo.dbCategory}` : `/?q=${encodeURIComponent(categoryInfo.slug === 'bonds' ? '채권' : '특허')}`}
                         className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-700 transition-colors"
                     >
                         🔍 {categoryInfo.name} 공고 검색하기

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent, useEffect } from 'react';
+import { useState, FormEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function SearchForm() {
@@ -13,7 +13,9 @@ export default function SearchForm() {
     const [keyword, setKeyword] = useState(searchParams.get('q') || '');
     const [category, setCategory] = useState(searchParams.get('cat') || '');
     const [isLoading, setIsLoading] = useState(false);
-    const [dateError, setDateError] = useState('');
+    const dateError = startDate && endDate && startDate > endDate
+        ? '⚠️ 시작일이 종료일보다 미래입니다. 날짜를 확인해주세요.'
+        : '';
 
     // Presets mapping
     const presets = [
@@ -27,15 +29,6 @@ export default function SearchForm() {
         { label: '무체재산권', value: 'intangible' },
         { label: '기타', value: 'etc' },
     ];
-
-    // Validate dates whenever they change
-    useEffect(() => {
-        if (startDate && endDate && startDate > endDate) {
-            setDateError('⚠️ 시작일이 종료일보다 미래입니다. 날짜를 확인해주세요.');
-        } else {
-            setDateError('');
-        }
-    }, [startDate, endDate]);
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
@@ -191,7 +184,7 @@ export default function SearchForm() {
                             </div>
                         </>
                     ) : (
-                        <span>🚀 수집 시작 (조회)</span>
+                        <span>🔍 공고 조회하기</span>
                     )}
                 </button>
             </div>

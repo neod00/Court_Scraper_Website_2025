@@ -260,7 +260,7 @@ export async function generateMetadata({ params }: PageProps) {
         title: isPublic ? `${article.title} | 자산매각 가이드` : '가이드를 찾을 수 없습니다',
         description: isPublic ? article.title + '에 대한 일반 정보 가이드입니다.' : '가이드 정보를 찾을 수 없습니다.',
         alternates: isPublic ? { canonical: `/guide/${slug}` } : undefined,
-        robots: isPublic ? undefined : { index: false, follow: false },
+        robots: { index: false, follow: isPublic },
     };
 }
 
@@ -302,17 +302,22 @@ export default async function GuideDetailPage({ params }: PageProps) {
                 </div>
             </header>
 
-            <div
-                className="prose prose-lg prose-indigo max-w-none text-gray-700 leading-relaxed
-                prose-headings:text-gray-900 prose-headings:font-bold
-                prose-strong:text-indigo-900 prose-ul:list-disc prose-li:mb-2"
-                dangerouslySetInnerHTML={{ __html: article.content }}
-            />
-
-            <aside className="mt-10 rounded-xl border border-amber-200 bg-amber-50 p-6 text-sm leading-6 text-amber-900">
-                이 글은 공고를 읽기 위한 일반 정보입니다. 실제 입찰 전에는 원문 공고, 매각 조건과 권리관계를 직접 확인하고 필요한 경우 전문가의 검토를 받으세요.{' '}
-                <Link href="/editorial-policy" className="font-semibold underline">편집·검수 원칙 보기</Link>
-            </aside>
+            <section className="rounded-2xl border border-amber-200 bg-amber-50 p-6 sm:p-8 text-amber-950">
+                <h2 className="text-2xl font-bold mb-3">내용 재검수 중</h2>
+                <p className="leading-7">
+                    이 가이드는 공고별로 달라지는 가격·보증금·인도·권리 조건을 일반화하지 않도록 공식 자료와 대조해 다시 작성하고 있습니다.
+                    검수가 완료되기 전에는 기존 투자 조언과 수치 정보를 제공하지 않습니다.
+                </p>
+                <ul className="mt-5 list-disc pl-6 space-y-2 leading-7">
+                    <li>현재 조건은 개별 법원 공고와 첨부파일에서 확인하세요.</li>
+                    <li>AI 요약은 법률·세무 자문이나 감정평가가 아닙니다.</li>
+                    <li>권리관계나 계약 판단이 필요한 경우 자격 있는 전문가에게 사건 자료를 보여주고 확인하세요.</li>
+                </ul>
+                <div className="mt-5 flex flex-wrap gap-4 text-sm font-semibold">
+                    <Link href="/blog" className="underline">검수 완료된 편집 글 보기</Link>
+                    <Link href="/editorial-policy" className="underline">편집·검수 원칙 보기</Link>
+                </div>
+            </section>
 
             <footer className="mt-16 pt-8 border-t border-gray-200">
                 <div className="bg-indigo-50 rounded-xl p-8 flex flex-col sm:flex-row items-center justify-between gap-6">

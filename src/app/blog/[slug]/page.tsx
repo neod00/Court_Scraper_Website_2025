@@ -8,6 +8,7 @@ import ViewTracker from '@/components/ViewTracker';
 import RelatedNoticesRSS from '@/components/RelatedNoticesRSS';
 import { ALLOW_DATABASE_BLOG_POSTS } from '@/lib/contentPolicy';
 
+import AdSenseLoader from '@/components/AdSenseLoader';
 export const dynamic = 'force-dynamic';
 
 interface PageProps {
@@ -232,6 +233,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
         return (
             <div className="max-w-7xl mx-auto px-4 py-8">
+                <AdSenseLoader />
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                     <article className="lg:col-span-2">
                 <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8">
@@ -279,14 +281,33 @@ export default async function BlogPostPage({ params }: PageProps) {
                     {renderContent(staticPost.content)}
                 </div>
 
-                <div className="mt-12 rounded-xl border border-amber-200 bg-amber-50 p-6 text-sm leading-6 text-amber-900">
+                <div className="mt-12 rounded-xl border border-emerald-200 bg-emerald-50 p-6 text-sm leading-6 text-emerald-950">
                     <h2 className="font-bold mb-2">작성·검수 안내</h2>
-                    <p>
-                        로옥션 편집팀이 일반적인 공고 확인 절차를 설명하기 위해 작성한 정보성 글입니다.
-                        개별 물건의 법률·세무·가격 판단을 대신하지 않으며, 참여 전 원문 공고와 최신 법령을 직접 확인해야 합니다.{' '}
+                    <dl className="space-y-2">
+                        <div><dt className="inline font-semibold">작성:</dt> <dd className="inline"><Link href="/authors/lawauction-editorial-team" className="underline">{staticPost.author}</Link></dd></div>
+                        {staticPost.reviewedAt && <div><dt className="inline font-semibold">최종 사실 확인:</dt> <dd className="inline">{staticPost.reviewedAt}</dd></div>}
+                        {staticPost.reviewMethod && <div><dt className="inline font-semibold">확인 방법:</dt> <dd className="inline">{staticPost.reviewMethod}</dd></div>}
+                    </dl>
+                    <p className="mt-3">
+                        개별 물건의 법률·세무·가격 판단을 대신하지 않습니다.{' '}
                         <Link href="/editorial-policy" className="font-semibold underline">편집·검수 원칙 보기</Link>
                     </p>
                 </div>
+
+                {staticPost.sources && staticPost.sources.length > 0 && (
+                    <section className="mt-8 rounded-xl border border-gray-200 bg-white p-6">
+                        <h2 className="text-lg font-bold text-gray-900 mb-3">공식 참고자료</h2>
+                        <ul className="space-y-2 text-sm">
+                            {staticPost.sources.map((source) => (
+                                <li key={source.url}>
+                                    <a href={source.url} target="_blank" rel="noopener noreferrer" className="text-indigo-700 underline">
+                                        {source.title}
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    </section>
+                )}
 
                 {relatedPosts.length > 0 && (
                     <section className="mt-16 pt-8 border-t border-gray-200">
@@ -332,9 +353,9 @@ export default async function BlogPostPage({ params }: PageProps) {
                             courtName="로옥션 분석팀" 
                         />
                         <div className="bg-indigo-600 rounded-2xl p-6 text-white shadow-xl">
-                            <h4 className="font-bold text-lg mb-2">🚀 투자 초보자라면?</h4>
+                            <h4 className="font-bold text-lg mb-2">처음 공고를 확인한다면</h4>
                             <p className="text-xs text-indigo-100 mb-4 leading-relaxed">
-                                로옥션이 제공하는 실시간 공고 요약과 수익률 계산기를 활용해 스마트한 투자를 시작하세요.
+                                검색 결과는 출발점입니다. 일정과 조건은 법원 공고 원문과 첨부 문서에서 다시 확인하세요.
                             </p>
                             <Link href="/" className="inline-block bg-white text-indigo-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-50 transition-colors">
                                 공고 검색하기 &rarr;
@@ -358,6 +379,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-8">
+            <AdSenseLoader />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                 <article className="lg:col-span-2">
             <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8">

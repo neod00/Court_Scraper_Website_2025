@@ -1,750 +1,202 @@
-import type { Metadata } from 'next';
-import Script from 'next/script';
-import { supabase } from '@/lib/supabase';
-import NoticeCard from '@/components/NoticeCard';
-import SearchForm from '@/components/SearchForm';
-import Sidebar from '@/components/Sidebar';
 import Link from 'next/link';
+import { Suspense } from 'react';
+import type { Metadata } from 'next';
+import SearchForm from '@/components/SearchForm';
+import NoticeCard from '@/components/NoticeCard';
+import { supabase } from '@/lib/supabase';
 import { getRecentPosts, blogCategories } from '@/data/blog-posts';
-import { glossaryTerms } from '@/data/glossary';
-import { filterQualityNotices } from '@/lib/noticeQuality';
 
-// Force dynamic rendering to handle searchParams correctly
-export const dynamic = 'force-dynamic';
-
-interface HomeProps {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+interface PageProps {
+  searchParams: Promise<{
+    start?: string;
+    end?: string;
+    q?: string;
+    cat?: string;
+  }>;
 }
 
-// 검색 파라미터가 있는 페이지(검색 결과)는 색인 제외 — 무한 파라미터 URL의 thin/doorway 색인 방지.
-// 파라미터 없는 기본 홈(/)만 색인되도록 한다.
-export async function generateMetadata({ searchParams }: HomeProps): Promise<Metadata> {
+export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
   const params = await searchParams;
-  const hasParams = Boolean(params.start || params.end || params.q || params.cat);
-  if (hasParams) {
-    return {
-      robots: { index: false, follow: true },
-      alternates: { canonical: 'https://www.courtauction.site/' },
-    };
-  }
-  return { alternates: { canonical: 'https://www.courtauction.site/' } };
-}
-
-export default async function Home({ searchParams }: HomeProps) {
-  // Await searchParams (required in Next.js 15+)
-  const params = await searchParams;
-
-  // Parse Search Params
-  const start = typeof params.start === 'string' ? params.start : '';
-  const end = typeof params.end === 'string' ? params.end : '';
-  const keyword = typeof params.q === 'string' ? params.q : '';
-  const category = typeof params.cat === 'string' ? params.cat : '';
-
-  // Check if any search parameter is provided
-  const hasSearchParams = start || end || keyword || category;
-
-  // Only execute search query if user has provided search params
-  let notices: any[] | null = null;
-  let count: number | null = null;
-  let error: any = null;
+  const hasSearchParams = Boolean(params.start || params.end || params.q || params.cat);
 
   if (hasSearchParams) {
-    // Build Query for search results
+    return {
+      title: '법원 자산매각 공고 검색 결과 | LawAuction',
+      description: '입력한 기간, 자산 유형과 키워드에 맞는 법원 회생·파산 자산매각 공고를 조회합니다.',
+      alternates: { canonical: '/' },
+      robots: { index: false, follow: true },
+    };
+  }
+
+  return {
+    title: '로옥션 | 법원 회생·파산 자산매각 공고 검색',
+    description: '대한민국 법원에 공개된 회생·파산 자산매각 공고를 기간, 자산 유형과 키워드로 찾아 원문을 확인할 수 있는 민간 검색 서비스입니다.',
+    alternates: { canonical: '/' },
+    robots: { index: true, follow: true },
+  };
+}
+
+export default async function Home({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const start = params.start?.trim();
+  const end = params.end?.trim();
+  const keyword = params.q?.trim();
+  const category = params.cat?.trim();
+  const hasSearchParams = Boolean(start || end || keyword || category);
+
+  if (hasSearchParams) {
     let query = supabase
       .from('court_notices')
-      .select('*', { count: 'exact' })
+      .select('id, title, department, date_posted, category, site_id, ai_summary, view_count', { count: 'exact' })
       .eq('source_type', 'notice');
 
-    // Apply Filters
-    if (start) {
-      query = query.gte('date_posted', start);
-    }
-    if (end) {
-      query = query.lte('date_posted', end);
-    }
-    if (category) {
-      query = query.eq('category', category);
-    }
+    if (start) query = query.gte('date_posted', start);
+    if (end) query = query.lte('date_posted', end);
+    if (category) query = query.eq('category', category);
     if (keyword) {
-      query = query.or(`title.ilike.%${keyword}%,content_text.ilike.%${keyword}%`);
+      const safeKeyword = keyword.replace(/[,%()]/g, ' ').trim();
+      if (safeKeyword) query = query.or(`title.ilike.%${safeKeyword}%,content_text.ilike.%${safeKeyword}%`);
     }
 
-    // Default Order & Limit
-    query = query.order('date_posted', { ascending: false }).limit(50);
-
-    const result = await query;
-    notices = result.data;
-    count = result.count;
-    error = result.error;
-
-    if (error) {
-      console.error('Error fetching notices:', error);
-    }
-  }
-
-  // 검색을 하지 않은 기본 방문자에게 보여줄 "분석이 담긴 추천 공고" (크롤 가능한 기본 콘텐츠).
-  let featuredNotices: any[] = [];
-  if (!hasSearchParams) {
-    const { data: featuredRaw } = await supabase
-      .from('court_notices')
-      .select('id, title, department, date_posted, category, site_id, ai_summary, view_count')
-      .eq('source_type', 'notice')
-      .not('ai_summary', 'is', null)
+    const { data: notices, count, error } = await query
       .order('date_posted', { ascending: false })
-      .limit(60);
-    featuredNotices = filterQualityNotices(featuredRaw).slice(0, 12);
+      .limit(50);
+
+    return (
+      <div className="max-w-6xl mx-auto">
+        <header className="mb-8">
+          <p className="text-sm font-semibold text-indigo-600 mb-2">공개 공고 검색 도구</p>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900">법원 자산매각 공고 검색 결과</h1>
+          <p className="mt-4 text-gray-600 leading-relaxed">
+            검색 결과는 대한민국 법원 공개자료를 수집해 정리한 참고 정보입니다. 일정과 조건은 변경될 수 있으므로
+            참여 전 공고 상세의 원문 링크와 첨부파일을 다시 확인하세요.
+          </p>
+        </header>
+
+        <Suspense fallback={<div className="h-96 rounded-2xl bg-gray-100 animate-pulse" />}>
+          <SearchForm />
+        </Suspense>
+
+        {error ? (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-red-800">
+            공고를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
+          </div>
+        ) : (
+          <section>
+            <div className="flex items-center justify-between gap-4 mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">조회 결과</h2>
+              <span className="text-sm text-gray-500">최대 50건 표시 · 전체 {count ?? 0}건</span>
+            </div>
+
+            {notices && notices.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {notices.map((notice) => <NoticeCard key={notice.id} notice={notice} />)}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-gray-200 bg-white p-10 text-center">
+                <h3 className="font-bold text-gray-900 mb-2">조건에 맞는 공고가 없습니다</h3>
+                <p className="text-gray-600">기간을 넓히거나 키워드·자산 유형을 변경해 다시 조회해 보세요.</p>
+              </div>
+            )}
+          </section>
+        )}
+      </div>
+    );
   }
 
-  // Calculate dates for weekly notices
-  const today = new Date();
-  const weekAgo = new Date(today);
-  weekAgo.setDate(today.getDate() - 7);
-  const twoWeeksAgo = new Date(today);
-  twoWeeksAgo.setDate(today.getDate() - 14);
-
-  const todayStr = today.toISOString().split('T')[0];
-  const weekAgoStr = weekAgo.toISOString().split('T')[0];
-  const twoWeeksAgoStr = twoWeeksAgo.toISOString().split('T')[0];
-
-  // ===== 주간 트렌드 통계 쿼리 =====
-  // 이번 주 전체 공고 (카테고리별 집계용)
-  const { data: thisWeekAll, count: thisWeekCount } = await supabase
-    .from('court_notices')
-    .select('category, department', { count: 'exact' })
-    .eq('source_type', 'notice')
-    .gte('date_posted', weekAgoStr)
-    .lte('date_posted', todayStr);
-
-  // 지난 주 전체 공고 수
-  const { count: lastWeekCount } = await supabase
-    .from('court_notices')
-    .select('*', { count: 'exact', head: true })
-    .eq('source_type', 'notice')
-    .gte('date_posted', twoWeeksAgoStr)
-    .lt('date_posted', weekAgoStr);
-
-  // 카테고리별 집계
-  const categoryCounts: Record<string, number> = {};
-  const departmentCounts: Record<string, number> = {};
-  if (thisWeekAll) {
-    thisWeekAll.forEach((item: any) => {
-      const cat = item.category || 'other';
-      categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
-      const dept = item.department || '기타';
-      departmentCounts[dept] = (departmentCounts[dept] || 0) + 1;
-    });
-  }
-
-  // 전주 대비 증감율 계산
-  const weeklyTotal = thisWeekCount || 0;
-  const lastTotal = lastWeekCount || 0;
-  const changeRate = lastTotal > 0
-    ? Math.round(((weeklyTotal - lastTotal) / lastTotal) * 100)
-    : 0;
-
-  // 가장 활발한 법원 (최다 공고)
-  const topDepartment = Object.entries(departmentCounts)
-    .sort(([, a], [, b]) => b - a)[0];
-
-  // ===== 주간 AI 트렌드 리포트 조회 =====
-  const { data: weeklyReport } = await supabase
-    .from('weekly_reports')
-    .select('trending_tags, week_start, week_end, view_count')
-    .order('week_end', { ascending: false })
-    .limit(1)
-    .single();
-
-  // Parse trending tags
-  let trendingTags: { tag: string; count: number }[] = [];
-  if (weeklyReport?.trending_tags) {
-    try {
-      trendingTags = typeof weeklyReport.trending_tags === 'string'
-        ? JSON.parse(weeklyReport.trending_tags)
-        : weeklyReport.trending_tags;
-    } catch { trendingTags = []; }
-  }
-
-  // ===== 기존 주간 공고 쿼리 =====
-  // Query for weekly real estate notices
-  const { data: realEstateNotices } = await supabase
-    .from('court_notices')
-    .select('*')
-    .gte('date_posted', weekAgoStr)
-    .lte('date_posted', todayStr)
-    .eq('category', 'real_estate')
-    .eq('source_type', 'notice')
-    .order('date_posted', { ascending: false })
-    .limit(10);
-
-  // Query for weekly vehicle notices
-  const { data: vehicleNotices } = await supabase
-    .from('court_notices')
-    .select('*')
-    .gte('date_posted', weekAgoStr)
-    .lte('date_posted', todayStr)
-    .eq('category', 'vehicle')
-    .eq('source_type', 'notice')
-    .order('date_posted', { ascending: false })
-    .limit(10);
-
-  // Query for past notices (1-2 months ago) for compact list
-  const twoMonthsAgo = new Date(today);
-  twoMonthsAgo.setDate(today.getDate() - 60);
-  const twoMonthsAgoStr = twoMonthsAgo.toISOString().split('T')[0];
-
-  const { data: pastNotices } = await supabase
-    .from('court_notices')
-    .select('id, title, category, department, date_posted')
-    .eq('source_type', 'notice')
-    .gte('date_posted', twoMonthsAgoStr)
-    .lt('date_posted', weekAgoStr)
-    .order('date_posted', { ascending: false })
-    .limit(30);
+  const recentPosts = getRecentPosts(5);
 
   return (
-    <div className="flex flex-col xl:flex-row gap-8 xl:gap-12">
-      {!hasSearchParams && (
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5907754718994620"
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
-      )}
-      {/* Main Content Area */}
-      <div className="flex-1 min-w-0">
-
-        {/* Premium Hero Section */}
-        <div className="relative rounded-3xl bg-slate-900 overflow-hidden shadow-2xl mb-12 border border-slate-800">
-          {/* Abstract Background Effects */}
-          <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
-          <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-cyan-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.05)_0%,transparent_100%)] pointer-events-none" />
-
-          <div className="relative p-8 sm:p-10 z-10 flex flex-col justify-center min-h-[220px]">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-300 text-xs font-bold tracking-wide w-fit mb-4">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-              </span>
-              매일 여러 차례 데이터 갱신
-            </div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight mb-4 leading-tight">
-              대법원 회생 · 파산 자산매각 공고<br className="max-sm:hidden" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">프리미엄 수집 플랫폼</span>
-            </h1>
-            <p className="text-slate-300 leading-relaxed text-[0.95rem] max-w-2xl font-light">
-              복잡한 법정 공고들 중에서 사용자가 원하는 부동산, 차량, 비상장 주식 등의 우량 자산을
-              가장 빠르고 정확하게 찾아드립니다. 대한민국법원 공식 데이터를 기반으로 제공합니다.
-            </p>
+    <div className="max-w-6xl mx-auto space-y-16">
+      <header className="rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 px-6 py-12 sm:px-10 sm:py-16 text-white overflow-hidden relative">
+        <div className="relative z-10 max-w-3xl">
+          <p className="text-cyan-300 font-semibold text-sm mb-4">법원 공개자료를 정리하는 민간 정보 서비스</p>
+          <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight tracking-tight">
+            회생·파산 자산매각 공고를<br className="hidden sm:block" /> 한곳에서 찾아보세요
+          </h1>
+          <p className="mt-6 text-slate-300 leading-7 max-w-2xl">
+            로옥션은 대한민국 법원에 공개된 공고를 기간, 자산 유형과 키워드로 찾을 수 있게 정리합니다.
+            법원 또는 법원행정처와 제휴·보증 관계가 없으며, 검색 결과와 AI 요약은 원문 확인을 돕는 보조 자료입니다.
+          </p>
+          <div className="mt-7 flex flex-wrap gap-3 text-sm">
+            <Link href="/about" className="rounded-full bg-white/10 px-4 py-2 hover:bg-white/20">서비스와 운영자 정보</Link>
+            <Link href="/editorial-policy" className="rounded-full bg-white/10 px-4 py-2 hover:bg-white/20">데이터·편집 원칙</Link>
           </div>
         </div>
+      </header>
 
-        {/* Search Form */}
-        <SearchForm />
-
-        {/* 🔥 AI 트렌드 워드 플로우 (해시태그) */}
-        {trendingTags.length > 0 && (!hasSearchParams) && (
-          <div className="mt-6 mb-8 px-2">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-sm">🔥</span>
-              <h3 className="text-xs font-bold text-gray-500 tracking-wider flex-1">지금 뜨고 있는 AI 키워드</h3>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {trendingTags.slice(0, 10).map((item) => (
-                <Link
-                  key={item.tag}
-                  href={`/?q=${encodeURIComponent(item.tag)}`}
-                  className="inline-flex items-center gap-1.5 bg-white hover:bg-indigo-50 border border-gray-200 hover:border-indigo-300 text-gray-600 hover:text-indigo-700 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 shadow-sm"
-                >
-                  <span className="text-indigo-400">#</span>
-                  <span>{item.tag}</span>
-                  <span className="bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full text-[10px] ml-1">{item.count}</span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* 검색 시: 결과 / 기본 방문 시: 추천 공고 */}
-        <div className="mt-4">
-          {hasSearchParams ? (
-            (!notices || notices.length === 0) ? (
-              <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-md">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm text-blue-700">
-                      검색 조건에 맞는 공고가 없습니다. 검색어나 기간을 바꿔 다시 시도해 보세요.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <div className="flex items-center justify-between mb-4 border-b border-gray-200 pb-2">
-                  <h2 className="text-xl font-bold text-gray-900">📊 검색 결과</h2>
-                  <span className="text-sm text-gray-500">
-                    {count !== null ? `총 ${count}건` : '조회 완료'}
-                  </span>
-                </div>
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-                  {notices.map((notice) => (
-                    <NoticeCard key={notice.id} notice={notice} />
-                  ))}
-                </div>
-              </div>
-            )
-          ) : (
-            featuredNotices.length > 0 && (
-              <div>
-                <div className="flex items-center justify-between mb-4 border-b border-gray-200 pb-2">
-                  <h2 className="text-xl font-bold text-gray-900">📌 최신 추천 공고</h2>
-                  <span className="text-sm text-gray-500">AI 분석 리포트 제공</span>
-                </div>
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-                  {featuredNotices.map((notice) => (
-                    <NoticeCard key={notice.id} notice={notice} />
-                  ))}
-                </div>
-              </div>
-            )
-          )}
+      <section aria-labelledby="search-heading">
+        <div className="mb-6">
+          <h2 id="search-heading" className="text-3xl font-bold text-gray-900">공고 검색</h2>
+          <p className="mt-2 text-gray-600">검색 버튼을 누를 때만 현재 저장된 공고를 조회합니다.</p>
         </div>
+        <Suspense fallback={<div className="h-96 rounded-2xl bg-gray-100 animate-pulse" />}>
+          <SearchForm />
+        </Suspense>
+      </section>
 
-        {/* 📊 주간 매각 공고 트렌드 */}
-        <div className="mt-8 bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-6 text-white shadow-xl">
-          <div className="flex items-center gap-2 mb-5">
-            <span className="text-2xl">📊</span>
-            <h2 className="text-lg font-bold">주간 매각 공고 트렌드</h2>
-            <span className="text-xs text-slate-400 ml-auto">
-              {weekAgoStr} ~ {todayStr}
-            </span>
-          </div>
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-5" aria-label="서비스 이용 원칙">
+        <article className="rounded-2xl border border-gray-200 bg-white p-6">
+          <div className="text-2xl mb-3">🔎</div>
+          <h2 className="text-lg font-bold text-gray-900 mb-2">원문으로 이어지는 검색</h2>
+          <p className="text-sm text-gray-600 leading-6">공고 제목·게시일·담당 법원과 첨부자료를 찾기 쉽게 정리하고 상세 페이지에서 법원 원문으로 연결합니다.</p>
+        </article>
+        <article className="rounded-2xl border border-gray-200 bg-white p-6">
+          <div className="text-2xl mb-3">🧭</div>
+          <h2 className="text-lg font-bold text-gray-900 mb-2">절차를 구분하는 안내</h2>
+          <p className="text-sm text-gray-600 leading-6">법원 경매와 회생·파산 자산매각을 같은 절차로 단정하지 않고, 공고별 제출·계약 조건을 확인하도록 안내합니다.</p>
+        </article>
+        <article className="rounded-2xl border border-gray-200 bg-white p-6">
+          <div className="text-2xl mb-3">📄</div>
+          <h2 className="text-lg font-bold text-gray-900 mb-2">AI 범위의 명확한 표시</h2>
+          <p className="text-sm text-gray-600 leading-6">AI 요약은 일정과 가격 같은 항목을 찾기 위한 초안이며 법률 판단, 감정평가 또는 수익 보장이 아님을 표시합니다.</p>
+        </article>
+      </section>
 
-          {/* 상단 통계 카드 */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-            {/* 총 공고 건수 */}
-            <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center">
-              <p className="text-xs text-slate-300 mb-1">이번 주 총 공고</p>
-              <p className="text-2xl font-bold text-white">{weeklyTotal}<span className="text-sm font-normal">건</span></p>
-              {changeRate !== 0 && (
-                <p className={`text-xs mt-1 font-medium ${changeRate > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {changeRate > 0 ? '▲' : '▼'} 전주 대비 {Math.abs(changeRate)}%
-                </p>
-              )}
-              {changeRate === 0 && lastTotal > 0 && (
-                <p className="text-xs mt-1 text-slate-400">전주와 동일</p>
-              )}
-            </div>
-
-            {/* 부동산 */}
-            <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center">
-              <p className="text-xs text-slate-300 mb-1">🏠 부동산</p>
-              <p className="text-2xl font-bold text-emerald-400">{categoryCounts['real_estate'] || 0}<span className="text-sm font-normal text-slate-300">건</span></p>
-            </div>
-
-            {/* 차량/동산 */}
-            <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center">
-              <p className="text-xs text-slate-300 mb-1">🚗 차량/동산</p>
-              <p className="text-2xl font-bold text-blue-400">{categoryCounts['vehicle'] || 0}<span className="text-sm font-normal text-slate-300">건</span></p>
-            </div>
-
-            {/* 기타 (채권, 주식, 특허 등) */}
-            <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center">
-              <p className="text-xs text-slate-300 mb-1">📄 기타 자산</p>
-              <p className="text-2xl font-bold text-amber-400">
-                {weeklyTotal - (categoryCounts['real_estate'] || 0) - (categoryCounts['vehicle'] || 0)}
-                <span className="text-sm font-normal text-slate-300">건</span>
-              </p>
-            </div>
-          </div>
-
-          {/* 하단 정보 */}
-          <div className="flex flex-col sm:flex-row gap-3 text-sm">
-            {topDepartment && (
-              <div className="flex items-center gap-2 bg-white/5 rounded-lg px-4 py-2">
-                <span className="text-yellow-400">🏛️</span>
-                <span className="text-slate-300">최다 공고 법원:</span>
-                <span className="font-semibold text-white">{topDepartment[0]}</span>
-                <span className="text-slate-400">({topDepartment[1]}건)</span>
-              </div>
-            )}
-            <div className="flex items-center gap-2 bg-white/5 rounded-lg px-4 py-2">
-              <span className="text-blue-400">ℹ️</span>
-              <span className="text-slate-300">전주 공고 수:</span>
-              <span className="font-semibold text-white">{lastTotal}건</span>
-            </div>
-          </div>
-
-          {/* 최근 수집 데이터를 바탕으로 한 사실 중심 요약 */}
-          {weeklyReport && (
-            <div className="mt-5 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-400/20 rounded-xl p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-lg">📊</span>
-                <h3 className="text-sm font-bold text-cyan-300 tracking-wide">주간 데이터 요약</h3>
-                <div className="ml-auto flex items-center gap-2">
-                  <span className="text-xs text-slate-500">{weeklyReport?.week_start} ~ {weeklyReport?.week_end}</span>
-                </div>
-              </div>
-              <p className="text-slate-200 text-sm leading-relaxed">
-                최근 7일간 수집된 공고는 총 {weeklyTotal}건입니다.
-                {topDepartment ? ` 가장 많은 공고가 확인된 법원은 ${topDepartment[0]}이며 ${topDepartment[1]}건입니다.` : ''}
-                {' '}부동산 {categoryCounts.real_estate || 0}건, 차량·동산 {categoryCounts.vehicle || 0}건을 포함합니다.
-              </p>
-              <div className="mt-3 text-right">
-                <Link href="/trend" className="text-xs text-cyan-400 hover:text-cyan-300 font-medium transition-colors">
-                  주간 통계 자세히 보기 →
-                </Link>
-              </div>
-            </div>
-          )}
-
-
+      <section className="rounded-3xl border border-gray-200 bg-white p-6 sm:p-10">
+        <div className="max-w-3xl">
+          <p className="text-sm font-semibold text-indigo-600 mb-2">확인 절차</p>
+          <h2 className="text-3xl font-bold text-gray-900">공고를 검토할 때 지키는 순서</h2>
+          <ol className="mt-6 grid gap-4 text-gray-700 leading-7">
+            <li><strong>1. 절차 확인:</strong> 법원 경매인지, 회생·파산 공고의 별도 입찰인지 구분합니다.</li>
+            <li><strong>2. 원문 대조:</strong> 제목뿐 아니라 첨부파일, 정정·재공고와 담당자 안내를 확인합니다.</li>
+            <li><strong>3. 조건 기록:</strong> 보증금, 제출 방법, 법원 허가, 대금 납부와 인도 조건을 원문 그대로 기록합니다.</li>
+            <li><strong>4. 개별 조사:</strong> 등기·등록 상태, 점유, 현장 상태와 부대비용을 자산 유형에 맞게 조사합니다.</li>
+            <li><strong>5. 최종 재확인:</strong> 참여 직전에 일정 변경·취소 여부를 공식 페이지에서 다시 확인합니다.</li>
+          </ol>
         </div>
+      </section>
 
-        {/* 📊 주간 매각물건 분석 리포트 CTA Banner */}
-        <div className="mt-6">
-          <Link href="/trend" className="group block">
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 p-6 sm:p-8 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-0.5">
-              {/* Background decoration */}
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-              <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4" />
-
-              <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="inline-flex items-center gap-1 bg-white/20 backdrop-blur-sm text-white text-xs font-bold px-2.5 py-1 rounded-full">
-                      <span className="relative flex h-1.5 w-1.5">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white"></span>
-                      </span>
-                      NEW
-                    </span>
-                    <span className="text-emerald-100 text-xs font-medium">매주 자동 업데이트 • 조회 {(weeklyReport?.view_count || 0).toLocaleString()}회</span>
-                  </div>
-                  <h3 className="text-xl sm:text-2xl font-extrabold text-white mb-1 group-hover:translate-x-1 transition-transform duration-200">
-                    📊 주간 매각물건 분석 리포트
-                  </h3>
-                  <p className="text-emerald-100 text-sm leading-relaxed max-w-lg">
-                    AI가 이번 주 부동산·차량·기타 자산 매각 공고를 분석했습니다. 매물 종류, 가격대, 지역 분포를 한눈에 확인하세요.
-                  </p>
-                </div>
-                <div className="flex-shrink-0">
-                  <span className="inline-flex items-center gap-2 bg-white text-emerald-700 font-bold px-6 py-3 rounded-xl shadow-md group-hover:shadow-lg group-hover:bg-emerald-50 transition-all duration-200 text-sm">
-                    리포트 보기
-                    <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </span>
-                </div>
-              </div>
-            </div>
-          </Link>
-        </div>
-
-
-
-        {/* TEMPORARY HIDDEN FOR ADSENSE */}
-        {false && (<>
-        {/* Weekly Notices Section - Bottom of Page */}
-        <div className="mt-12 border-t border-gray-200 pt-8">
-          <div className="flex items-center gap-2 mb-6">
-            <span className="text-2xl">📌</span>
-            <h2 className="text-xl font-bold text-gray-900">
-              최근 1주일 주요 공고
-            </h2>
-            <span className="text-sm text-gray-500 ml-2">
-              ({weekAgoStr} ~ {todayStr})
-            </span>
-          </div>
-
-          {/* Real Estate Section */}
-          <div className="mb-8">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                🏠 부동산
-              </span>
-              <span className="text-sm text-gray-500">
-                {realEstateNotices?.length || 0}건
-              </span>
-            </div>
-            {realEstateNotices && (realEstateNotices?.length ?? 0) > 0 ? (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-                {realEstateNotices?.map((notice) => (
-                  <NoticeCard key={notice.id} notice={notice} />
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-gray-500 bg-gray-50 p-4 rounded-md">
-                최근 1주일간 부동산 관련 공고가 없습니다.
-              </p>
-            )}
-          </div>
-
-          {/* Vehicle Section */}
+      <section>
+        <div className="flex items-end justify-between gap-4 mb-6">
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                🚗 차량/중기
-              </span>
-              <span className="text-sm text-gray-500">
-                {vehicleNotices?.length || 0}건
-              </span>
-            </div>
-            {vehicleNotices && (vehicleNotices?.length ?? 0) > 0 ? (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-                {vehicleNotices?.map((notice) => (
-                  <NoticeCard key={notice.id} notice={notice} />
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-gray-500 bg-gray-50 p-4 rounded-md">
-                최근 1주일간 차량/중기 관련 공고가 없습니다.
-              </p>
-            )}
+            <p className="text-sm font-semibold text-indigo-600 mb-2">사람이 확인한 편집 콘텐츠</p>
+            <h2 className="text-3xl font-bold text-gray-900">공고 확인 가이드</h2>
           </div>
+          <Link href="/blog" className="text-indigo-700 font-semibold hover:underline">전체 글 보기 →</Link>
         </div>
-
-        {/* Past 1-2 Months Compact List Section */}
-        {pastNotices && (pastNotices?.length ?? 0) > 0 && (
-          <div className="mt-12 border-t border-gray-200 pt-8">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">⏳</span>
-                <h2 className="text-xl font-bold text-gray-900">
-                  최근 1~2개월 주요 공고 (마감 임박)
-                </h2>
-                <span className="text-sm text-gray-500 ml-2 hidden sm:inline">
-                  ({twoMonthsAgoStr} ~ {weekAgoStr})
-                </span>
-              </div>
-            </div>
-            
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <ul className="divide-y divide-gray-100">
-                {pastNotices?.map((notice) => (
-                  <li key={notice.id} className="hover:bg-indigo-50/40 transition-colors group">
-                    <Link href={`/notice/${notice.id}`} className="block px-4 py-3.5 sm:px-6">
-                      <div className="flex items-center gap-3">
-                        <span className={`flex-shrink-0 inline-flex items-center justify-center px-2 py-0.5 rounded text-[11px] font-bold tracking-wide ${
-                          notice.category === 'real_estate' 
-                            ? 'bg-green-100 text-green-700' 
-                            : notice.category === 'vehicle' 
-                              ? 'bg-blue-100 text-blue-700' 
-                              : 'bg-amber-100 text-amber-700'
-                        }`}>
-                          {notice.category === 'real_estate' ? '부동산' : notice.category === 'vehicle' ? '차량/동산' : '기타'}
-                        </span>
-                        <p className="flex-1 text-sm font-medium text-gray-800 truncate group-hover:text-indigo-700 transition-colors">
-                          {notice.title}
-                        </p>
-                        <div className="hidden sm:flex flex-shrink-0 items-center gap-6 text-[13px] text-gray-500 font-medium">
-                          <span className="w-24 truncate text-right">{notice.department || '-'}</span>
-                          <span className="w-20 text-right">{notice.date_posted}</span>
-                        </div>
-                      </div>
-                      <div className="sm:hidden flex items-center gap-3 mt-2 text-[12px] text-gray-500 font-medium pl-14">
-                        <span className="truncate">{notice.department || '-'}</span>
-                        <span className="text-gray-300">|</span>
-                        <span>{notice.date_posted}</span>
-                      </div>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        )}
-
-        
-        </>)}
-
-        {/* 블로그 & 가이드 섹션 */}
-        <div className="mt-16 border-t border-gray-100 pt-10">
-          <div className="flex flex-col items-center justify-center mb-10 text-center">
-            <span className="text-3xl mb-3">✍️</span>
-            <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">
-              입찰 가이드 & 투자 전략
-            </h2>
-            <p className="text-gray-500 mt-2 text-sm max-w-lg mx-auto leading-relaxed">
-              성공적인 투자를 위한 전문가의 인사이트와 실전 팁을 확인하세요.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {getRecentPosts(9).map((post) => (
-              <Link
-                key={post.slug}
-                href={`/blog/${post.slug}`}
-                className="group bg-white rounded-2xl shadow-sm border border-gray-100/80 overflow-hidden hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col"
-              >
-                <div className="h-1.5 w-full bg-gradient-to-r from-gray-200 to-gray-200 group-hover:from-indigo-500 group-hover:to-blue-500 transition-all duration-500" />
-                <div className="p-6 flex-grow flex flex-col">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="bg-indigo-50 text-indigo-700 text-xs font-bold px-2.5 py-1 rounded-md border border-indigo-100/50">
-                      {blogCategories.find(c => c.name === post.category)?.icon} {post.category}
-                    </span>
-                    <span className="text-xs font-medium text-gray-400 flex items-center gap-1">
-                      ⏱️ {post.readingTime}분
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-indigo-600 transition-colors line-clamp-2 leading-snug">
-                    {post.title}
-                  </h3>
-                  <p className="text-gray-500 text-sm line-clamp-2 leading-relaxed mb-4">
-                    {post.description}
-                  </p>
-                  <div className="mt-auto pt-4 border-t border-gray-50 text-xs font-bold text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-end gap-1">
-                    자세히 보기 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-                  </div>
-                </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {recentPosts.map((post) => {
+            const categoryInfo = blogCategories.find((item) => item.name === post.category);
+            return (
+              <Link key={post.slug} href={`/blog/${post.slug}`} className="rounded-2xl border border-gray-200 bg-white p-6 hover:border-indigo-300 hover:shadow-md transition-all">
+                <p className="text-sm font-semibold text-indigo-600">{categoryInfo?.icon} {categoryInfo?.label}</p>
+                <h3 className="mt-2 text-xl font-bold text-gray-900 leading-snug">{post.title}</h3>
+                <p className="mt-3 text-sm text-gray-600 leading-6">{post.description}</p>
+                <p className="mt-4 text-xs text-gray-500">최종 사실 확인 {post.reviewedAt ?? post.updatedAt} · {post.author}</p>
               </Link>
-            ))}
-          </div>
-
-          <div className="mt-8 text-center">
-            <Link href="/blog" className="inline-flex items-center justify-center px-6 py-2.5 bg-gray-50 text-gray-700 font-semibold text-sm rounded-full hover:bg-gray-100 hover:text-gray-900 transition-colors border border-gray-200">
-              블로그 전체 보기
-            </Link>
-          </div>
+            );
+          })}
         </div>
+      </section>
 
-        {/* 용어사전 미리보기 섹션 */}
-        <div className="mt-12 border-t border-gray-200 pt-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">📖</span>
-              <h2 className="text-xl font-bold text-gray-900">
-                회생·파산 용어사전
-              </h2>
-            </div>
-            <Link href="/glossary" className="text-indigo-600 hover:text-indigo-800 font-medium text-sm">
-              전체 보기 →
-            </Link>
-          </div>
-
-          <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-2xl p-6">
-            <p className="text-gray-700 mb-4">
-              경매와 자산매각에서 자주 사용되는 법률 용어를 쉽게 설명합니다.
-              입찰 전에 꼭 알아야 할 핵심 개념들을 확인하세요.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {glossaryTerms.slice(0, 10).map((term) => (
-                <Link
-                  key={term.slug}
-                  href={`/glossary/${term.slug}`}
-                  className="bg-white text-gray-700 px-3 py-1.5 rounded-full text-sm font-medium border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 transition-colors"
-                >
-                  {term.term}
-                </Link>
-              ))}
-              <Link
-                href="/glossary"
-                className="bg-indigo-600 text-white px-4 py-1.5 rounded-full text-sm font-bold hover:bg-indigo-700 transition-colors"
-              >
-                +{glossaryTerms.length - 10}개 더보기
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* 카테고리 바로가기 */}
-        <div className="mt-16 mb-8 pt-8 border-t border-gray-100">
-          <div className="flex flex-col items-center justify-center mb-10 text-center">
-            <span className="text-3xl mb-3">🗂️</span>
-            <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">
-              무엇을 찾고 계신가요?
-            </h2>
-            <p className="text-gray-500 mt-2 text-sm max-w-lg mx-auto leading-relaxed">
-              관심 있는 자산 카테고리를 선택하면 관련 최신 공고와 맞춤형 투자 가이드를 한 번에 볼 수 있습니다.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
-            <Link
-              href="/category/real-estate"
-              className="relative overflow-hidden bg-white border border-green-100/60 rounded-2xl p-6 text-center hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1.5 transition-all duration-300 group z-10"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-green-50/50 to-emerald-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
-              <div className="w-16 h-16 mx-auto bg-green-50 text-green-600 rounded-2xl flex items-center justify-center text-3xl mb-5 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-sm border border-green-100">
-                🏠
-              </div>
-              <span className="block font-bold text-gray-900 text-lg mb-1 group-hover:text-green-700 transition-colors">부동산</span>
-              <p className="text-xs text-gray-500 font-medium tracking-wide">아파트, 상가, 토지</p>
-            </Link>
-
-            <Link
-              href="/category/vehicle"
-              className="relative overflow-hidden bg-white border border-blue-100/60 rounded-2xl p-6 text-center hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1.5 transition-all duration-300 group z-10"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-indigo-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
-              <div className="w-16 h-16 mx-auto bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center text-3xl mb-5 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300 shadow-sm border border-blue-100">
-                🚗
-              </div>
-              <span className="block font-bold text-gray-900 text-lg mb-1 group-hover:text-blue-700 transition-colors">차량/동산</span>
-              <p className="text-xs text-gray-500 font-medium tracking-wide">승용차, 특수차, 장비</p>
-            </Link>
-
-            <Link
-              href="/category/bonds"
-              className="relative overflow-hidden bg-white border border-amber-100/60 rounded-2xl p-6 text-center hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1.5 transition-all duration-300 group z-10"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-50/50 to-orange-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
-              <div className="w-16 h-16 mx-auto bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center text-3xl mb-5 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-sm border border-amber-100">
-                📄
-              </div>
-              <span className="block font-bold text-gray-900 text-lg mb-1 group-hover:text-amber-700 transition-colors">채권/주식</span>
-              <p className="text-xs text-gray-500 font-medium tracking-wide">매출채권, 비상장주식</p>
-            </Link>
-
-            <Link
-              href="/category/ip"
-              className="relative overflow-hidden bg-white border border-purple-100/60 rounded-2xl p-6 text-center hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1.5 transition-all duration-300 group z-10"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-50/50 to-fuchsia-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
-              <div className="w-16 h-16 mx-auto bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center text-3xl mb-5 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300 shadow-sm border border-purple-100">
-                💡
-              </div>
-              <span className="block font-bold text-gray-900 text-lg mb-1 group-hover:text-purple-700 transition-colors">특허/상표</span>
-              <p className="text-xs text-gray-500 font-medium tracking-wide">특허권, 실용신안</p>
-            </Link>
-          </div>
-        </div>
-
-        
-        {/* 서비스의 데이터 범위와 사용 방법 */}
-        <div className="mt-16 mb-8 bg-white rounded-2xl p-8 border border-gray-200 text-[14px] leading-[1.8] text-gray-600 shadow-sm">
-            <h2 className="text-xl font-bold text-gray-900 mb-4 tracking-tight">
-                법원 자산매각 공고를 확인하는 방법
-            </h2>
-            <p className="mb-4">
-                로옥션(LawAuction)은 대한민국 법원 대국민서비스에 공개된 회생·파산 자산매각 공고를
-                날짜, 자산 유형, 키워드별로 찾을 수 있도록 정리합니다. 법원 공고에는 부동산, 차량,
-                채권, 주식, 특허 등 서로 다른 자산과 계약 조건이 포함되므로 제목만으로 판단하지 말고
-                원문과 첨부파일을 함께 확인해야 합니다.
-            </p>
-            <p className="mb-4">
-                공고 상세의 AI 요약은 첨부 문서에서 일정과 가격 같은 항목을 찾기 위한 보조 자료입니다.
-                독립적인 법률 검토나 감정평가가 아니며 누락 또는 해석 오류가 있을 수 있습니다.
-                정확한 입찰 방식, 보증금, 잔금 기한, 자산 상태는 해당 공고의 원문과 담당자 연락처를 기준으로 확인하세요.
-            </p>
-            <p>
-                데이터 수집과 AI 활용 범위, 오류 정정 절차는
-                <Link href="/editorial-policy" className="ml-1 text-indigo-600 font-semibold hover:underline">
-                    편집·데이터 운영 원칙
-                </Link>에서 확인할 수 있습니다.
-            </p>
-        </div>
-
-      </div>
-
-      {/* Right Sidebar */}
-      <Sidebar />
+      <section className="rounded-2xl border border-amber-200 bg-amber-50 p-6 sm:p-8 text-amber-950">
+        <h2 className="text-xl font-bold mb-3">이용 전 확인하세요</h2>
+        <p className="leading-7">
+          로옥션은 법원과 제휴한 입찰 대행 서비스가 아닙니다. 공고의 효력과 현재 조건은 대한민국 법원 원문을 기준으로 하며,
+          권리관계·세금·계약 판단이 필요한 경우 관련 기관 또는 자격 있는 전문가에게 확인해야 합니다.
+        </p>
+      </section>
     </div>
   );
 }

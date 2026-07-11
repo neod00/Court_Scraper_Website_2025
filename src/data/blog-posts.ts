@@ -2,6 +2,7 @@
 // 구글 애드센스 승인을 위한 고품질 콘텐츠
 
 import { PUBLIC_BLOG_SLUGS } from '@/lib/contentPolicy';
+import { CURATED_BLOG_OVERRIDES, type CuratedSource } from '@/data/curated-blog-overrides';
 
 export interface BlogPost {
     slug: string;
@@ -15,6 +16,9 @@ export interface BlogPost {
     tags: string[];
     readingTime: number; // 분 단위
     featured: boolean;
+    reviewedAt?: string;
+    reviewMethod?: string;
+    sources?: CuratedSource[];
 }
 
 export const blogPosts: BlogPost[] = [
@@ -1856,10 +1860,15 @@ NPL 투자의 핵심 역시 권리가 꼬여있지만 미래 가치가 높은 '�
 // 슬러그로 게시물 찾기
 export const getPostBySlug = (slug: string): BlogPost | undefined => {
     if (!PUBLIC_BLOG_SLUGS.has(slug)) return undefined;
-    return blogPosts.find(post => post.slug === slug);
+    return getPublicBlogPosts().find(post => post.slug === slug);
 };
 export const getPublicBlogPosts = (): BlogPost[] => {
-    return blogPosts.filter(post => PUBLIC_BLOG_SLUGS.has(post.slug));
+    return blogPosts
+        .filter(post => PUBLIC_BLOG_SLUGS.has(post.slug))
+        .map((post) => ({
+            ...post,
+            ...CURATED_BLOG_OVERRIDES[post.slug],
+        }));
 };
 
 // 카테고리별 게시물 필터링

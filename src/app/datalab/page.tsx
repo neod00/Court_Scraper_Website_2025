@@ -10,7 +10,16 @@ export const metadata: Metadata = {
     description: 'AI가 분석한 최근 법원 자산매각의 통계 데이터를 확인하세요. 경매 마감(D-Day) 분포, 가격대별 랭킹 등 투자 인사이트를 제공합니다.',
     keywords: 'AI데이터랩, 경매통계, 데이터분석, 법원경매, 매각물건통계',
     alternates: { canonical: '/datalab' },
+    robots: { index: false, follow: true },
 };
+interface PriceItem {
+    id: string;
+    title: string;
+    department: string | null;
+    min: number;
+    app: number;
+}
+
 
 export default async function DataLabPage() {
     const today = new Date();
@@ -58,8 +67,8 @@ export default async function DataLabPage() {
         .neq('minimum_price', '0')
         .limit(1000); // 충분한 샘플 확보
 
-    let highestPriceItems: any[] = [];
-    let lowestPriceItems: any[] = [];
+    let highestPriceItems: PriceItem[] = [];
+    let lowestPriceItems: PriceItem[] = [];
 
     if (allPricedNotices) {
         const parsedItems = allPricedNotices.map(item => ({
@@ -100,7 +109,7 @@ export default async function DataLabPage() {
                         </h2>
                         <p className="mt-3 text-sm text-gray-600 leading-relaxed">
                             매각 기일(입찰일)이 다가오는 물건들의 일자별 분포를 나타냅니다. 
-                            그래프가 높게 솟은 날은 많은 자산이 시장에 풀리는 <strong>'슈퍼 입찰일'</strong>입니다. 
+                            그래프가 높게 솟은 날은 많은 자산이 시장에 풀리는 <strong>‘슈퍼 입찰일’</strong>입니다.
                             이러한 날에는 투자자들의 관심이 분산되어 단독 입찰이나 저가 낙찰의 기회가 상대적으로 높아질 수 있습니다. 반면 물건이 적은 날에는 인기가 몰려 낙찰가율이 상승할 수 있으니 주의 깊은 전략이 필요합니다.
                         </p>
                     </div>

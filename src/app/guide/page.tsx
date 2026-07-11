@@ -5,15 +5,16 @@ import { isPublicGuideSlug } from '@/lib/contentPolicy';
 
 export const metadata: Metadata = {
     title: '자산매각 가이드 | LawAuction',
-    description: '회생·파산 자산 매각 절차, 입찰 방법 및 2025년 최신 법규 가이드를 확인하세요.',
+    description: '회생·파산 자산매각 공고를 읽을 때 확인해야 할 절차와 자료를 안내합니다.',
     alternates: { canonical: '/guide' },
+    robots: { index: false, follow: true },
 };
 
 export const guides = [
     {
         slug: 'rehabilitation-asset-guide',
-        title: '회생 절차 중인 기업의 자산을 저렴하게 매수하는 법',
-        description: '기업 회생 절차에서 매각되는 자산의 특징과 입찰 전략을 전문가의 시선으로 분석합니다.',
+        title: '회생 절차 중 기업 자산매각 공고 확인 방법',
+        description: '기업 회생 절차에서 매각되는 자산의 공고와 계약조건 확인 항목을 정리합니다.',
         image: '/images/guides/rehab-asset-guide.png',
         date: '2025.01.04',
         category: '입찰 전략'
@@ -42,7 +43,7 @@ export default function GuideListPage() {
             <div className="text-center mb-12">
                 <h1 className="text-4xl font-bold text-gray-900 mb-4">📚 자산매각 가이드</h1>
                 <p className="text-lg text-gray-600">
-                    대법원 회생·파산 자산매각 공고를 보다 효율적으로 활용하기 위한 전문 가이드를 제공합니다.
+                    법원 회생·파산 자산매각 공고를 확인할 때 필요한 일반 정보를 제공합니다.
                 </p>
             </div>
 

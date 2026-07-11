@@ -3,12 +3,13 @@ import type { Metadata } from 'next';
 import { blogCategories, getFeaturedPosts, getPublicBlogPosts } from '@/data/blog-posts';
 import { supabase } from '@/lib/supabase';
 import { ALLOW_DATABASE_BLOG_POSTS } from '@/lib/contentPolicy';
+import AdSenseLoader from '@/components/AdSenseLoader';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-    title: '블로그 | 회생·파산 자산매각 전문 가이드',
-    description: '법원 경매와 회생·파산 자산매각에 대한 전문 가이드, 입찰 전략, 권리분석, 세금 정보를 제공합니다.',
+    title: '블로그 | 법원 자산매각 공고 확인 가이드',
+    description: '법원 경매와 회생·파산 자산매각 공고의 절차와 공식 확인자료를 정리합니다.',
     keywords: '경매가이드, 회생자산, 파산매각, 입찰전략, 권리분석, 부동산경매, 취득세',
     alternates: { canonical: '/blog' },
 };
@@ -28,7 +29,13 @@ interface UnifiedPost {
     source: 'static' | 'dynamic';
 }
 
-export default async function BlogPage() {
+interface PageProps {
+    searchParams: Promise<{ category?: string }>;
+}
+
+export default async function BlogPage({ searchParams }: PageProps) {
+    const { category: requestedCategory } = await searchParams;
+    const selectedCategory = requestedCategory?.trim();
     const featuredPosts = getFeaturedPosts();
 
     // Fetch dynamic blog posts from Supabase
@@ -76,19 +83,21 @@ export default async function BlogPage() {
     }));
 
     // Merge and sort by date (newest first)
-    const allPosts = [...dynamicPosts, ...staticPosts]
+    const mergedPosts = [...dynamicPosts, ...staticPosts]
         .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
 
-    // Extended categories with 시장분석
-    const allCategories = [
-        ...blogCategories,
-        ...(dynamicPosts.length > 0 && !blogCategories.find(c => c.name === '시장분석')
-            ? [{ name: '시장분석', label: '시장분석', icon: '📊' }]
-            : []),
-    ];
+    const availableCategoryNames = new Set(mergedPosts.map((post) => post.category));
+    const allCategories = blogCategories.filter((category) => availableCategoryNames.has(category.name));
+    const validSelectedCategory = selectedCategory && availableCategoryNames.has(selectedCategory)
+        ? selectedCategory
+        : undefined;
+    const allPosts = validSelectedCategory
+        ? mergedPosts.filter((post) => post.category === validSelectedCategory)
+        : mergedPosts;
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
+            <AdSenseLoader />
             {/* 헤더 */}
             <header className="text-center mb-12">
                 <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -104,15 +113,15 @@ export default async function BlogPage() {
             <nav className="flex flex-wrap justify-center gap-3 mb-12">
                 <Link
                     href="/blog"
-                    className="bg-indigo-600 text-white px-4 py-2 rounded-full font-medium hover:bg-indigo-700 transition-colors"
+                    className={`${!validSelectedCategory ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700'} px-4 py-2 rounded-full font-medium hover:bg-indigo-700 hover:text-white transition-colors`}
                 >
                     전체
                 </Link>
                 {allCategories.map((cat) => (
                     <Link
                         key={cat.name}
-                        href={`/blog?category=${cat.name}`}
-                        className="bg-gray-100 text-gray-700 px-4 py-2 rounded-full font-medium hover:bg-gray-200 transition-colors"
+                        href={`/blog?category=${encodeURIComponent(cat.name)}`}
+                        className={`${validSelectedCategory === cat.name ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700'} px-4 py-2 rounded-full font-medium hover:bg-indigo-700 hover:text-white transition-colors`}
                     >
                         {cat.icon} {cat.label}
                     </Link>
@@ -120,7 +129,7 @@ export default async function BlogPage() {
             </nav>
 
             {/* 추천 글 섹션 */}
-            {featuredPosts.length > 0 && (
+            {!validSelectedCategory && featuredPosts.length > 0 && (
                 <section className="mb-16">
                     <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                         ⭐ 추천 글

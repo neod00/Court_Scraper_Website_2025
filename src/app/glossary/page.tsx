@@ -7,6 +7,7 @@ export const metadata: Metadata = {
     description: '회생절차, 파산, 유치권, 법정지상권, 권리분석 등 법원 경매와 자산매각에 필요한 핵심 용어를 알기 쉽게 설명합니다.',
     keywords: '회생절차, 파산, 유치권, 법정지상권, 권리분석, 경매용어, 법률용어, 부동산경매, 감정가, 최저매각가격',
     alternates: { canonical: '/glossary' },
+    robots: { index: false, follow: true },
 };
 
 export default function GlossaryPage() {

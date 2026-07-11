@@ -73,7 +73,7 @@ export default async function RelatedNoticesRSS({ currentId, category }: Related
                         target="_blank"
                         className="text-[11px] font-bold text-orange-400 hover:text-orange-300 transition-colors flex items-center gap-1.5"
                     >
-                        <span>XML Feed 구독하기</span>
+                        <span>검수된 편집 글 RSS 보기</span>
                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M6.18,15.64A2.18,2.18,0,0,1,8.36,17.82,2.18,2.18,0,0,1,6.18,20,2.18,2.18,0,0,1,4,17.82,2.18,2.18,0,0,1,6.18,15.64ZM4,4.44A15.56,15.56,0,0,1,19.56,20h-2.83A12.73,12.73,0,0,0,4,7.27Zm0,5.66a9.9,9.9,0,0,1,9.9,9.9H11.07A7.07,7.07,0,0,0,4,12.93Z"></path>
                         </svg>

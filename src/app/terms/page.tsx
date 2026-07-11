@@ -13,7 +13,7 @@ export default function TermsPage() {
 
             <div className="bg-white shadow rounded-lg p-6 space-y-8">
                 <p className="text-gray-600 text-sm">
-                    최종 수정일: 2026년 2월 21일
+                    최종 수정일: 2026년 7월 11일
                 </p>
 
                 <section>
@@ -28,13 +28,13 @@ export default function TermsPage() {
                     <h2 className="text-xl font-semibold text-gray-800 mb-3">제2조 (서비스의 내용)</h2>
                     <p className="text-gray-600 leading-relaxed">
                         본 서비스는 대법원 회생/파산 자산매각 공고를 자동으로 수집하여 사용자에게
-                        검색 및 조회 기능을 제공하며, 각 공고에 대해 투자 가이드, 권리분석 체크리스트,
-                        세금 안내 등 자체 분석 콘텐츠를 추가로 제공합니다.
+                        검색 및 조회 기능을 제공하며, 공고 원문 확인 방법과 일반적인 절차,
+                        관련 기관 확인 경로를 설명하는 편집 콘텐츠를 추가로 제공합니다.
                     </p>
                     <ul className="list-disc list-inside text-gray-600 mt-3 space-y-1">
                         <li>회생/파산 자산매각 공고 검색</li>
                         <li>날짜별, 카테고리별 필터링</li>
-                        <li>공고 상세 정보 조회 및 전문 분석 콘텐츠</li>
+                        <li>공고 상세 정보 조회 및 원문 확인 안내</li>
                         <li>원본 파일 다운로드 링크 제공</li>
                         <li>입찰가 계산기, 취득세 계산기 등 투자 도구</li>
                     </ul>
@@ -78,7 +78,7 @@ export default function TermsPage() {
                                 https://www.scourt.go.kr
                             </a>
                             )<br />
-                            공공저작물(저작권법 제24조의2)에 따라 출처를 표시하여 이용하였습니다.
+                            법원이 작성·공개한 자료와 제3자 작성 첨부물의 권리관계는 서로 다를 수 있습니다. 로옥션은 출처와 원문 링크를 표시하며, 별도 권리가 있는 자료는 해당 이용조건을 따릅니다.
                         </p>
                     </div>
                 </section>
@@ -110,7 +110,7 @@ export default function TermsPage() {
 
                 <section className="border-t border-gray-200 pt-6">
                     <p className="text-sm text-gray-500">
-                        본 이용약관은 2026년 2월 21일부터 시행됩니다.
+                        본 이용약관은 2026년 7월 11일부터 시행됩니다.
                     </p>
                 </section>
             </div>

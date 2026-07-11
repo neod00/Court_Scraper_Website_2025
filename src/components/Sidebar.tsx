@@ -132,11 +132,11 @@ export default function Sidebar() {
                     </li>
                     <li>
                         <Link
-                            href="/blog/acquisition-tax-guide-2026"
+                            href="/blog/auction-vs-public-sale-differences"
                             className="flex items-start gap-2 text-blue-100 hover:text-white transition-colors text-sm leading-snug"
                         >
                             <span className="text-blue-300 mt-0.5 flex-shrink-0">▸</span>
-                            2026년 취득세 완벽 정리
+                            법원 경매와 온비드 공매 비교
                         </Link>
                     </li>
                     <li>
