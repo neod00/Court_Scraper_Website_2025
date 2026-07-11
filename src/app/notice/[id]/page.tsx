@@ -9,10 +9,11 @@ import NoticeFAQ from '@/components/NoticeFAQ';
 import NoticeHero from '@/components/NoticeHero';
 import RelatedNoticesRSS from '@/components/RelatedNoticesRSS';
 import CourtCostCalculator from '@/components/CourtCostCalculator';
-import CarValuation from '@/components/CarValuation';
 import { getRecentPosts } from '@/data/blog-posts';
 import { glossaryTerms } from '@/data/glossary';
 import { isQualityNotice } from '@/lib/noticeQuality';
+import { INDEX_AUTOMATED_NOTICE_PAGES } from '@/lib/contentPolicy';
+import { getCategoryByDbCategory } from '@/data/categories';
 
 // Revalidate every hour
 export const revalidate = 3600;
@@ -48,8 +49,8 @@ export async function generateMetadata({ params }: PageProps) {
 
     const siteUrl = 'https://www.courtauction.site';
 
-    // noindex pages without a substantive AI summary (shared quality gate) to prevent thin-content indexing
-    const isThinContent = !isQualityNotice(notice);
+    // Automated records stay available as a utility but are not editorial pages.
+    const shouldIndex = INDEX_AUTOMATED_NOTICE_PAGES && isQualityNotice(notice);
 
     return {
         title,
@@ -62,7 +63,7 @@ export async function generateMetadata({ params }: PageProps) {
             description,
             url: `${siteUrl}/notice/${id}`,
         },
-        ...(isThinContent ? { robots: { index: false, follow: true } } : {}),
+        ...(!shouldIndex ? { robots: { index: false, follow: true } } : {}),
     };
 }
 
@@ -91,12 +92,13 @@ export default async function NoticeDetail({ params }: PageProps) {
         return '기타';
     };
 
+    const categorySlug = getCategoryByDbCategory(notice.category)?.slug;
     return (
         <div className="max-w-7xl mx-auto px-4 py-6 md:py-10">
             <Breadcrumbs 
                 items={[
                     { label: '공고 검색', href: '/' },
-                    { label: getCategoryName(notice.category), href: `/category/${notice.category}` },
+                    { label: getCategoryName(notice.category), href: categorySlug ? `/category/${categorySlug}` : '/' },
                     { label: notice.title, href: `/notice/${notice.id}` }
                 ]} 
             />
@@ -230,11 +232,12 @@ export default async function NoticeDetail({ params }: PageProps) {
                                 </div>
                                 <div className="mt-8 pt-4 border-t border-gray-100">
                                     <details className="cursor-pointer group">
-                                        <summary className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2 hover:text-indigo-600 transition-colors">Data Verification Sources</summary>
+                                        <summary className="text-xs font-bold text-gray-500 tracking-widest flex items-center gap-2 hover:text-indigo-600 transition-colors">분석 범위와 확인 방법</summary>
                                         <ul className="list-disc pl-5 mt-3 space-y-1 text-xs text-gray-500 font-medium">
-                                            <li>대한민국 법원 법원경매정보 (Official Public Data)</li>
-                                            <li>국토교통부 실거래가 공개시스템 API</li>
-                                            <li>본 보고서는 법원 공고문을 법률 특화 AI 모델로 분석한 요약본이며, 최종 결정 전 전문가의 자문을 권장합니다.</li>
+                                            <li>요약 입력 자료: 이 페이지에 연결된 대한민국 법원 공고와 첨부 문서</li>
+                                            <li>분석 방식: 문서에서 일정·가격·대상 자산을 찾기 위한 AI 보조 추출</li>
+                                            <li>별도 실거래가 조회, 감정평가 또는 권리관계 검증은 포함하지 않습니다.</li>
+                                            <li>입찰 전 원문과 담당자 확인이 필요합니다.</li>
                                         </ul>
                                     </details>
                                 </div>
@@ -242,13 +245,6 @@ export default async function NoticeDetail({ params }: PageProps) {
                         </article>
                     )}
 
-                    {/* AI Car Valuation - only for vehicle category */}
-                    <CarValuation
-                        noticeId={notice.id}
-                        category={notice.category}
-                        aiSummary={notice.ai_summary}
-                        title={notice.title}
-                    />
 
                     <div id="calculator"><CourtCostCalculator category={notice.category} /></div>
 

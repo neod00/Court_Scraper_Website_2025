@@ -9,6 +9,7 @@ export const metadata: Metadata = {
     title: 'AI 데이터랩 | 법원 자산매각 주간 누적 통계',
     description: 'AI가 분석한 최근 법원 자산매각의 통계 데이터를 확인하세요. 경매 마감(D-Day) 분포, 가격대별 랭킹 등 투자 인사이트를 제공합니다.',
     keywords: 'AI데이터랩, 경매통계, 데이터분석, 법원경매, 매각물건통계',
+    alternates: { canonical: '/datalab' },
 };
 
 export default async function DataLabPage() {
@@ -79,7 +80,7 @@ export default async function DataLabPage() {
             <header className="mb-10 sm:mb-16">
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 text-sm font-bold mb-4 border border-emerald-100">
                     <span className="text-emerald-500">📊</span>
-                    실시간 데이터 연동 중
+                    정기 데이터 연동 중
                 </div>
                 <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">
                     AI 데이터랩 <span className="text-gray-400 font-light">| 주간 누적 통계</span>

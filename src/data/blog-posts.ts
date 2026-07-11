@@ -1,6 +1,8 @@
 // 블로그 게시물 데이터
 // 구글 애드센스 승인을 위한 고품질 콘텐츠
 
+import { PUBLIC_BLOG_SLUGS } from '@/lib/contentPolicy';
+
 export interface BlogPost {
     slug: string;
     title: string;
@@ -1073,8 +1075,8 @@ export const blogPosts: BlogPost[] = [
     ,
     {
         slug: 'auction-vs-public-sale-differences',
-        title: '법원 경매 vs 캠코 공매: 완벽 비교 및 초보자 맞춤형 투자 가이드',
-        description: '부동산 투자의 두 축인 법원 경매와 캠코 공매의 차이점, 장단점, 입찰 방식 등을 완벽하게 비교 분석해 드립니다.',
+        title: '법원 경매와 캠코 공매의 주요 차이 및 확인사항',
+        description: '법원 경매와 캠코 공매의 진행 주체, 입찰 방식과 참여 전 확인할 차이점을 정리합니다.',
         author: '편집팀',
         publishedAt: '2026-03-24',
         updatedAt: '2026-03-24',
@@ -1853,22 +1855,26 @@ NPL 투자의 핵심 역시 권리가 꼬여있지만 미래 가치가 높은 '�
 
 // 슬러그로 게시물 찾기
 export const getPostBySlug = (slug: string): BlogPost | undefined => {
+    if (!PUBLIC_BLOG_SLUGS.has(slug)) return undefined;
     return blogPosts.find(post => post.slug === slug);
+};
+export const getPublicBlogPosts = (): BlogPost[] => {
+    return blogPosts.filter(post => PUBLIC_BLOG_SLUGS.has(post.slug));
 };
 
 // 카테고리별 게시물 필터링
 export const getPostsByCategory = (category: BlogPost['category']): BlogPost[] => {
-    return blogPosts.filter(post => post.category === category);
+    return getPublicBlogPosts().filter(post => post.category === category);
 };
 
 // 추천 게시물 가져오기
 export const getFeaturedPosts = (): BlogPost[] => {
-    return blogPosts.filter(post => post.featured);
+    return getPublicBlogPosts().filter(post => post.featured);
 };
 
 // 최신 게시물 가져오기
 export const getRecentPosts = (count: number = 5): BlogPost[] => {
-    return [...blogPosts]
+    return getPublicBlogPosts()
         .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
         .slice(0, count);
 };
@@ -1878,7 +1884,7 @@ export const getRelatedPosts = (currentSlug: string, count: number = 3): BlogPos
     const currentPost = getPostBySlug(currentSlug);
     if (!currentPost) return [];
 
-    return blogPosts
+    return getPublicBlogPosts()
         .filter(post => post.slug !== currentSlug && post.category === currentPost.category)
         .slice(0, count);
 };

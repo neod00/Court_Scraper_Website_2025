@@ -1,14 +1,14 @@
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import MarkdownRenderer from '@/components/MarkdownRenderer';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-    title: '주간 매각물건 분석 리포트 | 법원 자산매각 AI 분석',
-    description: 'AI가 분석한 법원 회생·파산 자산매각 주간 매각물건 분석 리포트. 매주 업데이트되는 부동산, 차량, 기타 자산의 매각 트렌드를 확인하세요.',
-    keywords: '주간동향, 시장분석, AI분석, 자산매각, 회생파산, 매각물건분석, 법원경매',
+    title: '주간 매각 공고 통계 | 법원 자산매각',
+    description: '수집된 법원 회생·파산 자산매각 공고의 주간 건수와 분류별 집계를 확인하세요.',
+    keywords: '주간통계, 자산매각, 회생파산, 매각공고, 법원경매',
+    alternates: { canonical: '/trend' },
 };
 
 interface TrendingTag {
@@ -65,14 +65,14 @@ export default async function TrendPage() {
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
                     </span>
-                    AI 자동 분석 · 매주 업데이트
+                    공고 데이터 자동 집계 · 매주 업데이트
                 </div>
                 <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4 leading-tight tracking-tight">
-                    주간 매각물건 분석 리포트
+                    주간 매각 공고 통계
                 </h1>
                 <p className="text-gray-500 max-w-2xl mx-auto leading-relaxed text-sm">
-                    매주 수집되는 법원 회생·파산 자산매각 공고의 AI 요약 데이터를 종합 분석하여,
-                    투자자에게 필요한 핵심 인사이트를 자동으로 생성합니다.
+                    수집된 공고를 주차·분류·담당 법원 기준으로 집계합니다.
+                    수치는 탐색을 위한 참고 정보이며 실제 내용은 원문 공고에서 확인해야 합니다.
                 </p>
             </header>
 
@@ -122,20 +122,6 @@ export default async function TrendPage() {
                             </div>
                         </div>
 
-                        {/* AI 브리핑 하이라이트 */}
-                        {latestReport.briefing_text && (
-                            <div className="bg-gradient-to-r from-amber-50 via-yellow-50 to-orange-50 px-8 py-6 border-b border-amber-100">
-                                <div className="flex items-start gap-4">
-                                    <div className="bg-amber-100 text-amber-600 w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0 shadow-sm">
-                                        ✨
-                                    </div>
-                                    <div>
-                                        <h3 className="text-sm font-extrabold text-amber-800 mb-2 uppercase tracking-wider">에디터 핵심 요약</h3>
-                                        <p className="text-gray-700 leading-relaxed text-[15px]">{latestReport.briefing_text}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
 
                         {/* 트렌딩 태그 */}
                         {trendingTags.length > 0 && (
@@ -159,9 +145,17 @@ export default async function TrendPage() {
                             </div>
                         )}
 
-                        {/* 전체 리포트 본문 - react-markdown */}
+                        {/* 집계 기준 안내 */}
                         <div className="px-8 py-10 sm:px-12">
-                            <MarkdownRenderer content={latestReport.full_report} />
+                            <h3 className="text-xl font-bold text-gray-900 mb-4">이 통계를 읽는 방법</h3>
+                            <div className="space-y-3 text-sm leading-7 text-gray-600">
+                                <p>총 공고 수는 해당 주간에 수집된 공고를 기준으로 집계합니다.</p>
+                                <p>분류와 담당 법원 표기는 원문 및 수집 데이터에 따라 달라질 수 있으며, 중복·정정 공고로 실제 건수와 차이가 날 수 있습니다.</p>
+                                <p>가격 적정성, 권리관계, 물건 상태를 판단하는 분석 결과가 아닙니다. 참여 전 원문과 첨부 문서를 직접 확인하세요.</p>
+                                <p>
+                                    <Link href="/editorial-policy" className="font-semibold text-indigo-700 underline">데이터·편집 원칙 자세히 보기</Link>
+                                </p>
+                            </div>
                         </div>
 
                         {/* CTA */}
@@ -191,7 +185,7 @@ export default async function TrendPage() {
             ) : (
                 <div className="bg-blue-50 border-l-4 border-blue-400 p-6 rounded-r-lg">
                     <p className="text-blue-700">
-                        아직 생성된 주간 리포트가 없습니다. 데이터가 충분히 수집되면 AI가 자동으로 분석 리포트를 생성합니다.
+                        아직 집계된 주간 통계가 없습니다. 공고 데이터가 수집되면 주간 단위로 표시됩니다.
                     </p>
                 </div>
             )}
@@ -222,13 +216,10 @@ export default async function TrendPage() {
                             } catch { cats = {}; }
                             const totalNotices = Object.values(cats).reduce((a: number, b: number) => a + b, 0);
 
-                            const slug = `weekly-trend-${report.week_start}-to-${report.week_end}`;
-
                             return (
-                                <a
+                                <article
                                     key={report.id || idx}
-                                    href={`/blog/${slug}`}
-                                    className="group block bg-white border border-gray-200 rounded-xl p-5 hover:border-emerald-300 hover:shadow-lg transition-all duration-200"
+                                    className="block bg-white border border-gray-200 rounded-xl p-5"
                                 >
                                     <div className="flex items-center justify-between mb-3">
                                         <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold px-2.5 py-1 rounded-full">
@@ -238,21 +229,21 @@ export default async function TrendPage() {
                                             {totalNotices > 0 ? `${totalNotices}건` : ''}
                                         </span>
                                     </div>
-                                    <h3 className="font-bold text-gray-900 text-sm mb-2 group-hover:text-emerald-700 transition-colors">
-                                        {weekLabel} 매각물건 분석 리포트
+                                    <h3 className="font-bold text-gray-900 text-sm mb-2">
+                                        {weekLabel} 매각 공고 집계
                                     </h3>
                                     <p className="text-xs text-gray-500 leading-relaxed line-clamp-2 mb-3">
-                                        {report.briefing_text || '리포트 요약 정보가 없습니다.'}
+                                        수집 공고 {totalNotices || report.total_notices || 0}건을 분류별로 집계한 기록입니다.
                                     </p>
                                     <div className="flex items-center justify-between">
                                         <span className="text-xs text-gray-400">
                                             {report.week_start} ~ {report.week_end}
                                         </span>
-                                        <span className="text-xs text-emerald-600 font-medium group-hover:translate-x-0.5 transition-transform">
-                                            자세히 보기 →
+                                        <span className="text-xs text-gray-400 font-medium">
+                                            자동 집계
                                         </span>
                                     </div>
-                                </a>
+                                </article>
                             );
                         })}
                     </div>
@@ -268,7 +259,7 @@ export default async function TrendPage() {
                             "@context": "https://schema.org",
                             "@type": "Article",
                             "headline": `법원 자산매각 주간 동향 리포트 (${latestReport.week_start} ~ ${latestReport.week_end})`,
-                            "description": latestReport.briefing_text,
+                            "description": `수집된 매각 공고 ${latestReport.total_notices || 0}건의 주간 분류별 집계`,
                             "datePublished": latestReport.week_end,
                             "dateModified": latestReport.week_end,
                             "author": {

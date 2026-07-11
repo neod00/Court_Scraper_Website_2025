@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { blogPosts, blogCategories, getFeaturedPosts } from '@/data/blog-posts';
+import { blogCategories, getFeaturedPosts, getPublicBlogPosts } from '@/data/blog-posts';
 import { supabase } from '@/lib/supabase';
+import { ALLOW_DATABASE_BLOG_POSTS } from '@/lib/contentPolicy';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,6 +10,7 @@ export const metadata: Metadata = {
     title: '블로그 | 회생·파산 자산매각 전문 가이드',
     description: '법원 경매와 회생·파산 자산매각에 대한 전문 가이드, 입찰 전략, 권리분석, 세금 정보를 제공합니다.',
     keywords: '경매가이드, 회생자산, 파산매각, 입찰전략, 권리분석, 부동산경매, 취득세',
+    alternates: { canonical: '/blog' },
 };
 
 // Unified post type for both static and dynamic posts
@@ -31,7 +33,7 @@ export default async function BlogPage() {
 
     // Fetch dynamic blog posts from Supabase
     let dynamicPosts: UnifiedPost[] = [];
-    try {
+    if (ALLOW_DATABASE_BLOG_POSTS) try {
         const { data } = await supabase
             .from('blog_posts')
             .select('slug, title, description, author, published_at, category, tags, reading_time, featured, view_count')
@@ -59,7 +61,7 @@ export default async function BlogPage() {
     }
 
     // Convert static posts to unified format
-    const staticPosts: UnifiedPost[] = blogPosts.map(p => ({
+    const staticPosts: UnifiedPost[] = getPublicBlogPosts().map(p => ({
         slug: p.slug,
         title: p.title,
         description: p.description,
@@ -93,8 +95,8 @@ export default async function BlogPage() {
                     📝 회생·파산 자산매각 블로그
                 </h1>
                 <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                    법원 경매와 회생·파산 자산매각에 대한 전문 지식을 쉽게 풀어드립니다.
-                    첫 입찰부터 고급 전략까지, 성공적인 투자를 위한 모든 정보를 제공합니다.
+                    법원 경매와 회생·파산 자산매각 공고를 이해하는 데 필요한 기본 개념을 정리합니다.
+                    실제 참여 전에는 원문 공고와 최신 법령을 반드시 확인하세요.
                 </p>
             </header>
 

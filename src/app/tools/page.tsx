@@ -5,6 +5,7 @@ export const metadata: Metadata = {
     title: '투자 계산기 도구 | LawAuction',
     description: '회생·파산 자산매각 입찰에 필요한 취득세 계산기, 입찰가 계산기, 차량 이전비 계산기, 투자 수익률 계산기 등 무료 도구를 제공합니다.',
     keywords: '취득세 계산기, 입찰가 계산기, 차량 이전비 계산기, 투자 수익률 계산기, 경매 계산기',
+    alternates: { canonical: '/tools' },
 };
 
 const tools = [

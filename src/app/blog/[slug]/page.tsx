@@ -1,12 +1,12 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { blogPosts, getPostBySlug, getRelatedPosts, blogCategories } from '@/data/blog-posts';
+import { getPostBySlug, getPublicBlogPosts, getRelatedPosts, blogCategories } from '@/data/blog-posts';
 import { supabase } from '@/lib/supabase';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
 import ViewTracker from '@/components/ViewTracker';
 import RelatedNoticesRSS from '@/components/RelatedNoticesRSS';
-import NoticeHero from '@/components/NoticeHero';
+import { ALLOW_DATABASE_BLOG_POSTS } from '@/lib/contentPolicy';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +18,7 @@ interface PageProps {
 
 // Fetch a dynamic post from Supabase
 async function getDynamicPost(slug: string) {
+    if (!ALLOW_DATABASE_BLOG_POSTS) return null;
     try {
         const { data } = await supabase
             .from('blog_posts')
@@ -83,7 +84,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export async function generateStaticParams() {
-    return blogPosts.map((post) => ({
+    return getPublicBlogPosts().map((post) => ({
         slug: post.slug,
     }));
 }
@@ -278,23 +279,13 @@ export default async function BlogPostPage({ params }: PageProps) {
                     {renderContent(staticPost.content)}
                 </div>
 
-                {/* References and Sources for E-E-A-T */}
-                <div className="mt-12 pt-6 border-t border-gray-100">
-                    <details className="cursor-pointer group bg-gray-50 rounded-xl p-4 border border-gray-100">
-                        <summary className="text-base font-bold text-gray-800 flex items-center gap-2 hover:text-indigo-600 transition-colors">
-                            📚 본문 자료 출처 및 분석 방법론
-                        </summary>
-                        <div className="mt-4 space-y-3 text-sm text-gray-600 leading-relaxed">
-                            <p>본 칼럼은 다음과 같은 공신력 있는 자료를 바탕으로 <strong>로옥션 전문 분석팀</strong>에서 작성되었습니다:</p>
-                            <ul className="list-disc pl-5 space-y-1">
-                                <li>대한민국 법원경매정보시스템(Courtauction) 공고 데이터</li>
-                                  <li>국토교통부 실거래가 공개시스템 시세 데이터</li>
-                                <li>대법원 판례 및 민사집행법 관련 법령 자료</li>
-                                <li>주요 은행별 NPL(부실채권) 매각 통계 및 시장 리포트</li>
-                            </ul>
-                            <p className="text-xs text-gray-500 mt-2 italic">※ 본 콘텐츠의 저작권은 로옥션(LawAuction)에 있으며, 무단 전재 및 재배포를 금합니다.</p>
-                        </div>
-                    </details>
+                <div className="mt-12 rounded-xl border border-amber-200 bg-amber-50 p-6 text-sm leading-6 text-amber-900">
+                    <h2 className="font-bold mb-2">작성·검수 안내</h2>
+                    <p>
+                        로옥션 편집팀이 일반적인 공고 확인 절차를 설명하기 위해 작성한 정보성 글입니다.
+                        개별 물건의 법률·세무·가격 판단을 대신하지 않으며, 참여 전 원문 공고와 최신 법령을 직접 확인해야 합니다.{' '}
+                        <Link href="/editorial-policy" className="font-semibold underline">편집·검수 원칙 보기</Link>
+                    </p>
                 </div>
 
                 {relatedPosts.length > 0 && (

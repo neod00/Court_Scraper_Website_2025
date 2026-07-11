@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import Script from 'next/script';
 import './globals.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -47,12 +46,6 @@ export const metadata: Metadata = {
     title: siteName,
     description: siteDescription,
   },
-  alternates: {
-    canonical: '/',
-    languages: {
-      'ko-KR': '/',
-    },
-  },
 };
 
 // JSON-LD 구조화 데이터
@@ -92,28 +85,6 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} min-h-screen flex flex-col bg-gray-50`}>
-        {/* Google Maps API 로드 완료 콜백 함수 정의 (먼저 로드) */}
-        <Script id="google-maps-callback" strategy="beforeInteractive">
-          {`window.initGoogleMap = function() {
-            console.log('구글 지도 API 로드 완료 (callback)');
-            window.googleMapReady = true;
-            if (window.onGoogleMapReady) {
-              window.onGoogleMapReady();
-            }
-          };`}
-        </Script>
-        {/* Google Maps API - callback 방식으로 비동기 로딩 */}
-        <Script
-          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAP_API_KEY || ''}&libraries=geometry&language=ko&callback=initGoogleMap`}
-          strategy="afterInteractive"
-        />
-        {/* Google AdSense */}
-        <Script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5907754718994620"
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
         <Header />
         <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {children}

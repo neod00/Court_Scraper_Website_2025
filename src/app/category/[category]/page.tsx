@@ -5,6 +5,10 @@ import { categories, getCategoryBySlug } from '@/data/categories';
 import { supabase } from '@/lib/supabase';
 import NoticeCard from '@/components/NoticeCard';
 import { filterQualityNotices } from '@/lib/noticeQuality';
+import { glossaryTerms } from '@/data/glossary';
+import { isPublicBlogSlug } from '@/lib/contentPolicy';
+
+export const dynamic = 'force-dynamic';
 
 interface PageProps {
     params: Promise<{
@@ -26,6 +30,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         title: `${categoryInfo.icon} ${categoryInfo.name} 매각 공고 | 대법원 자산매각`,
         description: categoryInfo.description,
         keywords: `${categoryInfo.name}, 매각공고, 회생, 파산, 경매, ${categoryInfo.relatedTerms.join(', ')}`,
+        alternates: { canonical: `/category/${categoryInfo.slug}` },
     };
 }
 
@@ -177,14 +182,14 @@ export default async function CategoryPage({ params }: PageProps) {
                 </div>
             </header>
 
-            {/* SEO 최적화 전문 서론 블록 (애드센스 승인 및 검색 노출 강화용) */}
+            {/* 데이터 범위와 확인 방법 */}
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-8 border border-blue-100 text-gray-700 leading-relaxed text-[15px] shadow-sm">
                 <p>
-                    대법원 <strong>{categoryInfo.name}</strong> 자산매각(회생/파산) 공고는 법원을 통해 유치권, 점유 등 복잡한 사항을 해결하고 안전하게 취득할 수 있는 공식 매각 절차 시장 중 하나입니다. 
-                    특히 {categoryInfo.name} 물건의 경우 일반 경매시장 대비 대중의 인지도가 낮아 경쟁률이 상대적으로 적으며, 결과적으로 시세 대비 대폭 합리적인 가격에 낙찰받을 가능성이 높습니다.
+                    이 페이지는 대한민국 법원에 공개된 회생·파산 관련 <strong>{categoryInfo.name}</strong> 자산매각 공고를 모아 보여줍니다.
+                    공고마다 매각 방식, 권리관계, 자산 상태와 계약 조건이 다르며 법원 공고라는 이유만으로 권리나 하자가 자동으로 정리되는 것은 아닙니다.
                     <br/><br/>
-                    본 페이지에서는 실시간으로 업데이트되는 <strong>전국의 {categoryInfo.name} 매각 공고</strong> 최신 정보를 제공하며, 복잡한 첨부파일에 기반한 AI 권리분석 요약본까지 무료로 확인하실 수 있습니다. 
-                    입찰을 준비 중이시라면 아래의 공고 목록과 함께 가장 하단에 제공되는 투자 전 주의사항 팁과 가이드를 반드시 꼼꼼히 체크해 보시기 바랍니다.
+                    목록은 매일 여러 차례 갱신됩니다. AI 요약은 첨부 문서에서 주요 항목을 찾기 위한 보조 자료이며 독립적인 권리분석이 아닙니다.
+                    실제 입찰을 검토할 때는 공고 원문, 첨부파일, 담당자 안내와 현장 상태를 직접 확인하세요.
                 </p>
             </div>
 
@@ -243,27 +248,30 @@ export default async function CategoryPage({ params }: PageProps) {
                         📖 관련 용어
                     </h2>
                     <div className="flex flex-wrap gap-3">
-                        {categoryInfo.relatedTerms.map((term) => (
+                        {categoryInfo.relatedTerms.map((term) => {
+                            const glossaryTerm = glossaryTerms.find((item) => item.term === term);
+                            return (
                             <Link
                                 key={term}
-                                href={`/glossary/${term.toLowerCase().replace(/\//g, '-')}`}
+                                href={glossaryTerm ? `/glossary/${glossaryTerm.slug}` : '/glossary'}
                                 className="bg-indigo-100 text-indigo-700 px-4 py-2 rounded-full font-medium hover:bg-indigo-200 transition-colors"
                             >
                                 {term}
                             </Link>
-                        ))}
+                            );
+                        })}
                     </div>
                 </section>
             )}
 
             {/* 관련 가이드 */}
-            {categoryInfo.relatedGuides.length > 0 && (
+            {categoryInfo.relatedGuides.some((guide) => isPublicBlogSlug(guide.slug)) && (
                 <section className="mb-12">
                     <h2 className="text-2xl font-bold text-gray-900 mb-6">
                         📚 추천 가이드
                     </h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {categoryInfo.relatedGuides.map((guide) => (
+                        {categoryInfo.relatedGuides.filter((guide) => isPublicBlogSlug(guide.slug)).map((guide) => (
                             <Link
                                 key={guide.slug}
                                 href={`/blog/${guide.slug}`}

@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
     title: 'LawAuction 소개 | 로옥션',
     description: '로옥션(LawAuction)은 대법원 회생·파산 자산매각 공고를 자동 수집·분석해 제공하는 정보 플랫폼입니다. 서비스 및 운영자 정보를 안내합니다.',
+    alternates: { canonical: '/about' },
 };
 
 export default function AboutPage() {
@@ -65,7 +66,7 @@ export default function AboutPage() {
 
                 <section className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-md">
                     <p className="text-sm text-yellow-700">
-                        ⚠️ <strong>주의:</strong> 공고일로부터 90일이 지난 데이터는 자동으로 삭제됩니다.
+                        ⚠️ <strong>주의:</strong> 과거 공고는 통계와 변경 이력 확인을 위해 보관될 수 있습니다. 현재 유효한 조건은 법원 원문을 기준으로 확인하세요.
                         필요한 정보는 미리 저장해 두시기 바랍니다.
                     </p>
                 </section>

@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
     title: '개인정보처리방침 | LawAuction',
     description: 'LawAuction의 개인정보처리방침입니다. Google 광고, 쿠키 사용 및 데이터 수집에 대한 상세한 안내를 제공합니다.',
+    alternates: { canonical: '/privacy' },
 };
 
 export default function PrivacyPage() {

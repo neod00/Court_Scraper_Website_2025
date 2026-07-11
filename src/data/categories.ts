@@ -187,3 +187,8 @@ export const categories: CategoryInfo[] = [
 export const getCategoryBySlug = (slug: string): CategoryInfo | undefined => {
     return categories.find(cat => cat.slug === slug);
 };
+
+export const getCategoryByDbCategory = (dbCategory: string | null): CategoryInfo | undefined => {
+    if (!dbCategory) return undefined;
+    return categories.find((category) => category.dbCategory === dbCategory);
+};

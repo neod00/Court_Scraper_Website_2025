@@ -1,191 +1,62 @@
 import { MetadataRoute } from 'next';
 import { glossaryTerms } from '@/data/glossary';
-import { blogPosts } from '@/data/blog-posts';
+import { getPublicBlogPosts } from '@/data/blog-posts';
 import { categories } from '@/data/categories';
-import { supabase } from '@/lib/supabase';
-import { filterQualityNotices } from '@/lib/noticeQuality';
+import { PUBLIC_GUIDE_SLUGS } from '@/lib/contentPolicy';
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = 'https://www.courtauction.site';
-    const lastModified = new Date();
+const baseUrl = 'https://www.courtauction.site';
 
-    // 정적 페이지
+export default function sitemap(): MetadataRoute.Sitemap {
     const staticPages: MetadataRoute.Sitemap = [
-        {
-            url: baseUrl,
-            lastModified,
-            changeFrequency: 'daily',
-            priority: 1,
-        },
-        {
-            url: `${baseUrl}/about`,
-            lastModified,
-            changeFrequency: 'monthly',
-            priority: 0.8,
-        },
-        {
-            url: `${baseUrl}/privacy`,
-            lastModified,
-            changeFrequency: 'yearly',
-            priority: 0.5,
-        },
-        {
-            url: `${baseUrl}/terms`,
-            lastModified,
-            changeFrequency: 'yearly',
-            priority: 0.5,
-        },
-        {
-            url: `${baseUrl}/contact`,
-            lastModified,
-            changeFrequency: 'yearly',
-            priority: 0.5,
-        },
-        {
-            url: `${baseUrl}/faq`,
-            lastModified,
-            changeFrequency: 'monthly',
-            priority: 0.7,
-        },
-        {
-            url: `${baseUrl}/guide`,
-            lastModified,
-            changeFrequency: 'weekly',
-            priority: 0.9,
-        },
-        {
-            url: `${baseUrl}/guide/rehabilitation-asset-guide`,
-            lastModified,
-            changeFrequency: 'monthly',
-            priority: 0.8,
-        },
-        {
-            url: `${baseUrl}/guide/bankruptcy-vs-auction`,
-            lastModified,
-            changeFrequency: 'monthly',
-            priority: 0.8,
-        },
-        {
-            url: `${baseUrl}/guide/law-changes-2025`,
-            lastModified,
-            changeFrequency: 'monthly',
-            priority: 0.8,
-        },
-        {
-            url: `${baseUrl}/trend`,
-            lastModified,
-            changeFrequency: 'weekly',
-            priority: 0.9,
-        },
+        { url: baseUrl, changeFrequency: 'daily', priority: 1 },
+        { url: `${baseUrl}/about`, changeFrequency: 'monthly', priority: 0.7 },
+        { url: `${baseUrl}/editorial-policy`, changeFrequency: 'monthly', priority: 0.8 },
+        { url: `${baseUrl}/privacy`, changeFrequency: 'yearly', priority: 0.4 },
+        { url: `${baseUrl}/terms`, changeFrequency: 'yearly', priority: 0.4 },
+        { url: `${baseUrl}/contact`, changeFrequency: 'yearly', priority: 0.5 },
+        { url: `${baseUrl}/faq`, changeFrequency: 'monthly', priority: 0.6 },
+        { url: `${baseUrl}/guide`, changeFrequency: 'monthly', priority: 0.8 },
+        { url: `${baseUrl}/trend`, changeFrequency: 'weekly', priority: 0.8 },
+        { url: `${baseUrl}/datalab`, changeFrequency: 'daily', priority: 0.8 },
+        { url: `${baseUrl}/tools`, changeFrequency: 'monthly', priority: 0.7 },
+        { url: `${baseUrl}/glossary`, changeFrequency: 'monthly', priority: 0.8 },
+        { url: `${baseUrl}/blog`, changeFrequency: 'monthly', priority: 0.8 },
     ];
 
-    // 용어사전 페이지
-    const glossaryPages: MetadataRoute.Sitemap = [
-        {
-            url: `${baseUrl}/glossary`,
-            lastModified,
-            changeFrequency: 'weekly',
-            priority: 0.9,
-        },
-        ...glossaryTerms.map((term) => ({
-            url: `${baseUrl}/glossary/${term.slug}`,
-            lastModified,
-            changeFrequency: 'monthly' as const,
-            priority: 0.7,
-        })),
-    ];
-
-    // 블로그 페이지 (정적 및 동적DB 통합)
-    let dynamicBlogPages: MetadataRoute.Sitemap = [];
-    try {
-        const { data: dbPosts } = await supabase
-            .from('blog_posts')
-            .select('slug, published_at')
-            .eq('is_published', true)
-            .order('published_at', { ascending: false });
-
-        if (dbPosts) {
-            dynamicBlogPages = dbPosts.map((post) => ({
-                url: `${baseUrl}/blog/${post.slug}`,
-                lastModified: new Date(post.published_at),
-                changeFrequency: 'weekly' as const,
-                priority: 0.8,
-            }));
-        }
-    } catch (e) {
-        console.error('Error fetching dynamic blog posts for sitemap:', e);
-    }
-
-    const blogPages: MetadataRoute.Sitemap = [
-        {
-            url: `${baseUrl}/blog`,
-            lastModified,
-            changeFrequency: 'weekly',
-            priority: 0.9,
-        },
-        ...blogPosts.map((post) => ({
-            url: `${baseUrl}/blog/${post.slug}`,
-            lastModified: new Date(post.updatedAt),
-            changeFrequency: 'monthly' as const,
-            priority: 0.8,
-        })),
-        ...dynamicBlogPages,
-    ];
-
-    // 카테고리 페이지
-    const categoryPages: MetadataRoute.Sitemap = categories.map((cat) => ({
-        url: `${baseUrl}/category/${cat.slug}`,
-        lastModified,
-        changeFrequency: 'weekly' as const,
-        priority: 0.85,
+    const guidePages: MetadataRoute.Sitemap = [...PUBLIC_GUIDE_SLUGS].map((slug) => ({
+        url: `${baseUrl}/guide/${slug}`,
+        changeFrequency: 'monthly' as const,
+        priority: 0.7,
     }));
 
-    // 도구 페이지
-    const toolPages: MetadataRoute.Sitemap = [
-        {
-            url: `${baseUrl}/tools`,
-            lastModified,
-            changeFrequency: 'monthly',
-            priority: 0.9,
-        },
-        {
-            url: `${baseUrl}/tools/acquisition-tax`,
-            lastModified,
-            changeFrequency: 'monthly',
-            priority: 0.9,
-        },
-        {
-            url: `${baseUrl}/tools/bid-calculator`,
-            lastModified,
-            changeFrequency: 'monthly',
-            priority: 0.9,
-        },
+    const glossaryPages: MetadataRoute.Sitemap = glossaryTerms.map((term) => ({
+        url: `${baseUrl}/glossary/${term.slug}`,
+        changeFrequency: 'monthly' as const,
+        priority: 0.6,
+    }));
+
+    const blogPages: MetadataRoute.Sitemap = getPublicBlogPosts().map((post) => ({
+        url: `${baseUrl}/blog/${post.slug}`,
+        lastModified: new Date(post.updatedAt),
+        changeFrequency: 'monthly' as const,
+        priority: 0.7,
+    }));
+
+    const categoryPages: MetadataRoute.Sitemap = categories.map((category) => ({
+        url: `${baseUrl}/category/${category.slug}`,
+        changeFrequency: 'daily' as const,
+        priority: 0.7,
+    }));
+
+    // Automated notice pages and unreviewed calculators are intentionally not
+    // advertised to search engines. They remain available as user tools.
+    const pages = [
+        ...staticPages,
+        ...guidePages,
+        ...glossaryPages,
+        ...blogPages,
+        ...categoryPages,
     ];
 
-    // 공고 상세 페이지 (AI 분석 리포트가 있는 페이지 우선)
-    let noticePages: MetadataRoute.Sitemap = [];
-    try {
-        const { data: notices } = await supabase
-            .from('court_notices')
-            .select('id, date_posted, ai_summary')
-            .not('ai_summary', 'is', null)
-            .order('date_posted', { ascending: false })
-            .limit(400);
-
-        if (notices) {
-            // Filter out fallback/thin summaries via the shared quality gate.
-            const highQualityNotices = filterQualityNotices(notices).slice(0, 200);
-
-            noticePages = highQualityNotices.map((notice) => ({
-                url: `${baseUrl}/notice/${notice.id}`,
-                lastModified: new Date(notice.date_posted),
-                changeFrequency: 'weekly' as const,
-                priority: 0.9,
-            }));
-        }
-    } catch (error) {
-        console.error('Error fetching notices for sitemap:', error);
-    }
-
-    return [...staticPages, ...glossaryPages, ...blogPages, ...categoryPages, ...toolPages, ...noticePages];
+    return [...new Map(pages.map((page) => [page.url, page])).values()];
 }

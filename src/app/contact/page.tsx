@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
     title: '문의하기 | LawAuction',
     description: 'LawAuction에 대한 문의사항을 보내주세요.',
+    alternates: { canonical: '/contact' },
 };
 
 export default function ContactPage() {

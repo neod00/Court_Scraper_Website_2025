@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
     title: '이용약관 | LawAuction',
     description: 'LawAuction의 이용약관입니다. 서비스 이용 조건, 광고 게재, 면책조항 등을 안내합니다.',
+    alternates: { canonical: '/terms' },
 };
 
 export default function TermsPage() {
@@ -51,7 +52,7 @@ export default function TermsPage() {
                         <li>본 서비스는 정보의 정확성, 완전성, 적시성을 보장하지 않습니다.</li>
                         <li>본 서비스 이용으로 인해 발생하는 직/간접적인 손해에 대해 책임지지 않습니다.</li>
                         <li>데이터는 주기적으로 업데이트되나, 실시간 반영이 아닐 수 있습니다.</li>
-                        <li>공고일로부터 90일이 지난 데이터는 자동으로 삭제될 수 있습니다.</li>
+                        <li>과거 공고는 통계와 변경 이력 확인을 위해 보관될 수 있습니다.</li>
                     </ul>
                 </section>
 
@@ -86,7 +87,7 @@ export default function TermsPage() {
                     <h2 className="text-xl font-semibold text-gray-800 mb-3">제5조 (서비스 이용 및 광고 게재)</h2>
                     <p className="text-gray-600 leading-relaxed">
                         본 서비스는 별도의 회원가입 없이 무료로 이용할 수 있습니다.
-                        서비스 운영을 위해 Google AdSense를 통한 광고가 게재되며,
+                        서비스 운영을 위해 검수된 편집 콘텐츠에 광고가 게재될 수 있으며,
                         광고 수익은 오로지 서비스 운영 및 개선을 위해 사용됩니다.
                         광고의 내용은 서비스 제공자와 무관하며, 광고에 대한 책임은 해당 광고주에게 있습니다.
                     </p>

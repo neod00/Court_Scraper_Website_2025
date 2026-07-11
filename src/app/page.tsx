@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import { supabase } from '@/lib/supabase';
 import NoticeCard from '@/components/NoticeCard';
 import SearchForm from '@/components/SearchForm';
@@ -6,7 +7,6 @@ import Sidebar from '@/components/Sidebar';
 import Link from 'next/link';
 import { getRecentPosts, blogCategories } from '@/data/blog-posts';
 import { glossaryTerms } from '@/data/glossary';
-import ViewTracker from '@/components/ViewTracker';
 import { filterQualityNotices } from '@/lib/noticeQuality';
 
 // Force dynamic rendering to handle searchParams correctly
@@ -27,7 +27,7 @@ export async function generateMetadata({ searchParams }: HomeProps): Promise<Met
       alternates: { canonical: 'https://www.courtauction.site/' },
     };
   }
-  return {};
+  return { alternates: { canonical: 'https://www.courtauction.site/' } };
 }
 
 export default async function Home({ searchParams }: HomeProps) {
@@ -149,7 +149,7 @@ export default async function Home({ searchParams }: HomeProps) {
   // ===== 주간 AI 트렌드 리포트 조회 =====
   const { data: weeklyReport } = await supabase
     .from('weekly_reports')
-    .select('briefing_text, trending_tags, full_report, week_start, week_end, view_count')
+    .select('trending_tags, week_start, week_end, view_count')
     .order('week_end', { ascending: false })
     .limit(1)
     .single();
@@ -203,6 +203,14 @@ export default async function Home({ searchParams }: HomeProps) {
 
   return (
     <div className="flex flex-col xl:flex-row gap-8 xl:gap-12">
+      {!hasSearchParams && (
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5907754718994620"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
+      )}
       {/* Main Content Area */}
       <div className="flex-1 min-w-0">
 
@@ -219,7 +227,7 @@ export default async function Home({ searchParams }: HomeProps) {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
               </span>
-              실시간 데이터 연동 중
+              매일 여러 차례 데이터 갱신
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight mb-4 leading-tight">
               대법원 회생 · 파산 자산매각 공고<br className="max-sm:hidden" />
@@ -373,29 +381,24 @@ export default async function Home({ searchParams }: HomeProps) {
             </div>
           </div>
 
-          {/* ✨ AI 시장 동향 브리핑 (방법 1) */}
-          {weeklyReport?.briefing_text && (
+          {/* 최근 수집 데이터를 바탕으로 한 사실 중심 요약 */}
+          {weeklyReport && (
             <div className="mt-5 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-400/20 rounded-xl p-5">
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-lg">✨</span>
-                <h3 className="text-sm font-bold text-cyan-300 tracking-wide">AI 시장 동향 분석</h3>
+                <span className="text-lg">📊</span>
+                <h3 className="text-sm font-bold text-cyan-300 tracking-wide">주간 데이터 요약</h3>
                 <div className="ml-auto flex items-center gap-2">
-                  <ViewTracker 
-                    tableName="weekly_reports" 
-                    idColumn="week_end" 
-                    idValue={weeklyReport?.week_end} 
-                    initialCount={weeklyReport?.view_count || 0}
-                    className="text-slate-400 bg-slate-800/50 px-2 py-0.5 rounded-full text-[10px]"
-                  />
                   <span className="text-xs text-slate-500">{weeklyReport?.week_start} ~ {weeklyReport?.week_end}</span>
                 </div>
               </div>
               <p className="text-slate-200 text-sm leading-relaxed">
-                {weeklyReport?.briefing_text}
+                최근 7일간 수집된 공고는 총 {weeklyTotal}건입니다.
+                {topDepartment ? ` 가장 많은 공고가 확인된 법원은 ${topDepartment[0]}이며 ${topDepartment[1]}건입니다.` : ''}
+                {' '}부동산 {categoryCounts.real_estate || 0}건, 차량·동산 {categoryCounts.vehicle || 0}건을 포함합니다.
               </p>
               <div className="mt-3 text-right">
                 <Link href="/trend" className="text-xs text-cyan-400 hover:text-cyan-300 font-medium transition-colors">
-                  전체 리포트 보기 →
+                  주간 통계 자세히 보기 →
                 </Link>
               </div>
             </div>
@@ -714,21 +717,27 @@ export default async function Home({ searchParams }: HomeProps) {
         </div>
 
         
-        {/* SEO Text Block for AdSense Approval */}
+        {/* 서비스의 데이터 범위와 사용 방법 */}
         <div className="mt-16 mb-8 bg-white rounded-2xl p-8 border border-gray-200 text-[14px] leading-[1.8] text-gray-600 shadow-sm">
             <h2 className="text-xl font-bold text-gray-900 mb-4 tracking-tight">
-                대법원 회생·파산 자산매각 공고, 나만의 숨은 수익처 찾기 가이드
+                법원 자산매각 공고를 확인하는 방법
             </h2>
             <p className="mb-4">
-                로옥션(LawAuction)은 대한민국 법원 대국민서비스를 통해 공개되는 회생 및 파산 관련 부동산, 차량, 특허 및 비상장 주식 등 다양한 자산 매각 공고를 실시간으로 분석하고 가공하여 제공하는 프리미엄 정보 플랫폼입니다. 일반적인 법원 경매와 달리, 파산관재인이나 회생 관리인이 법원의 허가를 받아 진행하는 매각 절차는 아직 대중화되지 않은 진정한 블루오션입니다. 상대적으로 낮은 경쟁률과 유연한 매각 조건(수의계약 가능성 등), 그리고 시세 대비 현저하게 저렴한 입찰 가능성을 제공합니다.
+                로옥션(LawAuction)은 대한민국 법원 대국민서비스에 공개된 회생·파산 자산매각 공고를
+                날짜, 자산 유형, 키워드별로 찾을 수 있도록 정리합니다. 법원 공고에는 부동산, 차량,
+                채권, 주식, 특허 등 서로 다른 자산과 계약 조건이 포함되므로 제목만으로 판단하지 말고
+                원문과 첨부파일을 함께 확인해야 합니다.
             </p>
             <p className="mb-4">
-                특히, 경매 입찰 초보부터 전문 투자자까지 누구나 손쉽게 복잡한 공고를 이해할 수 있도록 자체적인 AI 분석 엔진을 도입했습니다. 각각의 공고에 포함된 방대한 양의 매각물건명세서, 감정평가서, 그리고 유치권 신고 내역 등을 자동으로 텍스트화하여 핵심만을 짚어드리는 AI 요약 서비스는 오직 로옥션에서만 만나보실 수 있습니다. 또한 낙찰 시뮬레이션을 위한 예상 부대비용 및 취득세 계산기, 권리분석 단계별 필수 체크리스트를 전면 무료로 제공함으로써 사용자 여러분의 투자 실패율을 제로(0%)에 수렴하게 만드는 것을 목표로 합니다.
+                공고 상세의 AI 요약은 첨부 문서에서 일정과 가격 같은 항목을 찾기 위한 보조 자료입니다.
+                독립적인 법률 검토나 감정평가가 아니며 누락 또는 해석 오류가 있을 수 있습니다.
+                정확한 입찰 방식, 보증금, 잔금 기한, 자산 상태는 해당 공고의 원문과 담당자 연락처를 기준으로 확인하세요.
             </p>
             <p>
-                현장 임장을 떠나기 전, 반드시 본 사이트가 제공하는 카테고리별 투자 유의사항과 <strong>입찰 시나리오 플래너</strong>를 확인하시기 바랍니다. 로옥션은 단순한 1차 데이터(Raw Data)의 전달을 넘어, 매물별 예상 수익률, 인근 지역의 최신 낙찰가율 동향, 그리고 전문 에디터의 투자 전략 코멘트까지 하나의 통합된 인사이트(Insight)로 묶어 제공함으로써 대한민국 최상의 부동산·회생경매 리서치 센터로 발돋움하겠습니다. 
-                <br /><br />
-                *본 서비스에서 제공하는 모든 공고데이터 요약본과 예상 부대비용 수치는 AI와 자체 알고리즘이 산출한 참고 정보입니다. 입찰 전에는 반드시 대법원 사이트의 원본 서류와 현장 실사를 필수적으로 거치시길 강력히 권장합니다.
+                데이터 수집과 AI 활용 범위, 오류 정정 절차는
+                <Link href="/editorial-policy" className="ml-1 text-indigo-600 font-semibold hover:underline">
+                    편집·데이터 운영 원칙
+                </Link>에서 확인할 수 있습니다.
             </p>
         </div>
 

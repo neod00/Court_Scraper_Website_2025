@@ -1,10 +1,12 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Metadata } from 'next';
+import { isPublicGuideSlug } from '@/lib/contentPolicy';
 
 export const metadata: Metadata = {
     title: '자산매각 가이드 | LawAuction',
     description: '회생·파산 자산 매각 절차, 입찰 방법 및 2025년 최신 법규 가이드를 확인하세요.',
+    alternates: { canonical: '/guide' },
 };
 
 export const guides = [
@@ -45,7 +47,7 @@ export default function GuideListPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {guides.map((guide) => (
+                {guides.filter((guide) => isPublicGuideSlug(guide.slug)).map((guide) => (
                     <Link
                         key={guide.slug}
                         href={`/guide/${guide.slug}`}

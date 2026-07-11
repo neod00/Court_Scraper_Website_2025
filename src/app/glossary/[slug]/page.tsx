@@ -23,6 +23,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         title: `${term.term} - 회생·파산 용어사전 | 대법원 자산매각 공고`,
         description: term.shortDescription,
         keywords: `${term.term}, ${term.relatedTerms.join(', ')}, 법률용어, 경매용어`,
+        alternates: { canonical: `/glossary/${term.slug}` },
     };
 }
 

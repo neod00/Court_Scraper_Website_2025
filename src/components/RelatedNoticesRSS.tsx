@@ -8,7 +8,7 @@ interface RelatedNoticesRSSProps {
     courtName: string;
 }
 
-export default async function RelatedNoticesRSS({ currentId, category, courtName }: RelatedNoticesRSSProps) {
+export default async function RelatedNoticesRSS({ currentId, category }: RelatedNoticesRSSProps) {
     // Fetch related notices via direct DB query (mimicking RSS logic)
     const { data: rawNotices } = await supabase
         .from('court_notices')
@@ -43,7 +43,7 @@ export default async function RelatedNoticesRSS({ currentId, category, courtName
             <div className="p-6">
                 <p className="text-gray-400 text-xs mb-4 flex items-center gap-2">
                     <span>📡</span>
-                    지금 보고 계시는 <span className="text-white font-bold">{category === 'real_estate' ? '부동산' : '차량/동산'}</span> 분야의 실시간 신규 매각 매물입니다.
+                    지금 보고 계시는 <span className="text-white font-bold">{category === 'real_estate' ? '부동산' : '차량/동산'}</span> 분야의 최근 신규 매각 공고입니다.
                 </p>
                 
                 <div className="space-y-6">

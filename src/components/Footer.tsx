@@ -106,6 +106,11 @@ export default function Footer() {
                                     🔒 개인정보처리방침
                                 </Link>
                             </li>
+                            <li>
+                                <Link href="/editorial-policy" className="hover:text-white transition-colors">
+                                    📝 편집·데이터 운영 원칙
+                                </Link>
+                            </li>
                         </ul>
 
                         {/* 후원 안내 (임시 홀딩)
@@ -145,7 +150,7 @@ export default function Footer() {
                         본 사이트는 법원 또는 법원행정처와 제휴·보증 관계가 없으며, 제공되는 정보는 법적 효력이 없습니다.
                     </p>
                     <p className="mt-2">
-                        이 사이트는 Google AdSense를 통해 광고를 게재합니다.
+                        검수된 편집 콘텐츠에는 향후 Google AdSense 광고가 표시될 수 있습니다.
                         Google이 파트너 사이트를 통해 데이터를 사용하는 방식은{' '}
                         <a
                             href="https://www.google.com/policies/privacy/partners/"

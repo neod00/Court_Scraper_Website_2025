@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import { isPublicGuideSlug } from '@/lib/contentPolicy';
 
 // In a real app, this might come from a DB or CMS. 
 // For AdSense, static generation or high-quality static content is key.
@@ -253,10 +254,13 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps) {
     const { slug } = await params;
     const article = guideContent[slug as keyof typeof guideContent];
+    const isPublic = Boolean(article && isPublicGuideSlug(slug));
 
     return {
-        title: article ? `${article.title} | 자산매각 가이드` : '가이드를 찾을 수 없습니다',
-        description: article ? article.title + '에 대한 전문 가이드입니다.' : '가이드 정보를 찾을 수 없습니다.',
+        title: isPublic ? `${article.title} | 자산매각 가이드` : '가이드를 찾을 수 없습니다',
+        description: isPublic ? article.title + '에 대한 일반 정보 가이드입니다.' : '가이드 정보를 찾을 수 없습니다.',
+        alternates: isPublic ? { canonical: `/guide/${slug}` } : undefined,
+        robots: isPublic ? undefined : { index: false, follow: false },
     };
 }
 
@@ -264,7 +268,7 @@ export default async function GuideDetailPage({ params }: PageProps) {
     const { slug } = await params;
     const article = guideContent[slug as keyof typeof guideContent];
 
-    if (!article) {
+    if (!article || !isPublicGuideSlug(slug)) {
         notFound();
     }
 
@@ -304,6 +308,11 @@ export default async function GuideDetailPage({ params }: PageProps) {
                 prose-strong:text-indigo-900 prose-ul:list-disc prose-li:mb-2"
                 dangerouslySetInnerHTML={{ __html: article.content }}
             />
+
+            <aside className="mt-10 rounded-xl border border-amber-200 bg-amber-50 p-6 text-sm leading-6 text-amber-900">
+                이 글은 공고를 읽기 위한 일반 정보입니다. 실제 입찰 전에는 원문 공고, 매각 조건과 권리관계를 직접 확인하고 필요한 경우 전문가의 검토를 받으세요.{' '}
+                <Link href="/editorial-policy" className="font-semibold underline">편집·검수 원칙 보기</Link>
+            </aside>
 
             <footer className="mt-16 pt-8 border-t border-gray-200">
                 <div className="bg-indigo-50 rounded-xl p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
