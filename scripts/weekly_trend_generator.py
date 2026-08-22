@@ -111,8 +111,11 @@ def get_weekly_data(target_date: date = None) -> Dict:
     prev_end_str = prev_end.strftime('%Y-%m-%d')
 
     # This week's notices with AI summaries
+    # source_type='notice'(회생·파산 자산매각 공고)만 집계한다.
+    # 이 필터가 없으면 경매(auction) 건이 섞여 사이트 다른 화면과 수치가 어긋난다.
     result = supabase.table('court_notices') \
         .select('title, category, department, ai_summary, date_posted') \
+        .eq('source_type', 'notice') \
         .gte('date_posted', week_start_str) \
         .lte('date_posted', week_end_str) \
         .execute()
@@ -122,6 +125,7 @@ def get_weekly_data(target_date: date = None) -> Dict:
     # Previous week's count for comparison
     last_result = supabase.table('court_notices') \
         .select('id', count='exact') \
+        .eq('source_type', 'notice') \
         .gte('date_posted', prev_start_str) \
         .lte('date_posted', prev_end_str) \
         .execute()

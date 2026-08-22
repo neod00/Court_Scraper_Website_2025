@@ -5,6 +5,15 @@ import SearchForm from '@/components/SearchForm';
 import NoticeCard from '@/components/NoticeCard';
 import { supabase } from '@/lib/supabase';
 import { getRecentPosts, blogCategories } from '@/data/blog-posts';
+import {
+  type WeeklyReport,
+  filterPublishedColumns,
+  columnTitle,
+  columnExcerpt,
+  columnDate,
+  columnAuthor,
+  weekLabel,
+} from '@/lib/weeklyColumn';
 
 interface PageProps {
   searchParams: Promise<{
@@ -106,6 +115,16 @@ export default async function Home({ searchParams }: PageProps) {
 
   const recentPosts = getRecentPosts(5);
 
+  // 주간 데이터 칼럼 — 편집자 해석이 달린 최신 칼럼과 최신 집계 수치
+  const { data: weeklyRaw } = await supabase
+    .from('weekly_reports')
+    .select('*')
+    .order('week_end', { ascending: false })
+    .limit(12);
+  const weeklyReports = (weeklyRaw as WeeklyReport[]) || [];
+  const latestColumn = filterPublishedColumns(weeklyReports)[0];
+  const latestStats = weeklyReports[0];
+
   return (
     <div className="max-w-6xl mx-auto space-y-16">
       <header className="rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 px-6 py-12 sm:px-10 sm:py-16 text-white overflow-hidden relative">
@@ -134,6 +153,68 @@ export default async function Home({ searchParams }: PageProps) {
           <SearchForm />
         </Suspense>
       </section>
+
+      {/* 이번 주 데이터 — 편집자 칼럼이 있으면 칼럼을, 없으면 집계 수치를 보여준다 */}
+      {(latestColumn || latestStats) && (
+        <section aria-labelledby="weekly-heading">
+          <div className="flex items-end justify-between gap-4 mb-6">
+            <div>
+              <p className="text-sm font-semibold text-indigo-600 mb-2">수집 데이터로 보는 이번 주</p>
+              <h2 id="weekly-heading" className="text-3xl font-bold text-gray-900">주간 데이터 칼럼</h2>
+            </div>
+            <Link href="/trend" className="text-indigo-700 font-semibold hover:underline whitespace-nowrap">지난 칼럼 →</Link>
+          </div>
+
+          {latestColumn ? (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+              <Link
+                href={`/trend/${latestColumn.week_start}`}
+                className="lg:col-span-2 rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 hover:border-indigo-300 hover:shadow-md transition-all"
+              >
+                <p className="text-sm font-semibold text-indigo-600">{weekLabel(latestColumn)}</p>
+                <h3 className="mt-2 text-2xl font-bold text-gray-900 leading-snug">{columnTitle(latestColumn)}</h3>
+                <p className="mt-3 text-gray-600 leading-7">{columnExcerpt(latestColumn, 180)}</p>
+                <p className="mt-4 text-xs text-gray-500">{columnAuthor(latestColumn)} · {columnDate(latestColumn)}</p>
+              </Link>
+
+              <div className="rounded-2xl border border-gray-200 bg-gray-50 p-6 flex flex-col justify-center">
+                <p className="text-sm text-gray-500">
+                  {latestColumn.week_start} ~ {latestColumn.week_end} 수집
+                </p>
+                <p className="mt-2 text-4xl font-extrabold text-gray-900">
+                  {latestColumn.total_notices ?? 0}<span className="text-base font-normal text-gray-500 ml-1">건</span>
+                </p>
+                {latestColumn.top_department && (
+                  <p className="mt-4 text-sm text-gray-600">
+                    최다 공고 법원<br />
+                    <span className="font-bold text-gray-900">{latestColumn.top_department}</span>
+                  </p>
+                )}
+                <Link href="/datalab" className="mt-5 text-sm font-semibold text-indigo-700 hover:underline">
+                  입찰일·가격대 통계 보기 →
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-gray-200 bg-white p-6 sm:p-8">
+              <p className="text-gray-600 leading-7">
+                {latestStats.week_start} ~ {latestStats.week_end} 기간에 <strong className="text-gray-900">{latestStats.total_notices ?? 0}건</strong>의
+                회생·파산 자산매각 공고를 수집했습니다
+                {latestStats.top_department ? <>. 이 기간 공고가 가장 많았던 곳은 <strong className="text-gray-900">{latestStats.top_department}</strong>입니다</> : null}.
+                집계 기준과 한계는 데이터랩에 정리되어 있습니다.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-3 text-sm">
+                <Link href="/datalab" className="rounded-full bg-gray-900 text-white px-5 py-2.5 font-semibold hover:bg-gray-800">
+                  입찰일·가격대 통계
+                </Link>
+                <Link href="/trend" className="rounded-full border border-gray-200 px-5 py-2.5 font-semibold text-gray-700 hover:bg-gray-50">
+                  주간 집계 보기
+                </Link>
+              </div>
+            </div>
+          )}
+        </section>
+      )}
 
       <section className="grid grid-cols-1 md:grid-cols-3 gap-5" aria-label="서비스 이용 원칙">
         <article className="rounded-2xl border border-gray-200 bg-white p-6">
