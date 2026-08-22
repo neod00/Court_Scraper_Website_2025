@@ -1,7 +1,7 @@
 // 블로그 게시물 데이터
 // 구글 애드센스 승인을 위한 고품질 콘텐츠
 
-import { PUBLIC_BLOG_SLUGS } from '@/lib/contentPolicy';
+import { PUBLIC_BLOG_SLUGS, isRetiredBlogSlug } from '@/lib/contentPolicy';
 import { CURATED_BLOG_OVERRIDES, type CuratedSource } from '@/data/curated-blog-overrides';
 
 export interface BlogPost {
@@ -1507,7 +1507,8 @@ export const blogPosts: BlogPost[] = [
         category: '사례연구',
         tags: ['지분경매', '공유물분할', '내용증명', '협상', '소송'],
         readingTime: 12,
-        featured: true,
+        // 편집 심사(2026-08-22) 폐기 결정: 공유자 압박 대본, 수익 보장 표현, 민법 제269조(현물분할 원칙) 오류.
+        featured: false,
         content: `
 ## 서론: 반쪽짜리 집, 대체 왜 사는 겁니까?
 
@@ -1671,7 +1672,8 @@ export const blogPosts: BlogPost[] = [
         category: '권리분석',
         tags: ['유치권', '특수물건', '가짜유치권', '권리분석실전'],
         readingTime: 12,
-        featured: true,
+        // 편집 심사(2026-08-22): 형사 고소 압박 지시 등 삭제 전까지 공개 금지. 재작성 대상.
+        featured: false,
         content: `
 ## 서론: 유치권이라는 거대한 허들, 그리고 기회
 
@@ -1859,12 +1861,13 @@ NPL 투자의 핵심 역시 권리가 꼬여있지만 미래 가치가 높은 '�
 
 // 슬러그로 게시물 찾기
 export const getPostBySlug = (slug: string): BlogPost | undefined => {
-    if (!PUBLIC_BLOG_SLUGS.has(slug)) return undefined;
+    if (!PUBLIC_BLOG_SLUGS.has(slug) || isRetiredBlogSlug(slug)) return undefined;
     return getPublicBlogPosts().find(post => post.slug === slug);
 };
 export const getPublicBlogPosts = (): BlogPost[] => {
     return blogPosts
-        .filter(post => PUBLIC_BLOG_SLUGS.has(post.slug))
+        // 폐기 결정된 글은 화이트리스트에 들어 있더라도 공개하지 않는다 (이중 안전장치).
+        .filter(post => PUBLIC_BLOG_SLUGS.has(post.slug) && !isRetiredBlogSlug(post.slug))
         .map((post) => ({
             ...post,
             ...CURATED_BLOG_OVERRIDES[post.slug],
