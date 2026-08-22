@@ -43,3 +43,6 @@ next-env.d.ts
 # scraper results
 *.json
 /tmp/
+
+# 작성 중인 주간 칼럼 메모·초안 (발행 전 원고는 저장소에 두지 않는다)
+/drafts/
