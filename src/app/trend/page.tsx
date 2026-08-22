@@ -1,13 +1,25 @@
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import {
+    type WeeklyReport,
+    hasEditorNote,
+    filterPublishedColumns,
+    weekLabel,
+    columnTitle,
+    columnAuthor,
+    columnDate,
+    columnExcerpt,
+    columnParagraphs,
+    parseJsonColumn,
+} from '@/lib/weeklyColumn';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-    title: '주간 매각 공고 통계 | 법원 자산매각',
-    description: '수집된 법원 회생·파산 자산매각 공고의 주간 건수와 분류별 집계를 확인하세요.',
-    keywords: '주간통계, 자산매각, 회생파산, 매각공고, 법원경매',
+    title: '주간 데이터 칼럼 | 법원 자산매각 집계와 해석',
+    description: '로옥션이 매주 수집한 법원 회생·파산 자산매각 공고 집계에 편집자 해석을 더한 주간 칼럼입니다.',
+    keywords: '주간통계, 자산매각, 회생파산, 매각공고, 법원경매, 주간칼럼',
     alternates: { canonical: '/trend' },
 };
 
@@ -18,33 +30,24 @@ interface TrendingTag {
 
 export default async function TrendPage() {
     // Fetch all weekly reports, most recent first
-    const { data: reports } = await supabase
+    const { data } = await supabase
         .from('weekly_reports')
         .select('*')
         .order('week_end', { ascending: false })
-        .limit(12);
+        .limit(24);
 
-    const latestReport = reports?.[0];
+    const reports = (data as WeeklyReport[]) || [];
 
-    // Parse trending tags
-    let trendingTags: TrendingTag[] = [];
-    if (latestReport?.trending_tags) {
-        try {
-            trendingTags = typeof latestReport.trending_tags === 'string'
-                ? JSON.parse(latestReport.trending_tags)
-                : latestReport.trending_tags;
-        } catch { trendingTags = []; }
-    }
+    // 해석이 달린 주차 = 발행된 칼럼. 최신 칼럼을 머리기사로 세운다.
+    const publishedColumns = filterPublishedColumns(reports);
+    const featuredColumn = publishedColumns[0];
+    const olderColumns = publishedColumns.slice(1);
 
-    // Parse category breakdown
-    let categoryBreakdown: Record<string, number> = {};
-    if (latestReport?.category_breakdown) {
-        try {
-            categoryBreakdown = typeof latestReport.category_breakdown === 'string'
-                ? JSON.parse(latestReport.category_breakdown)
-                : latestReport.category_breakdown;
-        } catch { categoryBreakdown = {}; }
-    }
+    // 집계 수치는 해석 유무와 무관하게 최신 주차를 쓴다.
+    const latestReport = reports[0];
+
+    const trendingTags = parseJsonColumn<TrendingTag[]>(latestReport?.trending_tags, []);
+    const categoryBreakdown = parseJsonColumn<Record<string, number>>(latestReport?.category_breakdown, {});
 
     const catNames: Record<string, string> = {
         real_estate: '🏠 부동산',
@@ -60,18 +63,11 @@ export default async function TrendPage() {
         <div className="max-w-4xl mx-auto px-4 py-8">
             {/* 헤더 */}
             <header className="text-center mb-12">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-cyan-50 to-indigo-50 text-indigo-700 text-sm font-bold mb-4 border border-indigo-100">
-                    <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
-                    </span>
-                    공고 데이터 자동 집계 · 매주 업데이트
-                </div>
                 <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4 leading-tight tracking-tight">
-                    주간 매각 공고 통계
+                    주간 데이터 칼럼
                 </h1>
                 <p className="text-gray-500 max-w-2xl mx-auto leading-relaxed text-sm">
-                    수집된 공고를 주차·분류·담당 법원 기준으로 집계합니다.
+                    매주 수집한 법원 회생·파산 자산매각 공고를 집계하고, 그 주에 무엇이 눈에 띄었는지 편집자가 정리합니다.
                     수치는 탐색을 위한 참고 정보이며 실제 내용은 원문 공고에서 확인해야 합니다.
                 </p>
             </header>
@@ -145,18 +141,41 @@ export default async function TrendPage() {
                             </div>
                         )}
 
-                        {/* 집계 기준 안내 */}
-                        <div className="px-8 py-10 sm:px-12">
-                            <h3 className="text-xl font-bold text-gray-900 mb-4">이 통계를 읽는 방법</h3>
-                            <div className="space-y-3 text-sm leading-7 text-gray-600">
-                                <p>총 공고 수는 해당 주간에 수집된 공고를 기준으로 집계합니다.</p>
-                                <p>분류와 담당 법원 표기는 원문 및 수집 데이터에 따라 달라질 수 있으며, 중복·정정 공고로 실제 건수와 차이가 날 수 있습니다.</p>
-                                <p>가격 적정성, 권리관계, 물건 상태를 판단하는 분석 결과가 아닙니다. 참여 전 원문과 첨부 문서를 직접 확인하세요.</p>
-                                <p>
-                                    <Link href="/editorial-policy" className="font-semibold text-indigo-700 underline">데이터·편집 원칙 자세히 보기</Link>
-                                </p>
+                        {/* 편집자 해석 (있을 때) 또는 집계 기준 안내 */}
+                        {hasEditorNote(latestReport) ? (
+                            <div className="px-8 py-10 sm:px-12">
+                                <div className="flex flex-wrap items-baseline justify-between gap-2 mb-1">
+                                    <h3 className="text-xl font-bold text-gray-900">{columnTitle(latestReport)}</h3>
+                                    <span className="text-xs text-gray-400">{columnDate(latestReport)}</span>
+                                </div>
+                                <p className="text-sm text-gray-500 mb-6">{columnAuthor(latestReport)}</p>
+                                <div className="space-y-4 text-[15px] leading-8 text-gray-700">
+                                    {columnParagraphs(latestReport).slice(0, 2).map((p, i) => (
+                                        <p key={i}>{p}</p>
+                                    ))}
+                                </div>
+                                {columnParagraphs(latestReport).length > 2 && (
+                                    <Link
+                                        href={`/trend/${latestReport.week_start}`}
+                                        className="inline-flex items-center gap-1.5 mt-6 text-sm font-bold text-indigo-700 hover:text-indigo-800"
+                                    >
+                                        칼럼 전문 읽기 &rarr;
+                                    </Link>
+                                )}
                             </div>
-                        </div>
+                        ) : (
+                            <div className="px-8 py-10 sm:px-12">
+                                <h3 className="text-xl font-bold text-gray-900 mb-4">이 통계를 읽는 방법</h3>
+                                <div className="space-y-3 text-sm leading-7 text-gray-600">
+                                    <p>총 공고 수는 해당 주간에 수집된 공고를 기준으로 집계합니다.</p>
+                                    <p>분류와 담당 법원 표기는 원문 및 수집 데이터에 따라 달라질 수 있으며, 중복·정정 공고로 실제 건수와 차이가 날 수 있습니다.</p>
+                                    <p>가격 적정성, 권리관계, 물건 상태를 판단하는 분석 결과가 아닙니다. 참여 전 원문과 첨부 문서를 직접 확인하세요.</p>
+                                    <p>
+                                        <Link href="/editorial-policy" className="font-semibold text-indigo-700 underline">데이터·편집 원칙 자세히 보기</Link>
+                                    </p>
+                                </div>
+                            </div>
+                        )}
 
                         {/* CTA */}
                         <div className="bg-gradient-to-r from-indigo-50 to-blue-50 px-8 py-8 text-center border-t border-indigo-100">
@@ -190,63 +209,48 @@ export default async function TrendPage() {
                 </div>
             )}
 
-            {/* 📁 이전 주간 리포트 아카이브 */}
-            {reports && reports.length > 1 && (
+            {/* 지난 주간 칼럼 — 편집자 해석이 달린 주차만 개별 글로 발행됩니다 */}
+            {olderColumns.length > 0 && (
                 <section className="mt-16 border-t border-gray-200 pt-10">
-                    <div className="flex items-center gap-3 mb-6">
-                        <span className="text-2xl">📁</span>
-                        <h2 className="text-xl font-bold text-gray-900">이전 주간 리포트 아카이브</h2>
-                        <span className="text-sm text-gray-400 ml-auto">총 {reports.length - 1}건</span>
+                    <div className="flex items-center gap-3 mb-6 flex-wrap">
+                        <h2 className="text-xl font-bold text-gray-900">지난 주간 칼럼</h2>
+                        <span className="text-sm text-gray-400 ml-auto">총 {olderColumns.length}편</span>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {reports.slice(1).map((report: any, idx: number) => {
-                            // Use week_start (Monday) for month label
-                            const startDate = new Date(report.week_start);
-                            const month = startDate.getMonth() + 1;
-                            const day = startDate.getDate();
-                            // Week number based on Monday's position in month
-                            const weekOfMonth = day <= 7 ? 1 : day <= 14 ? 2 : day <= 21 ? 3 : day <= 28 ? 4 : 5;
-                            const weekLabel = `${month}월 ${weekOfMonth}주차`;
-
-                            let cats: Record<string, number> = {};
-                            try {
-                                cats = typeof report.category_breakdown === 'string'
-                                    ? JSON.parse(report.category_breakdown)
-                                    : (report.category_breakdown || {});
-                            } catch { cats = {}; }
-                            const totalNotices = Object.values(cats).reduce((a: number, b: number) => a + b, 0);
-
-                            return (
-                                <article
-                                    key={report.id || idx}
-                                    className="block bg-white border border-gray-200 rounded-xl p-5"
-                                >
-                                    <div className="flex items-center justify-between mb-3">
-                                        <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold px-2.5 py-1 rounded-full">
-                                            📊 {weekLabel}
-                                        </span>
-                                        <span className="text-xs text-gray-400">
-                                            {totalNotices > 0 ? `${totalNotices}건` : ''}
-                                        </span>
-                                    </div>
-                                    <h3 className="font-bold text-gray-900 text-sm mb-2">
-                                        {weekLabel} 매각 공고 집계
-                                    </h3>
-                                    <p className="text-xs text-gray-500 leading-relaxed line-clamp-2 mb-3">
-                                        수집 공고 {totalNotices || report.total_notices || 0}건을 분류별로 집계한 기록입니다.
-                                    </p>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-xs text-gray-400">
-                                            {report.week_start} ~ {report.week_end}
-                                        </span>
-                                        <span className="text-xs text-gray-400 font-medium">
-                                            자동 집계
-                                        </span>
-                                    </div>
-                                </article>
-                            );
-                        })}
+                        {olderColumns.map((report) => (
+                            <Link
+                                key={report.week_start}
+                                href={`/trend/${report.week_start}`}
+                                className="group block bg-white border border-gray-200 rounded-xl p-5 hover:border-indigo-300 hover:shadow-md transition-all"
+                            >
+                                <div className="flex items-center justify-between mb-3">
+                                    <span className="inline-flex items-center bg-indigo-50 text-indigo-700 text-xs font-bold px-2.5 py-1 rounded-full">
+                                        {weekLabel(report)}
+                                    </span>
+                                    <span className="text-xs text-gray-400">
+                                        {report.total_notices ? `${report.total_notices}건` : ''}
+                                    </span>
+                                </div>
+                                <h3 className="font-bold text-gray-900 text-sm mb-2 line-clamp-2 group-hover:text-indigo-700 transition-colors">
+                                    {columnTitle(report)}
+                                </h3>
+                                <p className="text-xs text-gray-500 leading-relaxed line-clamp-3 mb-3">
+                                    {columnExcerpt(report)}
+                                </p>
+                                <div className="flex items-center justify-between text-xs text-gray-400">
+                                    <span>{columnDate(report)}</span>
+                                    <span className="font-medium group-hover:text-indigo-600 transition-colors">읽기 &rarr;</span>
+                                </div>
+                            </Link>
+                        ))}
                     </div>
+                </section>
+            )}
+
+            {/* 아직 칼럼이 없을 때 안내 */}
+            {publishedColumns.length === 0 && latestReport && (
+                <section className="mt-12 bg-gray-50 border border-gray-200 rounded-xl p-6 text-sm text-gray-600 leading-7">
+                    <p>주간 칼럼은 집계 수치에 편집자 해석을 더해 발행합니다. 해석이 작성된 주차부터 개별 글로 공개됩니다.</p>
                 </section>
             )}
 

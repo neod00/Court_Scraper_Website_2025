@@ -163,13 +163,10 @@ export default async function NoticeDetail({ params }: PageProps) {
 
                     {/* AI Analysis Report Section */}
                     {notice.ai_summary && (
-                        <article className="relative overflow-hidden rounded-2xl border border-indigo-200/80 shadow-lg bg-white">
-                            <div className="px-6 py-4 bg-gradient-to-r from-indigo-600 to-blue-600 flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <span className="text-2xl">📋</span>
-                                    <h2 className="text-lg font-bold text-white uppercase tracking-tight">AI Assessment Report</h2>
-                                </div>
-                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black bg-white/20 text-white border border-white/30 backdrop-blur-sm">PRO VERSION v2</span>
+                        <article className="relative overflow-hidden rounded-2xl border border-gray-200 shadow-sm bg-white">
+                            <div className="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between gap-3 flex-wrap">
+                                <h2 className="text-base font-bold text-gray-900">공고 첨부문서 요약</h2>
+                                <span className="text-[11px] font-medium text-gray-500">AI 추출 · 원문 확인 필수</span>
                             </div>
 
                             <div className="p-6 md:p-8">
