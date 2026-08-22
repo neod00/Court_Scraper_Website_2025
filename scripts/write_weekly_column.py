@@ -37,6 +37,7 @@ AI의 역할은 (1) 살펴볼 지점 제시와 (3) 문장 다듬기까지입니�
 주차 슬러그는 week_start(월요일, YYYY-MM-DD)입니다.
 """
 import os
+import re
 import sys
 import json
 import argparse
@@ -209,6 +210,23 @@ def _collect_signals(week_start: str, week_end: str) -> dict:
         for d, c in sorted(this_dept.items(), key=lambda kv: -kv[1])[:3] if c >= 5
     ]
 
+    # 사건번호 묶음: 법원별 건수는 '사건 수'가 아니다.
+    # 한 파산 사건에서 물건이 여러 건으로 쪼개져 공고되는 경우가 많아, 건수만 보면 급증으로 오해한다.
+    case_pat = re.compile(r"(20\d{2}[가-힣]+\d+)")
+    case_counter = {}
+    titled = 0
+    for r in this_week:
+        m = case_pat.search(r.get("title") or "")
+        if not m:
+            continue
+        titled += 1
+        key = f"{r.get('department') or '미상'} {m.group(1)}"
+        case_counter[key] = case_counter.get(key, 0) + 1
+    multi_cases = [
+        {"법원_사건번호": k, "공고건수": v}
+        for k, v in sorted(case_counter.items(), key=lambda kv: -kv[1]) if v > 1
+    ][:6]
+
     # 가격 이상치
     priced = []
     for r in this_week:
@@ -223,9 +241,12 @@ def _collect_signals(week_start: str, week_end: str) -> dict:
     return {
         "이번주_총건수": len(this_week),
         "직전4주_주당평균": round(len(prior) / 4, 1),
+        "법원별_건수": dict(sorted(this_dept.items(), key=lambda kv: -kv[1])[:8]),
         "법원별_급증": dept_spikes,
         "분야_비중변화": cat_shifts,
         "특정법원_집중": clustered,
+        "한사건_다건공고": multi_cases,
+        "제목에_사건번호_표기": f"{titled}/{len(this_week)}건",
         "최고가_3건": priced[:3],
         "분야별_건수": {CATEGORY_LABELS.get(k, k): v for k, v in sorted(this_cat.items(), key=lambda kv: -kv[1])},
     }
@@ -280,6 +301,28 @@ def analyze(week_start: str):
         "# 한두 개만 채워도 충분합니다. 이 메모가 칼럼의 핵심이 됩니다.",
         "#",
         f"# 이번 주 {signals['이번주_총건수']}건 / 직전 4주 주당 평균 {signals['직전4주_주당평균']}건",
+        "#" + "-" * 60,
+        "#",
+        "# [근거 자료] 질문에 답할 때 참고하세요.",
+        "#",
+        "# ● 법원별 건수",
+    ]
+    for dept, cnt in signals["법원별_건수"].items():
+        lines.append(f"#     {cnt:3d}건  {dept}")
+
+    if signals["한사건_다건공고"]:
+        lines += [
+            "#",
+            "# ● 한 사건에서 여러 건이 공고된 경우 (법원별 건수 = 사건 수가 아님)",
+        ]
+        for item in signals["한사건_다건공고"]:
+            lines.append(f"#     {item['공고건수']}건  {item['법원_사건번호']}")
+
+    lines += [
+        "#",
+        f"# ● 제목에 사건번호가 표기된 공고: {signals['제목에_사건번호_표기']}",
+        "#     (법원마다 제목 관행이 달라, 표기가 없으면 제목만으로 물건을 구분하기 어렵습니다)",
+        "#",
         "#" + "-" * 60,
         "",
     ]
