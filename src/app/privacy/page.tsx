@@ -13,7 +13,7 @@ export default function PrivacyPage() {
 
             <div className="bg-white shadow rounded-lg p-6 space-y-8">
                 <p className="text-gray-600 text-sm">
-                    최종 수정일: 2026년 7월 11일
+                    최종 수정일: 2026년 8월 23일
                 </p>
 
                 <section>
@@ -146,10 +146,11 @@ export default function PrivacyPage() {
                     <h2 className="text-xl font-semibold text-gray-800 mb-3">6. 개인정보 보호책임자</h2>
                     <p className="text-gray-600 leading-relaxed">
                         개인정보 처리에 관한 업무를 총괄하여 책임지고, 개인정보 처리와 관련한 이용자의 불만처리 및
-                        피해구제 등을 위해 아래와 같이 개인정보 보호책임자를 지정하고 있습니다.
+                        피해구제 등을 위해 아래와 같이 개인정보 보호 업무 담당과 연락처를 안내합니다.
+                        본 서비스는 1인이 운영하며, 아래 연락처로 접수된 문의는 운영자가 직접 처리합니다.
                     </p>
                     <div className="bg-gray-50 p-4 rounded-md mt-3 space-y-1">
-                        <p className="text-gray-600"><strong>개인정보 보호책임자:</strong> 김달 (운영자)</p>
+                        <p className="text-gray-600"><strong>개인정보 보호 업무 담당:</strong> 로옥션 운영자</p>
                         <p className="text-gray-600"><strong>사업자등록번호:</strong> 199-06-02412</p>
                         <p className="text-gray-600">
                             <strong>이메일:</strong>{' '}
@@ -170,7 +171,7 @@ export default function PrivacyPage() {
 
                 <section className="border-t border-gray-200 pt-6">
                     <p className="text-sm text-gray-500">
-                        본 개인정보처리방침은 2026년 7월 11일부터 시행됩니다.
+                        본 개인정보처리방침은 2026년 8월 23일부터 시행됩니다.
                     </p>
                 </section>
             </div>
