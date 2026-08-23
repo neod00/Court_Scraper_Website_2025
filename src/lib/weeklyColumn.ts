@@ -58,7 +58,7 @@ export function columnTitle(report: WeeklyReport): string {
 }
 
 export function columnAuthor(report: WeeklyReport): string {
-    return report.editor_note_by?.trim() || '김달 · 로옥션 편집팀';
+    return report.editor_note_by?.trim() || '로옥션';
 }
 
 /** 발행일: 해석 작성 시각이 있으면 그것, 없으면 주차 종료일. */

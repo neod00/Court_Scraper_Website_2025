@@ -41,7 +41,6 @@ export default function ContactPage() {
                     <h2 className="text-xl font-semibold text-gray-800 mb-3">운영자 정보</h2>
                     <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-gray-700 text-sm space-y-1">
                         <p><strong>서비스명:</strong> 로옥션(LawAuction)</p>
-                        <p><strong>대표자:</strong> 김달</p>
                         <p><strong>사업자등록번호:</strong> 199-06-02412</p>
                     </div>
                 </section>

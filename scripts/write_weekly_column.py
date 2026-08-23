@@ -72,7 +72,7 @@ def _openai():
     return OpenAI(api_key=OPENAI_API_KEY)
 
 MIN_LENGTH = 200  # src/lib/weeklyColumn.ts 의 hasEditorNote 기준과 반드시 일치
-DEFAULT_AUTHOR = "김달 · 로옥션 편집팀"
+DEFAULT_AUTHOR = "로옥션"
 
 CATEGORY_LABELS = {
     "real_estate": "부동산", "vehicle": "차량/동산", "asset": "자산",

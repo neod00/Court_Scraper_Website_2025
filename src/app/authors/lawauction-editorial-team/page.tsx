@@ -2,19 +2,20 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
-    title: '로옥션 편집팀 소개 | LawAuction',
-    description: '로옥션 편집 콘텐츠의 작성 책임자, 자료 확인 방식과 AI 사용 범위를 안내합니다.',
+    title: '콘텐츠 작성과 검수 방식 | 로옥션',
+    description: '로옥션 편집 콘텐츠를 누가 어떤 절차로 작성하고 검수하는지, AI를 어디까지 사용하는지 안내합니다.',
     alternates: { canonical: '/authors/lawauction-editorial-team' },
 };
 
 export default function EditorialTeamPage() {
     return (
         <article className="max-w-4xl mx-auto bg-white rounded-2xl border border-gray-200 shadow-sm p-6 sm:p-10">
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">로옥션 편집팀</h1>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">콘텐츠 작성과 검수 방식</h1>
             <p className="text-gray-600 leading-relaxed mb-8">
-                편집 책임자는 로옥션 운영자 김달입니다. 법원 공개자료를 사용자가 확인하기 쉬운 순서로
-                정리하고, 원문과 서비스의 설명이 섞이지 않도록 관리합니다. 변호사·세무사 자격을
-                보유한 전문 자문기관을 표방하지 않으며 개별 사건의 법률·세무 판단을 제공하지 않습니다.
+                로옥션은 1인이 운영하는 민간 정보 서비스입니다. 편집 콘텐츠는 운영자가 직접 작성하고
+                공개 전에 원문과 대조합니다. 법원 공개자료를 사용자가 확인하기 쉬운 순서로 정리하되,
+                원문과 서비스의 설명이 섞이지 않도록 관리합니다. 변호사·세무사 자격을 보유한 전문
+                자문기관을 표방하지 않으며 개별 사건의 법률·세무 판단을 제공하지 않습니다.
             </p>
 
             <div className="space-y-8 text-gray-700 leading-relaxed">

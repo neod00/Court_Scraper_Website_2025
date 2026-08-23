@@ -45,7 +45,7 @@ export const CURATED_BLOG_OVERRIDES: Record<string, CuratedBlogOverride> = {
     'court-auction-vs-rehabilitation-sale': {
         title: '법원 경매와 회생·파산 자산매각: 절차와 확인자료 비교',
         description: '법원 경매와 회생·파산 자산매각의 진행 주체, 확인 문서, 인도 절차와 공고별 확인사항을 비교합니다.',
-        author: '김달 · 로옥션 편집팀',
+        author: '로옥션',
         updatedAt: '2026-07-11',
         reviewedAt: '2026-07-11',
         reviewMethod: '민사집행법, 채무자 회생 및 파산에 관한 법률과 대한민국 법원 공식 서비스를 대조해 일반 절차만 정리했습니다.',
@@ -86,7 +86,7 @@ export const CURATED_BLOG_OVERRIDES: Record<string, CuratedBlogOverride> = {
     'beginner-guide-first-bid': {
         title: '첫 입찰 전 확인해야 할 원문·일정·자금 체크리스트',
         description: '경매와 회생·파산 자산매각을 혼동하지 않고 첫 입찰 전에 확인해야 할 공고 원문, 일정, 자금과 현장 점검 항목을 정리합니다.',
-        author: '김달 · 로옥션 편집팀',
+        author: '로옥션',
         updatedAt: '2026-07-11',
         reviewedAt: '2026-07-11',
         reviewMethod: '고정된 보증금·잔금 기한을 제시하지 않고, 공식 공고에서 절차별 조건을 확인하는 방법만 정리했습니다.',
@@ -147,7 +147,7 @@ export const CURATED_BLOG_OVERRIDES: Record<string, CuratedBlogOverride> = {
     'understanding-registry-for-rights-analysis': {
         title: '등기사항증명서 읽기: 갑구·을구와 추가 확인자료',
         description: '등기사항증명서의 표제부, 갑구, 을구를 읽는 기본 방법과 등기만으로 판단할 수 없는 점유·매각조건 확인사항을 설명합니다.',
-        author: '김달 · 로옥션 편집팀',
+        author: '로옥션',
         updatedAt: '2026-07-11',
         reviewedAt: '2026-07-11',
         reviewMethod: '인터넷등기소와 민사집행법의 공식 안내 범위에서 등기 확인 절차를 정리했으며, 개별 권리의 인수 여부는 단정하지 않았습니다.',
@@ -195,7 +195,7 @@ export const CURATED_BLOG_OVERRIDES: Record<string, CuratedBlogOverride> = {
     'what-is-lien-and-why-important': {
         title: '유치권의 기본 요건과 매각 공고에서 확인할 사항',
         description: '민법상 유치권의 기본 요건과 등기만으로 확인하기 어려운 이유, 매각 공고와 현장에서 점검할 자료를 정리합니다.',
-        author: '김달 · 로옥션 편집팀',
+        author: '로옥션',
         updatedAt: '2026-07-11',
         reviewedAt: '2026-07-11',
         reviewMethod: '민법 제320조와 법원 공고 확인 절차를 기준으로 작성했으며, 유치권의 성립 여부나 채무 승계를 일반화하지 않았습니다.',
@@ -242,7 +242,7 @@ export const CURATED_BLOG_OVERRIDES: Record<string, CuratedBlogOverride> = {
     'auction-vs-public-sale-differences': {
         title: '법원 경매와 온비드 공매: 운영 주체와 확인 문서의 차이',
         description: '법원 경매와 온비드에서 진행되는 공매의 운영 주체, 참여 방식, 확인 문서와 인도 조건의 차이를 정리합니다.',
-        author: '김달 · 로옥션 편집팀',
+        author: '로옥션',
         updatedAt: '2026-07-11',
         reviewedAt: '2026-07-11',
         reviewMethod: '대한민국 법원 법원경매정보와 한국자산관리공사 온비드의 공식 안내를 대조해 공통 확인 절차를 정리했습니다.',
