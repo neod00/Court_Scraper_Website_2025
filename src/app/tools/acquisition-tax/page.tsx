@@ -141,11 +141,11 @@ export default function AcquisitionTaxPage() {
 
             {/* 헤더 */}
             <header className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                    🧮 취득세 계산기
+                <h1 className="text-3xl font-bold text-gray-900">
+                    취득세 계산기
                 </h1>
                 <p className="text-gray-600 mt-2">
-                    부동산 또는 차량 취득 시 납부해야 할 취득세를 계산합니다. (2026년 기준)
+                    부동산 또는 차량 취득 시 납부할 취득세를 입력값 기준으로 계산합니다. (2026년 1월 기준)
                 </p>
             </header>
 
@@ -158,7 +158,7 @@ export default function AcquisitionTaxPage() {
                         : 'border-transparent text-gray-500 hover:text-gray-700'
                         }`}
                 >
-                    🏠 부동산
+                    부동산
                 </button>
                 <button
                     onClick={() => setActiveTab('vehicle')}
@@ -167,7 +167,7 @@ export default function AcquisitionTaxPage() {
                         : 'border-transparent text-gray-500 hover:text-gray-700'
                         }`}
                 >
-                    🚗 차량
+                    차량
                 </button>
             </div>
 
@@ -325,7 +325,7 @@ export default function AcquisitionTaxPage() {
                             {/* KB차차차 링크 */}
                             <div className="bg-blue-50 rounded-lg p-4">
                                 <p className="text-sm text-blue-800 mb-2">
-                                    💡 차량 시세를 모르시나요?
+                                    차량 시세 참고
                                 </p>
                                 <a
                                     href="https://www.kbchachacha.com/public/market/price/v3/main.kbc"
@@ -342,8 +342,8 @@ export default function AcquisitionTaxPage() {
 
                 {/* 결과 */}
                 <div className="bg-gradient-to-br from-indigo-600 to-blue-700 rounded-2xl shadow-lg p-6 text-white">
-                    <h2 className="text-lg font-bold mb-6 flex items-center gap-2">
-                        📊 계산 결과
+                    <h2 className="text-lg font-bold mb-6">
+                        계산 결과
                     </h2>
 
                     {activeTab === 'property' ? (
@@ -427,13 +427,20 @@ export default function AcquisitionTaxPage() {
                 </div>
             </div>
 
-            {/* 안내사항 */}
+            {/* 계산 근거와 한계 */}
             <div className="mt-8 bg-amber-50 rounded-xl p-6 border border-amber-100">
-                <h3 className="font-bold text-amber-900 mb-3">⚠️ 안내사항</h3>
+                <h2 className="text-base font-bold text-amber-900 mb-3">계산 근거와 한계</h2>
+                <p className="text-sm text-amber-800 leading-relaxed mb-3">
+                    부동산 취득세율은 지방세법 제11조(부동산 취득의 세율), 다주택 중과는 지방세법 제13조의2, 차량 취득세율은 지방세법 제12조를 바탕으로 정리했으며,
+                    세부 적용 요건은 지방세법 시행령을 따릅니다. 지방교육세와 농어촌특별세는 각 법률의 부가세율을 단순 적용했습니다.
+                    이 계산기는 입력값을 그대로 계산할 뿐 실제 신고세액을 확정하지 않습니다.
+                </p>
                 <ul className="text-sm text-amber-800 space-y-1">
-                    <li>• 본 계산기는 참고용이며, 실제 세금은 관할 구청에서 확인하세요.</li>
-                    <li>• 조정대상지역, 생애최초 감면 등 특수한 경우는 반영되지 않았습니다.</li>
-                    <li>• 2026년 1월 기준 세율이며, 세법 개정 시 달라질 수 있습니다.</li>
+                    <li>• 실제 세금은 관할 지방자치단체 세무부서에서 확인해야 합니다.</li>
+                    <li>• 다주택 중과 세율은 조정대상지역 취득을 가정한 값이며, 비조정대상지역 2주택은 실제로 더 낮을 수 있습니다. 농어촌특별세는 85㎡ 초과·6억 원 초과 조건으로 단순화했습니다.</li>
+                    <li>• 생애최초 감면, 법인 취득 등 특수한 경우는 반영되지 않았습니다.</li>
+                    <li>• 2026년 1월 기준 세율이며, 세율 검토 필요 시 위택스(wetax.go.kr)와 국가법령정보센터(law.go.kr)에서 확인해야 합니다.</li>
+                    <li>• 차량의 공채 매입비와 등록비는 지역에 따라 달라지는 예시값입니다.</li>
                 </ul>
             </div>
 
@@ -443,7 +450,7 @@ export default function AcquisitionTaxPage() {
                     href="/tools/bid-calculator"
                     className="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors"
                 >
-                    📊 입찰가 계산기로 이동 →
+                    입찰가 계산기로 이동 →
                 </Link>
             </div>
         </div>

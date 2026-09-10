@@ -1,0 +1,322 @@
+{
+ "schema_version": 1,
+ "month": "2026-04",
+ "month_label": "2026년 4월",
+ "period": {
+  "start": "2026-04-01",
+  "end": "2026-04-30"
+ },
+ "snapshot_date": "2026-09-10",
+ "totals": {
+  "n": 425,
+  "prev_month": "2026-03",
+  "prev_month_n": 443,
+  "diff": -18,
+  "diff_pct": -4.1,
+  "prev_comparable": true,
+  "weekly_avg": 99.2,
+  "weekly_counts": [
+   {
+    "week_start": "2026-03-30",
+    "week_end": "2026-04-05",
+    "n": 59,
+    "partial": true
+   },
+   {
+    "week_start": "2026-04-06",
+    "week_end": "2026-04-12",
+    "n": 96,
+    "partial": false
+   },
+   {
+    "week_start": "2026-04-13",
+    "week_end": "2026-04-19",
+    "n": 98,
+    "partial": false
+   },
+   {
+    "week_start": "2026-04-20",
+    "week_end": "2026-04-26",
+    "n": 83,
+    "partial": false
+   },
+   {
+    "week_start": "2026-04-27",
+    "week_end": "2026-05-03",
+    "n": 89,
+    "partial": true
+   }
+  ]
+ },
+ "courts": {
+  "top": [
+   {
+    "name": "서울회생법원",
+    "n": 170,
+    "pct": 40.0,
+    "rank": 1,
+    "prev_n": 216,
+    "prev_rank": 1
+   },
+   {
+    "name": "수원회생법원",
+    "n": 53,
+    "pct": 12.5,
+    "rank": 2,
+    "prev_n": 54,
+    "prev_rank": 2
+   },
+   {
+    "name": "대전지방법원",
+    "n": 37,
+    "pct": 8.7,
+    "rank": 3,
+    "prev_n": 42,
+    "prev_rank": 3
+   },
+   {
+    "name": "창원지방법원",
+    "n": 35,
+    "pct": 8.2,
+    "rank": 4,
+    "prev_n": 23,
+    "prev_rank": 5
+   },
+   {
+    "name": "의정부지방법원",
+    "n": 33,
+    "pct": 7.8,
+    "rank": 5,
+    "prev_n": 26,
+    "prev_rank": 4
+   },
+   {
+    "name": "인천지방법원",
+    "n": 31,
+    "pct": 7.3,
+    "rank": 6,
+    "prev_n": 23,
+    "prev_rank": 5
+   },
+   {
+    "name": "춘천지방법원",
+    "n": 17,
+    "pct": 4.0,
+    "rank": 7,
+    "prev_n": 2,
+    "prev_rank": 13
+   },
+   {
+    "name": "부산회생법원",
+    "n": 13,
+    "pct": 3.1,
+    "rank": 8,
+    "prev_n": 16,
+    "prev_rank": 7
+   }
+  ],
+  "other_n": 36,
+  "distinct_n": 15
+ },
+ "categories": [
+  {
+   "key": "real_estate",
+   "label": "부동산",
+   "n": 174,
+   "pct": 40.9
+  },
+  {
+   "key": "asset",
+   "label": "자산",
+   "n": 103,
+   "pct": 24.2
+  },
+  {
+   "key": "bond",
+   "label": "채권",
+   "n": 45,
+   "pct": 10.6
+  },
+  {
+   "key": "etc",
+   "label": "기타",
+   "n": 41,
+   "pct": 9.6
+  },
+  {
+   "key": "vehicle",
+   "label": "차량/동산",
+   "n": 25,
+   "pct": 5.9
+  },
+  {
+   "key": "patent",
+   "label": "특허",
+   "n": 15,
+   "pct": 3.5
+  },
+  {
+   "key": "electronics",
+   "label": "전자장비",
+   "n": 17,
+   "pct": 4.0
+  },
+  {
+   "key": "stock",
+   "label": "주식",
+   "n": 5,
+   "pct": 1.2
+  }
+ ],
+ "price": {
+  "priced_n": 176,
+  "pct": 41.4,
+  "median": 4228161,
+  "p25": 1000000,
+  "p75": 15000000,
+  "ge_100m_n": 9,
+  "max": 1000000000,
+  "bands": [
+   {
+    "label": "1천만 원 미만",
+    "n": 124,
+    "pct": 70.5
+   },
+   {
+    "label": "1천만~1억 원",
+    "n": 43,
+    "pct": 24.4
+   },
+   {
+    "label": "1억~5억 원",
+    "n": 8,
+    "pct": 4.5
+   },
+   {
+    "label": "5억~10억 원",
+    "n": 0,
+    "pct": 0.0
+   },
+   {
+    "label": "10억 원 이상",
+    "n": 1,
+    "pct": 0.6
+   }
+  ]
+ },
+ "schedule": {
+  "with_auction_date_n": 187,
+  "pct": 44.0,
+  "excluded_n": 5,
+  "in_month_n": 128,
+  "next_month_n": 56,
+  "other_n": 3,
+  "by_month": [
+   {
+    "month": "2026-04",
+    "n": 128
+   },
+   {
+    "month": "2026-05",
+    "n": 56
+   },
+   {
+    "month": "2026-06",
+    "n": 3
+   }
+  ],
+  "top_dates": [
+   {
+    "date": "2026-04-23",
+    "n": 13
+   },
+   {
+    "date": "2026-04-24",
+    "n": 13
+   },
+   {
+    "date": "2026-04-30",
+    "n": 12
+   }
+  ]
+ },
+ "cases": {
+  "titled_with_case_n": 32,
+  "distinct_cases_n": 24,
+  "multi_case_n": 4,
+  "multi_case_examples": [
+   {
+    "court": "춘천지방법원",
+    "case_no": "2025하단1316",
+    "n": 4
+   },
+   {
+    "court": "춘천지방법원",
+    "case_no": "2023하단1234",
+    "n": 3
+   },
+   {
+    "court": "대구회생법원",
+    "case_no": "2025하단11869",
+    "n": 3
+   }
+  ]
+ },
+ "notable": [
+  {
+   "id": "2cd97306-6e29-42d3-b7ec-21c82daede4b",
+   "court": "수원회생법원",
+   "title": "부동산 매각공고(재공고)",
+   "min_price": 440000000,
+   "target": "제주특별자치도 제주시 해안동 13 대 3411㎡, 제주특별자치도 제주시 해안동 5-7 대 2515㎡, 제주특별자치도 제주시 해안동 5-7, 13…",
+   "rounds_noted": true
+  },
+  {
+   "id": "42f85124-ef37-468d-bc74-7b39bdb2e403",
+   "court": "전주지방법원",
+   "title": "부동산 매각공고(전주지방법원 2025하단313)",
+   "min_price": 390000000,
+   "target": "전라북도 전주시 덕진구 송천동1가 870 송천아이피크 제105동 제1층 제103호, 철근콘크리트조, 면적 101.8963㎡, 소유권대지권 403…",
+   "rounds_noted": true
+  },
+  {
+   "id": "ad0d1444-e027-4c16-b1e6-ac8dd0bf1f73",
+   "court": "부산회생법원",
+   "title": "부동산매각공고",
+   "min_price": 170000000,
+   "target": "부산광역시 사하구 괴정동 213-6 괴정스타클래스 제107동 제701호, 아파트, 84.8980㎡",
+   "rounds_noted": true
+  },
+  {
+   "id": "beb84bb0-fef1-4eca-9467-20453d0777aa",
+   "court": "서울회생법원",
+   "title": "부동산 매각 공고",
+   "min_price": 170000000,
+   "target": "경기 광주시 도척면 궁평리 871-13, 임야, 1,392㎡",
+   "rounds_noted": true
+  },
+  {
+   "id": "41875e19-a89c-414a-b5f3-805bc0b15e24",
+   "court": "수원회생법원",
+   "title": "자산 매각 공고",
+   "min_price": 141447928,
+   "target": "경기도 광주시 초월읍 쌍동리 48-3, 48-4, 48-7 건물 내 재고자산, 비품, 기계장치 등",
+   "rounds_noted": true
+  }
+ ],
+ "data_quality": {
+  "summary_fallback_n": 228,
+  "summary_fallback_pct": 53.6,
+  "summary_quality_n": 175,
+  "summary_quality_pct": 41.2,
+  "min_price_n": 176,
+  "auction_date_n": 187,
+  "unclassified_n": 0
+ },
+ "editor_note": "2026년 4월에는 공고 425건을 수집했습니다(집계 기준일 2026-09-10). 3월 443건보다 18건(4.1%) 적고, 주당 평균은 99.2건입니다.\n\n서울회생법원은 170건(40.0%)으로 3월 216건보다 줄었고, 수원회생법원 53건, 대전지방법원 37건, 창원지방법원 35건 순입니다. 창원지방법원은 3월 23건(공동 5위)에서 35건으로 늘어 4위가 됐고, 춘천지방법원은 3월 2건에서 17건으로 늘어 상위 8곳에 들어왔습니다. 자동 분류로는 부동산이 174건(40.9%)으로 여섯 달 중 비중이 가장 높았고, 자산 103건, 채권 45건이 뒤를 잇습니다.\n\n최저매각가가 기재된 공고는 176건(41.4%)이며 중앙값 약 423만 원, 상위 25% 경계 1,500만 원입니다. 1천만 원 미만이 124건(70.5%)이고 1억 원 이상은 9건입니다. 게시일 이후의 입찰 기일이 기재된 공고는 187건(44.0%)이고 56건은 5월 기일입니다. 제목에 사건번호가 적힌 공고는 32건(24개 사건)으로, 춘천지방법원 2025하단1316 사건이 4건, 대구회생법원 2025하단11869 사건이 3월에 이어 3건 공고됐습니다.\n\n요약 추출 실패는 228건(53.6%)으로 3월(28.0%)보다 크게 늘었습니다. 최저매각가 확인 비율이 3월 54.2%에서 41.4%로 낮아진 것은 이 변화와 함께 읽어야 합니다.",
+ "editor_note_title": "",
+ "editor_note_by": "로옥션",
+ "editor_note_status": "ai-draft",
+ "status": "draft",
+ "published_at": null
+}

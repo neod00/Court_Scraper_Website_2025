@@ -52,23 +52,21 @@ export default function CourtCostCalculator({ category }: Props) {
 
     return (
         <div className="bg-gradient-to-br from-gray-50 to-indigo-50/30 rounded-xl p-6 border border-gray-200 shadow-sm mt-8">
-            <div className="flex items-center gap-2 mb-4">
-                <span className="text-xl">🧮</span>
-                <h3 className="text-lg font-bold text-gray-900">예상 부대비용 및 수익률 계산기</h3>
-            </div>
-            
+            <h3 className="text-lg font-bold text-gray-900 mb-4">예상 부대비용 계산</h3>
+
             <p className="text-sm text-gray-600 mb-5 leading-relaxed">
-                보수적인 입찰가 산정을 위해 예상되는 취득세, 인지대, 명도/보관소 비용 등의 
-                부대비용을 미리 계산해 보세요. 정확한 부대비용 파악이 성공적인 투자의 핵심입니다.
+                입찰 금액을 입력하면 취득세와 등기·인도 관련 비용을 예시 세율로 계산합니다.
+                공고별 매각 조건과 실제 세율은 원문과 과세 기관에서 확인해야 합니다.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        예상 낙찰가 (또는 호가) 입력
+                    <label htmlFor="bid-price" className="block text-sm font-medium text-gray-700 mb-2">
+                        입찰 금액 입력
                     </label>
                     <div className="relative rounded-md shadow-sm">
                         <input
+                            id="bid-price"
                             type="text"
                             value={price ? price.toLocaleString() : ''}
                             onChange={(e) => {
@@ -104,7 +102,7 @@ export default function CourtCostCalculator({ category }: Props) {
                     
                     <div className="space-y-3 text-sm">
                         <div className="flex justify-between">
-                            <span className="text-gray-500">순수 낙찰가:</span>
+                            <span className="text-gray-500">입찰 금액:</span>
                             <span className="font-semibold text-gray-900">{isValid ? formatWon(numericPrice) : '-'}</span>
                         </div>
                         <div className="flex justify-between">
@@ -112,21 +110,22 @@ export default function CourtCostCalculator({ category }: Props) {
                             <span className="font-semibold text-red-600">+{isValid ? formatWon(estimatedTax) : '-'}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-gray-500">법무사/명도 등 여유 자금:</span>
+                            <span className="text-gray-500">등기·인도 관련 비용(예시 1.5%):</span>
                             <span className="font-semibold text-amber-600">+{isValid ? formatWon(estimatedExtra) : '-'}</span>
                         </div>
                         <div className="border-t border-gray-100 pt-3 mt-3 flex justify-between font-bold">
-                            <span className="text-indigo-900">최종 필요 예산:</span>
+                            <span className="text-indigo-900">예상 합계:</span>
                             <span className="text-indigo-700 text-lg">{isValid ? formatWon(totalCost) : '-'}</span>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <div className="mt-4 text-right">
-                <span className="text-[11px] text-gray-400">
-                    * 위 계산은 참고용 시뮬레이션이며 지역 및 과세표준에 따라 실제 세금과 차이가 있을 수 있습니다.
-                </span>
+            <div className="mt-4 text-[11px] text-gray-500 leading-relaxed">
+                <p>
+                    * 적용 세율은 예시이며 지역·과세표준·주택 수에 따라 실제 세금과 다를 수 있습니다.
+                    세율 근거와 자세한 계산은 <a href="/tools" className="underline text-indigo-600 hover:text-indigo-800">계산 도구 페이지</a>에서 확인할 수 있습니다.
+                </p>
             </div>
         </div>
     );

@@ -1,73 +1,87 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { glossaryTerms, glossaryByCategory } from '@/data/glossary';
+import {
+    glossaryTerms,
+    glossaryByCategory,
+    getTermDisplayName,
+    GLOSSARY_CORPUS_NOTE,
+    GLOSSARY_REVIEWED_AT,
+} from '@/data/glossary';
 
 export const metadata: Metadata = {
-    title: '회생·파산 용어사전 | LawAuction',
-    description: '회생절차, 파산, 유치권, 법정지상권, 권리분석 등 법원 경매와 자산매각에 필요한 핵심 용어를 알기 쉽게 설명합니다.',
-    keywords: '회생절차, 파산, 유치권, 법정지상권, 권리분석, 경매용어, 법률용어, 부동산경매, 감정가, 최저매각가격',
+    title: '회생·파산 자산매각 용어사전',
+    description:
+        '회생절차, 파산관재인, 수의계약, 입찰보증금, 최저매각가격 등 법원 회생·파산 자산매각 공고를 읽는 데 필요한 20개 용어를 설명하고, 로옥션이 수집한 공고에서 각 개념이 얼마나 자주 등장하는지 함께 정리했습니다.',
+    keywords: '회생절차, 파산관재인, 수의계약, 입찰보증금, 최저매각가격, 유치권, 법정지상권, 권리분석, 경매용어, 법률용어',
     alternates: { canonical: '/glossary' },
-    robots: { index: false, follow: true },
+    openGraph: {
+        title: '회생·파산 자산매각 용어사전',
+        description: '법원 회생·파산 자산매각 공고를 읽는 데 필요한 20개 용어와 공고 내 언급 빈도',
+        url: '/glossary',
+        type: 'website',
+    },
+};
+
+const categoryDescriptions: Record<string, string> = {
+    '절차': '회생, 파산, 관재인 매각 등 자산 매각과 관련된 법적 절차입니다.',
+    '권리': '유치권, 법정지상권, 근저당권 등 자산에 설정되는 권리입니다.',
+    '비용': '취득세, 감정가, 입찰보증금 등 금전과 관련된 용어입니다.',
+    '문서': '등기사항증명서, 매각물건명세서 등 확인이 필요한 서류입니다.',
+    '기타': '권리분석 등 그 밖의 개념입니다.',
 };
 
 export default function GlossaryPage() {
     const categorizedTerms = glossaryByCategory();
 
-    const categoryIcons: Record<string, string> = {
-        '절차': '⚙️',
-        '권리': '🔒',
-        '비용': '💰',
-        '문서': '📄',
-        '기타': '📌',
-    };
-
-    const categoryDescriptions: Record<string, string> = {
-        '절차': '회생, 파산, 경매 등 자산 매각 관련 법적 절차를 설명합니다.',
-        '권리': '유치권, 법정지상권, 근저당권 등 부동산에 설정되는 권리를 다룹니다.',
-        '비용': '취득세, 감정가, 입찰보증금 등 금전 관련 용어를 정리합니다.',
-        '문서': '등기부등본, 매각물건명세서 등 필수 서류를 안내합니다.',
-        '기타': '권리분석 등 기타 중요 개념을 설명합니다.',
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'DefinedTermSet',
+        name: '회생·파산 자산매각 용어사전',
+        url: 'https://www.courtauction.site/glossary',
+        inLanguage: 'ko-KR',
+        publisher: { '@type': 'Organization', name: '로옥션(LawAuction)', url: 'https://www.courtauction.site' },
+        hasDefinedTerm: glossaryTerms.map((t) => ({
+            '@type': 'DefinedTerm',
+            name: getTermDisplayName(t),
+            description: t.shortDescription,
+            url: `https://www.courtauction.site/glossary/${t.slug}`,
+        })),
     };
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
-            {/* 헤더 섹션 */}
-            <div className="text-center mb-12">
-                <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                    📚 회생·파산 용어사전
-                </h1>
-                <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                    법원 경매와 회생·파산 자산매각에 참여하기 위해 반드시 알아야 할 핵심 용어들을
-                    쉽고 정확하게 설명합니다. 처음 입찰에 도전하시는 분들께 유용한 가이드가 될 것입니다.
-                </p>
-                <div className="mt-6 flex justify-center gap-4 flex-wrap">
-                    <span className="bg-indigo-100 text-indigo-800 text-sm font-medium px-4 py-2 rounded-full">
-                        📖 총 {glossaryTerms.length}개 용어
-                    </span>
-                    <span className="bg-green-100 text-green-800 text-sm font-medium px-4 py-2 rounded-full">
-                        ✅ 실무 중심 설명
-                    </span>
-                    <span className="bg-amber-100 text-amber-800 text-sm font-medium px-4 py-2 rounded-full">
-                        🔄 정기 업데이트
-                    </span>
-                </div>
-            </div>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
 
-            {/* 빠른 이동 네비게이션 */}
-            <nav className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-12">
-                <h2 className="text-lg font-bold text-gray-800 mb-4">📍 카테고리별 바로가기</h2>
+            {/* 헤더 */}
+            <header className="mb-12">
+                <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                    회생·파산 자산매각 용어사전
+                </h1>
+                <p className="text-lg text-gray-600 max-w-3xl leading-relaxed">
+                    법원 회생·파산 자산매각 공고를 읽을 때 마주치는 {glossaryTerms.length}개 용어를 설명합니다.
+                    각 용어 끝에는 로옥션(LawAuction)이 수집한 공고에서 그 개념이 실제로 얼마나 언급되는지를 덧붙여,
+                    법원 경매 용어와 관재인·관리인 매각 공고의 차이를 확인할 수 있게 했습니다.
+                </p>
+                <p className="mt-4 text-sm text-gray-500">
+                    기준: {GLOSSARY_REVIEWED_AT} 검수 · 용어 {glossaryTerms.length}개 · 작성 <Link href="/authors/lawauction-editorial-team" className="underline hover:text-indigo-600">로옥션 편집팀</Link>
+                </p>
+            </header>
+
+            {/* 카테고리 바로가기 */}
+            <nav className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-12" aria-label="카테고리 바로가기">
+                <h2 className="text-lg font-bold text-gray-800 mb-4">카테고리별 바로가기</h2>
                 <div className="flex flex-wrap gap-3">
-                    {categorizedTerms.map(({ category }) => (
+                    {categorizedTerms.map(({ category, terms }) => (
                         <a
                             key={category}
                             href={`#category-${category}`}
                             className="inline-flex items-center gap-2 bg-gray-100 hover:bg-indigo-100 text-gray-700 hover:text-indigo-700 px-4 py-2 rounded-lg transition-colors"
                         >
-                            <span>{categoryIcons[category]}</span>
                             <span className="font-medium">{category}</span>
-                            <span className="text-sm text-gray-500">
-                                ({categorizedTerms.find(c => c.category === category)?.terms.length || 0})
-                            </span>
+                            <span className="text-sm text-gray-500">({terms.length})</span>
                         </a>
                     ))}
                 </div>
@@ -77,16 +91,11 @@ export default function GlossaryPage() {
             <div className="space-y-16">
                 {categorizedTerms.map(({ category, terms }) => (
                     <section key={category} id={`category-${category}`} className="scroll-mt-24">
-                        {/* 카테고리 헤더 */}
-                        <div className="flex items-center gap-3 mb-6 pb-4 border-b-2 border-indigo-100">
-                            <span className="text-3xl">{categoryIcons[category]}</span>
-                            <div>
-                                <h2 className="text-2xl font-bold text-gray-900">{category}</h2>
-                                <p className="text-sm text-gray-500">{categoryDescriptions[category]}</p>
-                            </div>
+                        <div className="mb-6 pb-4 border-b-2 border-indigo-100">
+                            <h2 className="text-2xl font-bold text-gray-900">{category}</h2>
+                            <p className="text-sm text-gray-500">{categoryDescriptions[category]}</p>
                         </div>
 
-                        {/* 용어 카드 그리드 */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {terms.map((item) => (
                                 <Link
@@ -96,9 +105,9 @@ export default function GlossaryPage() {
                                 >
                                     <div className="flex items-start justify-between mb-3">
                                         <h3 className="text-xl font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">
-                                            {item.term}
+                                            {getTermDisplayName(item)}
                                         </h3>
-                                        <span className="text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <span className="text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true">
                                             →
                                         </span>
                                     </div>
@@ -106,14 +115,18 @@ export default function GlossaryPage() {
                                         {item.shortDescription}
                                     </p>
                                     <div className="flex flex-wrap gap-2">
-                                        {item.relatedTerms.slice(0, 3).map((related) => (
-                                            <span
-                                                key={related}
-                                                className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded"
-                                            >
-                                                #{related}
-                                            </span>
-                                        ))}
+                                        {item.relatedTerms
+                                            .map((related) => glossaryTerms.find((t) => t.term === related))
+                                            .filter((t): t is NonNullable<typeof t> => Boolean(t))
+                                            .slice(0, 3)
+                                            .map((related) => (
+                                                <span
+                                                    key={related.slug}
+                                                    className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded"
+                                                >
+                                                    {getTermDisplayName(related)}
+                                                </span>
+                                            ))}
                                     </div>
                                 </Link>
                             ))}
@@ -122,24 +135,36 @@ export default function GlossaryPage() {
                 ))}
             </div>
 
-            {/* 하단 CTA */}
-            <div className="mt-16 bg-gradient-to-r from-indigo-600 to-blue-600 rounded-2xl p-8 text-center text-white">
-                <h3 className="text-2xl font-bold mb-3">📌 지금 바로 매각 공고를 확인해보세요</h3>
-                <p className="text-indigo-100 mb-6">
-                    용어를 숙지했다면, 실제 매각 공고를 검색하고 분석해보세요.
+            {/* 통계 기준 */}
+            <p className="mt-12 text-sm text-gray-500 leading-relaxed border-t border-gray-200 pt-6">
+                {GLOSSARY_CORPUS_NOTE}{' '}
+                집계 방법은 <Link href="/editorial-policy" className="underline hover:text-indigo-600">데이터·편집 원칙</Link>에서 확인할 수 있습니다.
+            </p>
+
+            {/* 다음 단계 */}
+            <div className="mt-8 bg-gray-50 rounded-2xl p-8 border border-gray-100">
+                <h2 className="text-xl font-bold text-gray-900 mb-3">함께 보기</h2>
+                <p className="text-gray-600 mb-6">
+                    용어를 확인한 뒤에는 실제 공고를 검색하거나, 공고 읽는 순서를 정리한 편집 글을 볼 수 있습니다.
                 </p>
-                <div className="flex justify-center gap-4 flex-wrap">
+                <div className="flex gap-4 flex-wrap">
                     <Link
                         href="/"
-                        className="bg-white text-indigo-600 font-bold px-8 py-3 rounded-lg hover:bg-indigo-50 transition-colors"
+                        className="bg-indigo-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors"
                     >
-                        🔍 공고 검색하기
+                        공고 검색
                     </Link>
                     <Link
-                        href="/guide"
-                        className="bg-indigo-500 text-white font-bold px-8 py-3 rounded-lg hover:bg-indigo-400 transition-colors"
+                        href="/blog"
+                        className="bg-white border border-gray-200 text-gray-700 font-bold px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors"
                     >
-                        📚 입찰 가이드 보기
+                        편집 콘텐츠
+                    </Link>
+                    <Link
+                        href="/faq"
+                        className="bg-white border border-gray-200 text-gray-700 font-bold px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors"
+                    >
+                        자주 묻는 질문
                     </Link>
                 </div>
             </div>

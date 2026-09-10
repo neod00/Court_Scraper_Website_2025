@@ -1,3 +1,14 @@
+"""
+DEPRECATED — 사이트에서 사용하지 않는 스크립트입니다.
+=====================================================
+이 스크립트가 만드는 AI 월간/분기 리포트(blog_posts 초안, is_published=False)는
+로옥션(LawAuction) 사이트 어디에서도 읽지 않습니다(ALLOW_DATABASE_BLOG_POSTS=False).
+월간 리포트는 scripts/monthly_report_builder.py + src/content/reports/*.json 으로 대체되었고,
+daily_scrape.yml 의 정기 실행 단계에서도 제거되었습니다(2026-09-08).
+
+수동 실행이 필요할 때만 사용하세요:
+    python scripts/periodic_report_generator.py --period manual --start 2026-08-01 --end 2026-08-31
+"""
 import os
 import json
 import argparse
@@ -91,7 +102,7 @@ JSON 형식으로 결과를 반환하세요: {{ "title": "제목", "description"
 """
 
     response = client.chat.completions.create(
-        model="gpt-4-turbo-preview",
+        model="gpt-4o-mini",
         messages=[{"role": "system", "content": "You are a professional market analyst expert."}, {"role": "user", "content": prompt}],
         response_format={ "type": "json_object" }
     )

@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: '이용약관 | LawAuction',
-    description: 'LawAuction의 이용약관입니다. 서비스 이용 조건, 광고 게재, 면책조항 등을 안내합니다.',
+    title: '이용약관',
+    description: '로옥션(LawAuction)의 이용약관입니다. 서비스 이용 조건, 광고 게재, 면책조항 등을 안내합니다.',
     alternates: { canonical: '/terms' },
 };
 
@@ -13,13 +13,13 @@ export default function TermsPage() {
 
             <div className="bg-white shadow rounded-lg p-6 space-y-8">
                 <p className="text-gray-600 text-sm">
-                    최종 수정일: 2026년 7월 11일
+                    최종 수정일: 2026년 9월 8일
                 </p>
 
                 <section>
                     <h2 className="text-xl font-semibold text-gray-800 mb-3">제1조 (목적)</h2>
                     <p className="text-gray-600 leading-relaxed">
-                        이 약관은 LawAuction(이하 &quot;서비스&quot;)이 제공하는
+                        이 약관은 로옥션(LawAuction)(이하 &quot;서비스&quot;)이 제공하는
                         모든 서비스의 이용조건 및 절차에 관한 사항을 규정함을 목적으로 합니다.
                     </p>
                 </section>
@@ -27,7 +27,7 @@ export default function TermsPage() {
                 <section>
                     <h2 className="text-xl font-semibold text-gray-800 mb-3">제2조 (서비스의 내용)</h2>
                     <p className="text-gray-600 leading-relaxed">
-                        본 서비스는 대법원 회생/파산 자산매각 공고를 자동으로 수집하여 사용자에게
+                        본 서비스는 대한민국 법원이 공개한 회생/파산 자산매각 공고 등 공개 자료를 수집·보관하여 사용자에게
                         검색 및 조회 기능을 제공하며, 공고 원문 확인 방법과 일반적인 절차,
                         관련 기관 확인 경로를 설명하는 편집 콘텐츠를 추가로 제공합니다.
                     </p>
@@ -36,7 +36,8 @@ export default function TermsPage() {
                         <li>날짜별, 카테고리별 필터링</li>
                         <li>공고 상세 정보 조회 및 원문 확인 안내</li>
                         <li>원본 파일 다운로드 링크 제공</li>
-                        <li>입찰가 계산기, 취득세 계산기 등 투자 도구</li>
+                        <li>입찰가 계산기, 취득세 계산기 등 참고용 계산 도구</li>
+                        <li>수집 데이터에 기반한 주간 칼럼·월간 리포트 등 편집 콘텐츠</li>
                     </ul>
                 </section>
 
@@ -45,7 +46,7 @@ export default function TermsPage() {
                     <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-md">
                         <p className="text-yellow-800 leading-relaxed">
                             <strong>중요:</strong> 본 서비스에서 제공하는 정보는 참고용으로만 제공되며,
-                            법적 효력이 없습니다. 정확한 정보는 반드시 대법원 홈페이지에서 직접 확인하시기 바랍니다.
+                            법적 효력이 없습니다. 정확한 정보는 반드시 대한민국 법원 대국민서비스(scourt.go.kr)에서 직접 확인하시기 바랍니다.
                         </p>
                     </div>
                     <ul className="list-disc list-inside text-gray-600 mt-4 space-y-2">
@@ -60,8 +61,8 @@ export default function TermsPage() {
                     <h2 className="text-xl font-semibold text-gray-800 mb-3">제4조 (데이터 출처 및 저작권)</h2>
                     <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-md">
                         <p className="text-blue-800 leading-relaxed mb-3">
-                            본 서비스는 대한민국 법원 대국민서비스(scourt.go.kr)에 공개된 부동산 공고 및 사건 정보를
-                            기초 데이터로 활용하여, 사용자의 편의를 위해 분석/정리/시각화한 민간 정보 서비스입니다.
+                            본 서비스는 대한민국 법원 대국민서비스(scourt.go.kr)에 공개된 회생/파산 자산매각 공고 정보를
+                            기초 데이터로 활용하여, 사용자의 편의를 위해 정리/시각화한 민간 정보 서비스입니다.
                         </p>
                         <p className="text-blue-800 leading-relaxed mb-3">
                             본 서비스는 법원 또는 법원행정처와 직접적인 제휴/보증 관계에 있지 않으며,
@@ -110,7 +111,7 @@ export default function TermsPage() {
 
                 <section className="border-t border-gray-200 pt-6">
                     <p className="text-sm text-gray-500">
-                        본 이용약관은 2026년 7월 11일부터 시행됩니다.
+                        본 이용약관은 2026년 7월 11일부터 시행되며, 2026년 9월 8일에 서비스 내용 조항(제2조·제4조)의 문구를 정비했습니다.
                     </p>
                 </section>
             </div>

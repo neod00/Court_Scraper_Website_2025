@@ -1,0 +1,322 @@
+{
+ "schema_version": 1,
+ "month": "2026-06",
+ "month_label": "2026년 6월",
+ "period": {
+  "start": "2026-06-01",
+  "end": "2026-06-30"
+ },
+ "snapshot_date": "2026-09-10",
+ "totals": {
+  "n": 515,
+  "prev_month": "2026-05",
+  "prev_month_n": 358,
+  "diff": 157,
+  "diff_pct": 43.9,
+  "prev_comparable": true,
+  "weekly_avg": 120.2,
+  "weekly_counts": [
+   {
+    "week_start": "2026-06-01",
+    "week_end": "2026-06-07",
+    "n": 96,
+    "partial": false
+   },
+   {
+    "week_start": "2026-06-08",
+    "week_end": "2026-06-14",
+    "n": 140,
+    "partial": false
+   },
+   {
+    "week_start": "2026-06-15",
+    "week_end": "2026-06-21",
+    "n": 110,
+    "partial": false
+   },
+   {
+    "week_start": "2026-06-22",
+    "week_end": "2026-06-28",
+    "n": 128,
+    "partial": false
+   },
+   {
+    "week_start": "2026-06-29",
+    "week_end": "2026-07-05",
+    "n": 41,
+    "partial": true
+   }
+  ]
+ },
+ "courts": {
+  "top": [
+   {
+    "name": "서울회생법원",
+    "n": 241,
+    "pct": 46.8,
+    "rank": 1,
+    "prev_n": 170,
+    "prev_rank": 1
+   },
+   {
+    "name": "수원회생법원",
+    "n": 67,
+    "pct": 13.0,
+    "rank": 2,
+    "prev_n": 51,
+    "prev_rank": 2
+   },
+   {
+    "name": "대전회생법원",
+    "n": 43,
+    "pct": 8.3,
+    "rank": 3,
+    "prev_n": 9,
+    "prev_rank": 7
+   },
+   {
+    "name": "인천지방법원",
+    "n": 41,
+    "pct": 8.0,
+    "rank": 4,
+    "prev_n": 17,
+    "prev_rank": 6
+   },
+   {
+    "name": "창원지방법원",
+    "n": 29,
+    "pct": 5.6,
+    "rank": 5,
+    "prev_n": 23,
+    "prev_rank": 4
+   },
+   {
+    "name": "의정부지방법원",
+    "n": 26,
+    "pct": 5.0,
+    "rank": 6,
+    "prev_n": 18,
+    "prev_rank": 5
+   },
+   {
+    "name": "춘천지방법원",
+    "n": 17,
+    "pct": 3.3,
+    "rank": 7,
+    "prev_n": 1,
+    "prev_rank": 14
+   },
+   {
+    "name": "광주회생법원",
+    "n": 16,
+    "pct": 3.1,
+    "rank": 8,
+    "prev_n": 4,
+    "prev_rank": 10
+   }
+  ],
+  "other_n": 35,
+  "distinct_n": 13
+ },
+ "categories": [
+  {
+   "key": "real_estate",
+   "label": "부동산",
+   "n": 192,
+   "pct": 37.3
+  },
+  {
+   "key": "asset",
+   "label": "자산",
+   "n": 133,
+   "pct": 25.8
+  },
+  {
+   "key": "bond",
+   "label": "채권",
+   "n": 55,
+   "pct": 10.7
+  },
+  {
+   "key": "etc",
+   "label": "기타",
+   "n": 52,
+   "pct": 10.1
+  },
+  {
+   "key": "vehicle",
+   "label": "차량/동산",
+   "n": 30,
+   "pct": 5.8
+  },
+  {
+   "key": "patent",
+   "label": "특허",
+   "n": 15,
+   "pct": 2.9
+  },
+  {
+   "key": "electronics",
+   "label": "전자장비",
+   "n": 26,
+   "pct": 5.0
+  },
+  {
+   "key": "stock",
+   "label": "주식",
+   "n": 12,
+   "pct": 2.3
+  }
+ ],
+ "price": {
+  "priced_n": 202,
+  "pct": 39.2,
+  "median": 4000000,
+  "p25": 1000000,
+  "p75": 20000000,
+  "ge_100m_n": 30,
+  "max": 700000000,
+  "bands": [
+   {
+    "label": "1천만 원 미만",
+    "n": 135,
+    "pct": 66.8
+   },
+   {
+    "label": "1천만~1억 원",
+    "n": 37,
+    "pct": 18.3
+   },
+   {
+    "label": "1억~5억 원",
+    "n": 26,
+    "pct": 12.9
+   },
+   {
+    "label": "5억~10억 원",
+    "n": 4,
+    "pct": 2.0
+   },
+   {
+    "label": "10억 원 이상",
+    "n": 0,
+    "pct": 0.0
+   }
+  ]
+ },
+ "schedule": {
+  "with_auction_date_n": 207,
+  "pct": 40.2,
+  "excluded_n": 1,
+  "in_month_n": 129,
+  "next_month_n": 77,
+  "other_n": 1,
+  "by_month": [
+   {
+    "month": "2026-06",
+    "n": 129
+   },
+   {
+    "month": "2026-07",
+    "n": 77
+   },
+   {
+    "month": "2026-08",
+    "n": 1
+   }
+  ],
+  "top_dates": [
+   {
+    "date": "2026-06-24",
+    "n": 13
+   },
+   {
+    "date": "2026-06-11",
+    "n": 12
+   },
+   {
+    "date": "2026-06-29",
+    "n": 12
+   }
+  ]
+ },
+ "cases": {
+  "titled_with_case_n": 33,
+  "distinct_cases_n": 24,
+  "multi_case_n": 5,
+  "multi_case_examples": [
+   {
+    "court": "춘천지방법원",
+    "case_no": "2025하단1316",
+    "n": 5
+   },
+   {
+    "court": "춘천지방법원",
+    "case_no": "2023하단1234",
+    "n": 3
+   },
+   {
+    "court": "대구회생법원",
+    "case_no": "2026하합138",
+    "n": 2
+   }
+  ]
+ },
+ "notable": [
+  {
+   "id": "d9928f7b-c9e0-448c-b679-b4befa4f4aca",
+   "court": "서울회생법원",
+   "title": "자산(특허권) 매각 공고",
+   "min_price": 700000000,
+   "target": "특허권",
+   "rounds_noted": true
+  },
+  {
+   "id": "fa2c91ea-f7df-47ca-beb5-cb5d257d35bc",
+   "court": "서울회생법원",
+   "title": "비상장 유가증권 공개매각 공고",
+   "min_price": 600000000,
+   "target": "비상장 유가증권, (법인명 생략), 33,600주 (1주당 액면가액: 5,000원)",
+   "rounds_noted": true
+  },
+  {
+   "id": "c2d3a8cc-e890-476e-818b-6bed76300729",
+   "court": "의정부지방법원",
+   "title": "부동산 매각공고",
+   "min_price": 590000000,
+   "target": "인천광역시 부평구 청천동 36-3번지 일원 아파트 217동 3104호, 84.5725㎡",
+   "rounds_noted": true
+  },
+  {
+   "id": "b5ff4b7d-1d27-4218-b671-d5a2d5f969af",
+   "court": "대전회생법원",
+   "title": "파산재단 자산 매각공고(채권)",
+   "min_price": 588195500,
+   "target": "(사건번호 생략) 손해배상(가)사건의 판결금원",
+   "rounds_noted": true
+  },
+  {
+   "id": "84a243b4-2d11-417c-a692-6e8daace778b",
+   "court": "춘천지방법원",
+   "title": "부동산매각공고 (춘천지방법원 2023하단1078)",
+   "min_price": 300000000,
+   "target": "세종시 장군면 대교리 451-6 임야, 1977㎡",
+   "rounds_noted": true
+  }
+ ],
+ "data_quality": {
+  "summary_fallback_n": 300,
+  "summary_fallback_pct": 58.3,
+  "summary_quality_n": 189,
+  "summary_quality_pct": 36.7,
+  "min_price_n": 202,
+  "auction_date_n": 207,
+  "unclassified_n": 0
+ },
+ "editor_note": "2026년 6월에는 공고 515건을 수집했습니다(집계 기준일 2026-09-10). 5월 358건보다 157건(43.9%) 많고, 3~8월 여섯 달 중 가장 많은 달입니다. 주당 평균은 120.2건이며, 6월 8일 주는 140건으로 가장 많은 주였습니다.\n\n서울회생법원은 241건(46.8%)으로 5월보다 71건 늘었고, 수원회생법원 67건, 대전회생법원 43건, 인천지방법원 41건 순입니다. 대전회생법원은 5월 9건에서 43건으로 늘어 3위가 됐고, 대전지방법원 표기는 상위 8곳에서 빠졌습니다. 춘천지방법원은 5월 1건에서 17건이 됐습니다. 자동 분류로는 부동산 192건(37.3%), 자산 133건(25.8%), 채권 55건, 기타 52건 순입니다.\n\n최저매각가가 기재된 공고는 202건(39.2%)이며 중앙값 400만 원, 상위 25% 경계 2,000만 원입니다. 1억 원 이상은 30건으로 3월과 함께 가장 많지만 10억 원 이상은 없고 최고액은 7억 원입니다. 게시일 이후의 입찰 기일이 기재된 공고는 207건(40.2%)이고 77건은 7월 기일입니다. 제목에 사건번호가 적힌 공고는 33건(24개 사건)이며, 춘천지방법원 2025하단1316 사건은 4월 4건에 이어 6월에 5건이 공고됐습니다.\n\n요약 추출 실패는 300건(58.3%)으로 여섯 달 중 가장 높습니다. 건수가 늘어난 만큼 확인되지 않은 공고도 함께 늘었습니다.",
+ "editor_note_title": "",
+ "editor_note_by": "로옥션",
+ "editor_note_status": "ai-draft",
+ "status": "draft",
+ "published_at": null
+}

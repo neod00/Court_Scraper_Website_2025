@@ -97,11 +97,11 @@ export default function Sidebar() {
                         <span className="text-xs font-bold text-gray-700 group-hover:text-purple-700">용어사전</span>
                     </Link>
                     <Link
-                        href="/guide"
+                        href="/blog"
                         className="group flex flex-col items-center gap-2 p-4 rounded-xl bg-gray-50 hover:bg-amber-50 border border-gray-100 hover:border-amber-200 transition-all duration-200 hover:-translate-y-0.5"
                     >
                         <span className="text-2xl group-hover:scale-110 transition-transform">📝</span>
-                        <span className="text-xs font-bold text-gray-700 group-hover:text-amber-700">투자 가이드</span>
+                        <span className="text-xs font-bold text-gray-700 group-hover:text-amber-700">편집 글</span>
                     </Link>
                 </div>
             </div>
@@ -110,7 +110,7 @@ export default function Sidebar() {
             <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 text-white overflow-hidden relative">
                 <div className="absolute -bottom-6 -right-6 w-28 h-28 bg-white rounded-full opacity-10 blur-xl pointer-events-none" />
                 <div className="text-3xl mb-3">📚</div>
-                <h3 className="text-base font-bold mb-3">인기 투자 가이드</h3>
+                <h3 className="text-base font-bold mb-3">인기 편집 글</h3>
                 <ul className="space-y-2.5">
                     <li>
                         <Link

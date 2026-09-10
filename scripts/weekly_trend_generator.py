@@ -7,6 +7,9 @@ and generates:
   2. A full markdown report (blog-style weekly analysis)
   3. Trending tags extracted from summaries
 
+Output goes to the weekly_reports table only. Writing drafts to blog_posts
+was disabled on 2026-09-08 (the site never reads those drafts).
+
 Usage:
     python scripts/weekly_trend_generator.py              # Current week
     python scripts/weekly_trend_generator.py --backfill   # Generate all missing weeks
@@ -523,9 +526,12 @@ def generate_weekly_trend(target_date: date = None):
     print("\n💾 Step 3: Saving to database...")
     save_report(data, report)
 
-    # Step 4: Auto-publish as blog post
-    print("\n📝 Step 4: Publishing as blog post...")
-    save_as_blog_post(data, report)
+    # Step 4 (disabled 2026-09-08): blog_posts 초안 저장을 중단했습니다.
+    # 사이트는 weekly_reports 행(total_notices/top_department/category_breakdown/
+    # trending_tags + 사람이 쓰는 editor_note)만 읽고, blog_posts 초안은 어디에서도
+    # 사용하지 않습니다(ALLOW_DATABASE_BLOG_POSTS=False). 함수는 참고용으로 남겨 둡니다.
+    # save_as_blog_post(data, report)
+    print("Step 4: Blog post draft skipped (disabled; weekly_reports only).")
 
     print("\n✅ Weekly trend report generation complete!")
 

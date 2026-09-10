@@ -1,0 +1,300 @@
+{
+ "schema_version": 1,
+ "month": "2026-05",
+ "month_label": "2026년 5월",
+ "period": {
+  "start": "2026-05-01",
+  "end": "2026-05-31"
+ },
+ "snapshot_date": "2026-09-10",
+ "totals": {
+  "n": 358,
+  "prev_month": "2026-04",
+  "prev_month_n": 425,
+  "diff": -67,
+  "diff_pct": -15.8,
+  "prev_comparable": true,
+  "weekly_avg": 80.8,
+  "weekly_counts": [
+   {
+    "week_start": "2026-05-04",
+    "week_end": "2026-05-10",
+    "n": 101,
+    "partial": false
+   },
+   {
+    "week_start": "2026-05-11",
+    "week_end": "2026-05-17",
+    "n": 87,
+    "partial": false
+   },
+   {
+    "week_start": "2026-05-18",
+    "week_end": "2026-05-24",
+    "n": 102,
+    "partial": false
+   },
+   {
+    "week_start": "2026-05-25",
+    "week_end": "2026-05-31",
+    "n": 68,
+    "partial": false
+   }
+  ]
+ },
+ "courts": {
+  "top": [
+   {
+    "name": "서울회생법원",
+    "n": 170,
+    "pct": 47.5,
+    "rank": 1,
+    "prev_n": 170,
+    "prev_rank": 1
+   },
+   {
+    "name": "수원회생법원",
+    "n": 51,
+    "pct": 14.2,
+    "rank": 2,
+    "prev_n": 53,
+    "prev_rank": 2
+   },
+   {
+    "name": "대전지방법원",
+    "n": 42,
+    "pct": 11.7,
+    "rank": 3,
+    "prev_n": 37,
+    "prev_rank": 3
+   },
+   {
+    "name": "창원지방법원",
+    "n": 23,
+    "pct": 6.4,
+    "rank": 4,
+    "prev_n": 35,
+    "prev_rank": 4
+   },
+   {
+    "name": "의정부지방법원",
+    "n": 18,
+    "pct": 5.0,
+    "rank": 5,
+    "prev_n": 33,
+    "prev_rank": 5
+   },
+   {
+    "name": "인천지방법원",
+    "n": 17,
+    "pct": 4.7,
+    "rank": 6,
+    "prev_n": 31,
+    "prev_rank": 6
+   },
+   {
+    "name": "대전회생법원",
+    "n": 9,
+    "pct": 2.5,
+    "rank": 7,
+    "prev_n": 0,
+    "prev_rank": null
+   },
+   {
+    "name": "부산회생법원",
+    "n": 8,
+    "pct": 2.2,
+    "rank": 8,
+    "prev_n": 13,
+    "prev_rank": 8
+   }
+  ],
+  "other_n": 20,
+  "distinct_n": 14
+ },
+ "categories": [
+  {
+   "key": "real_estate",
+   "label": "부동산",
+   "n": 114,
+   "pct": 31.8
+  },
+  {
+   "key": "asset",
+   "label": "자산",
+   "n": 89,
+   "pct": 24.9
+  },
+  {
+   "key": "bond",
+   "label": "채권",
+   "n": 43,
+   "pct": 12.0
+  },
+  {
+   "key": "etc",
+   "label": "기타",
+   "n": 28,
+   "pct": 7.8
+  },
+  {
+   "key": "vehicle",
+   "label": "차량/동산",
+   "n": 41,
+   "pct": 11.5
+  },
+  {
+   "key": "patent",
+   "label": "특허",
+   "n": 17,
+   "pct": 4.7
+  },
+  {
+   "key": "electronics",
+   "label": "전자장비",
+   "n": 19,
+   "pct": 5.3
+  },
+  {
+   "key": "stock",
+   "label": "주식",
+   "n": 7,
+   "pct": 2.0
+  }
+ ],
+ "price": {
+  "priced_n": 154,
+  "pct": 43.0,
+  "median": 3000000,
+  "p25": 787500,
+  "p75": 10000000,
+  "ge_100m_n": 13,
+  "max": 3000000000,
+  "bands": [
+   {
+    "label": "1천만 원 미만",
+    "n": 112,
+    "pct": 72.7
+   },
+   {
+    "label": "1천만~1억 원",
+    "n": 29,
+    "pct": 18.8
+   },
+   {
+    "label": "1억~5억 원",
+    "n": 10,
+    "pct": 6.5
+   },
+   {
+    "label": "5억~10억 원",
+    "n": 2,
+    "pct": 1.3
+   },
+   {
+    "label": "10억 원 이상",
+    "n": 1,
+    "pct": 0.6
+   }
+  ]
+ },
+ "schedule": {
+  "with_auction_date_n": 154,
+  "pct": 43.0,
+  "excluded_n": 4,
+  "in_month_n": 92,
+  "next_month_n": 61,
+  "other_n": 1,
+  "by_month": [
+   {
+    "month": "2026-05",
+    "n": 92
+   },
+   {
+    "month": "2026-06",
+    "n": 61
+   },
+   {
+    "month": "2026-07",
+    "n": 1
+   }
+  ],
+  "top_dates": [
+   {
+    "date": "2026-05-26",
+    "n": 17
+   },
+   {
+    "date": "2026-06-04",
+    "n": 11
+   },
+   {
+    "date": "2026-06-01",
+    "n": 10
+   }
+  ]
+ },
+ "cases": {
+  "titled_with_case_n": 12,
+  "distinct_cases_n": 12,
+  "multi_case_n": 0,
+  "multi_case_examples": []
+ },
+ "notable": [
+  {
+   "id": "e17f590c-99b9-4236-9ec0-8a06c4bb64f7",
+   "court": "대전회생법원",
+   "title": "파산재단 자산 매각공고(부동산)",
+   "min_price": 3000000000,
+   "target": "경기도 파주시 월롱면 덕은리 841-36(토지, 건물), 841-37(토지), 841-38(토지, 건물), 841-43(토지, 건물), 841-…",
+   "rounds_noted": true
+  },
+  {
+   "id": "c9b1c2f2-7de8-4757-8939-118eafab3c81",
+   "court": "창원지방법원",
+   "title": "부동산 매각공고",
+   "min_price": 631000000,
+   "target": "소재지 - 김해시 진영읍 본산로 15-17, 1층 122호(진영굿프라임시티오피스텔), 종류 - 부동산, 면적 - 64.8㎡",
+   "rounds_noted": true
+  },
+  {
+   "id": "8a8077ee-a029-4b5e-8c75-2d7379700f81",
+   "court": "의정부지방법원",
+   "title": "부동산 매각공고",
+   "min_price": 283345732,
+   "target": "경기도 남양주시 오남읍 오남리888 남양주오남두산위브아파트 제104동 제1층 제103호, 아파트, 84.9916㎡",
+   "rounds_noted": true
+  },
+  {
+   "id": "0649620d-ce36-4ccc-a80b-48490362d769",
+   "court": "부산회생법원",
+   "title": "부동산매각공고",
+   "min_price": 270000000,
+   "target": "부산광역시 사하구 괴정동 213-6 괴정스타클래스 제107동, 제701호, 면적 84.8980㎡, 소유권",
+   "rounds_noted": true
+  },
+  {
+   "id": "06071801-8b39-4848-8b07-d8a36e027757",
+   "court": "의정부지방법원",
+   "title": "부동산 매각 공고",
+   "min_price": 222000000,
+   "target": "경기도 광주시 태전동 502-48 제4층 제401호, 임차인 퇴거한 상태",
+   "rounds_noted": true
+  }
+ ],
+ "data_quality": {
+  "summary_fallback_n": 197,
+  "summary_fallback_pct": 55.0,
+  "summary_quality_n": 148,
+  "summary_quality_pct": 41.3,
+  "min_price_n": 154,
+  "auction_date_n": 154,
+  "unclassified_n": 0
+ },
+ "editor_note": "2026년 5월에는 공고 358건을 수집했습니다(집계 기준일 2026-09-10). 4월 425건보다 67건(15.8%) 적고, 3~8월 여섯 달 중 가장 적은 달입니다. 주당 평균은 80.8건이며 5월 25일 주는 68건으로 가장 적었습니다.\n\n서울회생법원은 170건(47.5%)으로 건수는 4월과 같았고 비중은 높아졌습니다. 수원회생법원 51건, 대전지방법원 42건, 창원지방법원 23건 순이며, 대전회생법원으로 표기된 공고 9건이 이 달 처음 집계에 나타났습니다. 법원 표기는 공고 원문을 그대로 따릅니다. 자동 분류로는 부동산 114건(31.8%), 자산 89건(24.9%), 채권 43건(12.0%), 차량/동산 41건(11.5%) 순입니다.\n\n최저매각가가 기재된 공고는 154건(43.0%)이며, 중앙값은 300만 원으로 여섯 달 중 가장 낮고 상위 25% 경계는 1,000만 원입니다. 1억 원 이상은 13건입니다. 게시일 이후의 입찰 기일이 기재된 공고는 154건(43.0%)이고, 이 중 61건(39.6%)은 6월 기일입니다. 5월 26일 하루에 17건이 몰렸습니다. 제목에 사건번호가 적힌 공고는 12건(12개 사건)으로, 한 사건이 여러 건으로 나뉜 사례는 없었습니다.\n\n요약 추출 실패는 197건(55.0%)입니다. 건수가 적은 달이라 법원별·유형별 비율은 작은 변동에도 크게 움직일 수 있습니다.",
+ "editor_note_title": "",
+ "editor_note_by": "로옥션",
+ "editor_note_status": "ai-draft",
+ "status": "draft",
+ "published_at": null
+}

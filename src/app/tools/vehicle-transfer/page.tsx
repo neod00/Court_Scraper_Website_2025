@@ -128,11 +128,11 @@ export default function VehicleTransferPage() {
 
             {/* 헤더 */}
             <header className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                    🚗 차량 이전비 계산기
+                <h1 className="text-3xl font-bold text-gray-900">
+                    차량 이전비 계산기
                 </h1>
                 <p className="text-gray-600 mt-2">
-                    법원 매각 차량 이전 시 필요한 취득세, 공채, 번호판 비용 등 총 이전비용을 계산합니다.
+                    법원 매각 차량을 이전 등록할 때 드는 취득세, 공채, 번호판 비용 등을 입력값 기준으로 합산합니다.
                 </p>
             </header>
 
@@ -207,7 +207,7 @@ export default function VehicleTransferPage() {
                                         : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
                                         }`}
                                 >
-                                    🏠 자가용 (비영업)
+                                    자가용 (비영업)
                                 </button>
                                 <button
                                     onClick={() => setUsage('business')}
@@ -216,7 +216,7 @@ export default function VehicleTransferPage() {
                                         : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
                                         }`}
                                 >
-                                    🏢 영업용
+                                    영업용
                                 </button>
                             </div>
                         </div>
@@ -274,8 +274,8 @@ export default function VehicleTransferPage() {
 
                 {/* 결과 */}
                 <div className="bg-gradient-to-br from-green-600 to-emerald-700 rounded-2xl shadow-lg p-6 text-white">
-                    <h2 className="text-lg font-bold mb-6 flex items-center gap-2">
-                        📊 이전비용 계산 결과
+                    <h2 className="text-lg font-bold mb-6">
+                        이전비용 계산 결과
                     </h2>
 
                     {result ? (
@@ -285,7 +285,7 @@ export default function VehicleTransferPage() {
                                 <div className="text-green-200 text-sm">취득세율</div>
                                 <div className="text-3xl font-bold">{result.taxRate}%</div>
                                 <div className="text-green-200 text-xs mt-1">
-                                    {category === 'light' ? '경차 감면 적용' :
+                                    {category === 'light' ? '경차 세율(4%)' :
                                         category === 'truck' || category === 'van' ? '화물/승합 세율' :
                                             usage === 'business' ? '영업용 세율' : '비영업용 승용차 세율'}
                                 </div>
@@ -337,7 +337,6 @@ export default function VehicleTransferPage() {
                         </div>
                     ) : (
                         <div className="text-center text-green-200 py-12">
-                            <div className="text-5xl mb-4">🚗</div>
                             <p>차량 가격을 입력하면</p>
                             <p>이전비용이 자동으로 계산됩니다</p>
                         </div>
@@ -347,39 +346,42 @@ export default function VehicleTransferPage() {
 
             {/* 추가 비용 안내 */}
             <div className="mt-8 bg-blue-50 rounded-xl p-6 border border-blue-100">
-                <h3 className="font-bold text-blue-900 mb-3">💡 법원 매각 차량 이전 시 추가 고려사항</h3>
+                <h2 className="text-base font-bold text-blue-900 mb-3">법원 매각 차량 이전 시 추가 확인 사항</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-800">
                     <div>
-                        <h4 className="font-bold mb-1">📋 필요 서류</h4>
+                        <h3 className="font-bold mb-1">필요 서류</h3>
                         <ul className="space-y-0.5 text-blue-700">
-                            <li>• 매각허가결정문 (법원 발급)</li>
-                            <li>• 대금완납증명서</li>
-                            <li>• 자동차등록원부 (등록사업소 발급)</li>
-                            <li>• 신분증, 도장</li>
-                            <li>• 자동차보험 가입증명서</li>
+                            <li>• 법원 경매(민사집행법)일 때: 매각허가결정 정본, 대금완납증명 등</li>
+                            <li>• 관재인·관리인 매각일 때: 매매계약서, 법원 허가서 사본 등 관재인이 안내하는 서류</li>
+                            <li>• 공통: 자동차등록원부(등록사업소 발급), 신분증, 도장, 자동차보험 가입증명서</li>
+                            <li>• 필요 서류는 공고와 관할 등록사업소 안내 기준으로 확인</li>
                         </ul>
                     </div>
                     <div>
-                        <h4 className="font-bold mb-1">⚠️ 주의사항</h4>
+                        <h3 className="font-bold mb-1">확인 사항</h3>
                         <ul className="space-y-0.5 text-blue-700">
                             <li>• 체납 과태료/자동차세 승계 여부 확인</li>
-                            <li>• 압류/저당 말소 여부 확인</li>
+                            <li>• 압류/저당 말소 여부와 말소 부담 주체 확인(공고 원문)</li>
                             <li>• 의무보험 가입 후 이전 등록 가능</li>
-                            <li>• 낙찰 후 30일 이내 이전 등록 필수</li>
-                            <li>• 대행 시 수수료 3~5만원 추가</li>
+                            <li>• 이전 등록 기한은 관할 등록사업소 안내 기준으로 확인</li>
+                            <li>• 대행 시 수수료 별도(예시값 3~5만 원)</li>
                         </ul>
                     </div>
                 </div>
             </div>
 
-            {/* 안내사항 */}
+            {/* 계산 근거와 한계 */}
             <div className="mt-6 bg-amber-50 rounded-xl p-6 border border-amber-100">
-                <h3 className="font-bold text-amber-900 mb-3">⚠️ 안내사항</h3>
+                <h2 className="text-base font-bold text-amber-900 mb-3">계산 근거와 한계</h2>
+                <p className="text-sm text-amber-800 leading-relaxed mb-3">
+                    차량 취득세율은 지방세법 제12조(부동산 외 취득의 세율)를 바탕으로 경차 4%, 비영업용 승용차 7%, 영업용·화물·승합 5%로 정리했으며,
+                    세부 적용 요건은 지방세법 시행령을 따릅니다. 공채 매입 비율과 할인율, 번호판·인지세·등록 수수료는 지역과 시점에 따라 달라지는 예시값입니다.
+                </p>
                 <ul className="text-sm text-amber-800 space-y-1">
-                    <li>• 본 계산기는 참고용이며, 실제 비용은 등록사업소에서 확인하세요.</li>
-                    <li>• 공채 할인율은 시장 상황에 따라 변동됩니다 (약 60~70% 할인 적용).</li>
-                    <li>• 경차/하이브리드/전기차는 취득세 감면 혜택이 있을 수 있습니다.</li>
-                    <li>• 2026년 2월 기준이며, 지방세법 개정 시 세율이 달라질 수 있습니다.</li>
+                    <li>• 실제 비용은 관할 자동차등록사업소에서 확인해야 합니다.</li>
+                    <li>• 공채 할인율은 시장 상황에 따라 변동됩니다(계산기는 액면가의 35% 부담으로 가정).</li>
+                    <li>• 경차, 하이브리드, 전기차의 취득세 감면은 요건과 시한이 있으므로 별도로 확인해야 합니다.</li>
+                    <li>• 2026년 1월 기준이며, 세율 검토 필요 시 위택스(wetax.go.kr)와 국가법령정보센터(law.go.kr)에서 확인해야 합니다.</li>
                 </ul>
             </div>
 
@@ -389,13 +391,13 @@ export default function VehicleTransferPage() {
                     href="/tools/acquisition-tax"
                     className="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors"
                 >
-                    🧮 취득세 계산기
+                    취득세 계산기
                 </Link>
                 <Link
                     href="/tools/roi-calculator"
                     className="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors"
                 >
-                    📈 투자 수익률 계산기
+                    매도·임대 손익 계산기
                 </Link>
             </div>
         </div>

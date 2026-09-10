@@ -3,6 +3,14 @@
 import { useState, FormEvent } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
+/** 브라우저 로컬 날짜를 input[type=date] 값(YYYY-MM-DD)으로. toISOString은 UTC라 날짜가 밀릴 수 있어 쓰지 않는다. */
+function toDateInput(date: Date): string {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
 export default function SearchForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -14,13 +22,14 @@ export default function SearchForm() {
     const [category, setCategory] = useState(searchParams.get('cat') || '');
     const [isLoading, setIsLoading] = useState(false);
     const dateError = startDate && endDate && startDate > endDate
-        ? '⚠️ 시작일이 종료일보다 미래입니다. 날짜를 확인해주세요.'
+        ? '시작일이 종료일보다 미래입니다. 날짜를 확인해 주세요.'
         : '';
 
     // Presets mapping
     const presets = [
         { label: '전체', value: '' },
         { label: '부동산', value: 'real_estate' },
+        { label: '자산(일괄·기타)', value: 'asset' },
         { label: '차량/중기', value: 'vehicle' },
         { label: '비품/전자', value: 'electronics' },
         { label: '채권', value: 'bond' },
@@ -43,9 +52,20 @@ export default function SearchForm() {
         // 후원 버튼 노출 조건: 경매 공고 조회 횟수 추적
         window.dispatchEvent(new CustomEvent('lawauction-search'));
 
+        // 기간을 모두 비우면 최근 30일을 조회한다 (빈 결과 방지).
+        let effectiveStart = startDate;
+        let effectiveEnd = endDate;
+        if (!startDate && !endDate) {
+            const today = new Date();
+            const monthAgo = new Date(today);
+            monthAgo.setDate(today.getDate() - 30);
+            effectiveStart = toDateInput(monthAgo);
+            effectiveEnd = toDateInput(today);
+        }
+
         const params = new URLSearchParams();
-        if (startDate) params.set('start', startDate);
-        if (endDate) params.set('end', endDate);
+        if (effectiveStart) params.set('start', effectiveStart);
+        if (effectiveEnd) params.set('end', effectiveEnd);
         if (keyword) params.set('q', keyword);
         if (category) params.set('cat', category);
 
@@ -71,7 +91,7 @@ export default function SearchForm() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div>
                         <label htmlFor="startDate" className="block text-sm text-gray-600 mb-2">
-                            📅 시작일
+                            시작일
                         </label>
                         <input
                             type="date"
@@ -83,7 +103,7 @@ export default function SearchForm() {
                     </div>
                     <div>
                         <label htmlFor="endDate" className="block text-sm text-gray-600 mb-2">
-                            📅 종료일
+                            종료일
                         </label>
                         <input
                             type="date"
@@ -94,6 +114,7 @@ export default function SearchForm() {
                         />
                     </div>
                 </div>
+                <p className="mt-3 text-xs text-gray-500">기간을 비우면 최근 30일을 조회합니다.</p>
                 {/* Date Error Message */}
                 {dateError && (
                     <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
@@ -108,7 +129,7 @@ export default function SearchForm() {
             {/* Search Settings */}
             <div className="mb-6">
                 <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2 mb-6">
-                    🔍 검색어 설정
+                    검색어 설정
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -184,7 +205,7 @@ export default function SearchForm() {
                             </div>
                         </>
                     ) : (
-                        <span>🔍 공고 조회하기</span>
+                        <span>공고 조회하기</span>
                     )}
                 </button>
             </div>

@@ -4,12 +4,15 @@ import type { Metadata } from 'next';
 import { getPostBySlug, getPublicBlogPosts, getRelatedPosts, blogCategories } from '@/data/blog-posts';
 import { supabase } from '@/lib/supabase';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
-import ViewTracker from '@/components/ViewTracker';
 import RelatedNoticesRSS from '@/components/RelatedNoticesRSS';
 import { ALLOW_DATABASE_BLOG_POSTS } from '@/lib/contentPolicy';
 
-import AdSenseLoader from '@/components/AdSenseLoader';
-export const dynamic = 'force-dynamic';
+// 편집 글은 정적으로 생성하고, 사이드바의 최근 공고만 1시간 단위로 갱신합니다.
+export const revalidate = 3600;
+
+const siteUrl = 'https://www.courtauction.site';
+const siteName = '로옥션(LawAuction)';
+const editorialTeamUrl = `${siteUrl}/authors/lawauction-editorial-team`;
 
 interface PageProps {
     params: Promise<{
@@ -33,15 +36,27 @@ async function getDynamicPost(slug: string) {
     }
 }
 
+function categoryLabel(name: string): string {
+    return blogCategories.find((category) => category.name === name)?.label ?? name;
+}
+
+// 인라인 마크다운(굵게, 링크)을 HTML로 바꿉니다. 본문은 저장소 안의 편집 글이라 신뢰할 수 있는 입력입니다.
+function inlineMarkdown(text: string): string {
+    return text
+        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-gray-900">$1</strong>')
+        .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-indigo-600 hover:underline" rel="noopener">$1</a>');
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
     const { slug } = await params;
-    const siteUrl = 'https://www.courtauction.site';
 
     // Try static first, then dynamic
     const staticPost = getPostBySlug(slug);
     if (staticPost) {
+        const modified = staticPost.reviewedAt ?? staticPost.updatedAt;
         return {
-            title: `${staticPost.title} | 로옥션 블로그`,
+            // 레이아웃의 title 템플릿(%s | 로옥션)이 사이트명을 붙입니다.
+            title: staticPost.title,
             description: staticPost.description,
             keywords: staticPost.tags.join(', '),
             alternates: {
@@ -51,11 +66,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
                 title: staticPost.title,
                 description: staticPost.description,
                 url: `${siteUrl}/blog/${slug}`,
+                siteName,
+                locale: 'ko_KR',
                 type: 'article',
                 publishedTime: staticPost.publishedAt,
-                modifiedTime: staticPost.updatedAt,
-                authors: [staticPost.author],
+                modifiedTime: modified,
+                authors: [editorialTeamUrl],
                 tags: staticPost.tags,
+            },
+            twitter: {
+                card: 'summary',
+                title: staticPost.title,
+                description: staticPost.description,
             },
         };
     }
@@ -63,7 +85,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const dynamicPost = await getDynamicPost(slug);
     if (dynamicPost) {
         return {
-            title: `${dynamicPost.title} | 로옥션 블로그`,
+            title: dynamicPost.title,
             description: dynamicPost.description,
             keywords: (dynamicPost.tags || []).join(', '),
             alternates: {
@@ -73,15 +95,22 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
                 title: dynamicPost.title,
                 description: dynamicPost.description,
                 url: `${siteUrl}/blog/${slug}`,
+                siteName,
+                locale: 'ko_KR',
                 type: 'article',
                 publishedTime: dynamicPost.published_at,
                 authors: [dynamicPost.author],
                 tags: dynamicPost.tags,
             },
+            twitter: {
+                card: 'summary',
+                title: dynamicPost.title,
+                description: dynamicPost.description,
+            },
         };
     }
 
-    return { title: '글을 찾을 수 없습니다' };
+    return { title: '글을 찾을 수 없습니다', robots: { index: false, follow: false } };
 }
 
 export async function generateStaticParams() {
@@ -99,7 +128,41 @@ export default async function BlogPostPage({ params }: PageProps) {
     if (staticPost) {
         // Render static post with existing inline markdown renderer
         const relatedPosts = getRelatedPosts(slug);
-        const category = blogCategories.find(c => c.name === staticPost.category);
+        const lastConfirmed = staticPost.reviewedAt ?? staticPost.updatedAt;
+        const pageUrl = `${siteUrl}/blog/${slug}`;
+
+        const blogPostingJsonLd = {
+            '@context': 'https://schema.org',
+            '@type': 'BlogPosting',
+            headline: staticPost.title,
+            description: staticPost.description,
+            datePublished: staticPost.publishedAt,
+            dateModified: lastConfirmed,
+            author: {
+                '@type': 'Organization',
+                name: '로옥션 편집팀',
+                url: editorialTeamUrl,
+            },
+            publisher: {
+                '@type': 'Organization',
+                '@id': `${siteUrl}/#organization`,
+                name: siteName,
+                url: siteUrl,
+                logo: {
+                    '@type': 'ImageObject',
+                    url: `${siteUrl}/logo.png`,
+                },
+            },
+            mainEntityOfPage: {
+                '@type': 'WebPage',
+                '@id': pageUrl,
+            },
+            url: pageUrl,
+            inLanguage: 'ko-KR',
+            articleSection: categoryLabel(staticPost.category),
+            keywords: staticPost.tags.join(', '),
+            isAccessibleForFree: true,
+        };
 
         const renderContent = (content: string) => {
             return content
@@ -197,9 +260,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                             <ol key={idx} className="list-decimal list-inside my-4 space-y-2 text-gray-700">
                                 {items.map((item, i) => (
                                     <li key={i} dangerouslySetInnerHTML={{
-                                        __html: item
-                                            .replace(/^\d+\.\s*/, '')
-                                            .replace(/\*\*(.*?)\*\*/g, '<strong class="text-gray-900">$1</strong>')
+                                        __html: inlineMarkdown(item.replace(/^\d+\.\s*/, ''))
                                     }} />
                                 ))}
                             </ol>
@@ -212,9 +273,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                             <ul key={idx} className="list-disc list-inside my-4 space-y-2 text-gray-700">
                                 {items.map((item, i) => (
                                     <li key={i} dangerouslySetInnerHTML={{
-                                        __html: item
-                                            .replace(/^-\s*/, '')
-                                            .replace(/\*\*(.*?)\*\*/g, '<strong class="text-gray-900">$1</strong>')
+                                        __html: inlineMarkdown(item.replace(/^-\s*/, ''))
                                     }} />
                                 ))}
                             </ul>
@@ -223,9 +282,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
                     return (
                         <p key={idx} className="my-4 text-gray-700 leading-relaxed" dangerouslySetInnerHTML={{
-                            __html: trimmed
-                                .replace(/\*\*(.*?)\*\*/g, '<strong class="text-gray-900">$1</strong>')
-                                .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-indigo-600 hover:underline">$1</a>')
+                            __html: inlineMarkdown(trimmed)
                         }} />
                     );
                 });
@@ -233,10 +290,13 @@ export default async function BlogPostPage({ params }: PageProps) {
 
         return (
             <div className="max-w-7xl mx-auto px-4 py-8">
-                <AdSenseLoader />
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingJsonLd).replace(/</g, '\\u003c') }}
+                />
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                     <article className="lg:col-span-2">
-                <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8">
+                <nav aria-label="현재 위치" className="flex items-center gap-2 text-sm text-gray-500 mb-8">
                     <Link href="/" className="hover:text-indigo-600">홈</Link>
                     <span>/</span>
                     <Link href="/blog" className="hover:text-indigo-600">블로그</Link>
@@ -247,7 +307,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                 <header className="mb-10">
                     <div className="flex items-center gap-3 mb-4">
                         <span className="bg-indigo-100 text-indigo-700 text-sm font-bold px-3 py-1 rounded-full">
-                            {category?.icon} {category?.label}
+                            {categoryLabel(staticPost.category)}
                         </span>
                         <span className="text-gray-400 text-sm">
                             {staticPost.readingTime}분 읽기
@@ -260,14 +320,12 @@ export default async function BlogPostPage({ params }: PageProps) {
                         {staticPost.description}
                     </p>
                     <div className="flex items-center justify-between flex-wrap gap-4 pb-6 border-b border-gray-200">
-                        <div className="flex items-center gap-4 text-sm text-gray-500">
-                            <span>✍️ {staticPost.author}</span>
-                            <span>📅 {staticPost.publishedAt}</span>
-                            {staticPost.updatedAt !== staticPost.publishedAt && (
-                                <span className="text-green-600">🔄 {staticPost.updatedAt} 업데이트</span>
-                            )}
-                        </div>
-                        <div className="flex gap-2">
+                        <dl className="flex items-center flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500">
+                            <div><dt className="inline">작성 </dt><dd className="inline text-gray-700">{staticPost.author}</dd></div>
+                            <div><dt className="inline">게시 </dt><dd className="inline"><time dateTime={staticPost.publishedAt}>{staticPost.publishedAt}</time></dd></div>
+                            <div><dt className="inline">최종 확인 </dt><dd className="inline text-gray-700"><time dateTime={lastConfirmed}>{lastConfirmed}</time></dd></div>
+                        </dl>
+                        <div className="flex gap-2 flex-wrap">
                             {staticPost.tags.map(tag => (
                                 <span key={tag} className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">
                                     #{tag}
@@ -283,20 +341,19 @@ export default async function BlogPostPage({ params }: PageProps) {
 
                 <div className="mt-12 rounded-xl border border-emerald-200 bg-emerald-50 p-6 text-sm leading-6 text-emerald-950">
                     <h2 className="font-bold mb-2">작성·검수 안내</h2>
-                    <dl className="space-y-2">
+                    <dl className="space-y-1">
                         <div><dt className="inline font-semibold">작성:</dt> <dd className="inline"><Link href="/authors/lawauction-editorial-team" className="underline">{staticPost.author}</Link></dd></div>
-                        {staticPost.reviewedAt && <div><dt className="inline font-semibold">최종 사실 확인:</dt> <dd className="inline">{staticPost.reviewedAt}</dd></div>}
+                        <div><dt className="inline font-semibold">최종 사실 확인:</dt> <dd className="inline">{lastConfirmed}</dd></div>
                         {staticPost.reviewMethod && <div><dt className="inline font-semibold">확인 방법:</dt> <dd className="inline">{staticPost.reviewMethod}</dd></div>}
                     </dl>
                     <p className="mt-3">
-                        개별 물건의 법률·세무·가격 판단을 대신하지 않습니다.{' '}
                         <Link href="/editorial-policy" className="font-semibold underline">편집·검수 원칙 보기</Link>
                     </p>
                 </div>
 
                 {staticPost.sources && staticPost.sources.length > 0 && (
-                    <section className="mt-8 rounded-xl border border-gray-200 bg-white p-6">
-                        <h2 className="text-lg font-bold text-gray-900 mb-3">공식 참고자료</h2>
+                    <section className="mt-8 rounded-xl border border-gray-200 bg-white p-6" aria-labelledby="sources-heading">
+                        <h2 id="sources-heading" className="text-lg font-bold text-gray-900 mb-3">공식 참고자료</h2>
                         <ul className="space-y-2 text-sm">
                             {staticPost.sources.map((source) => (
                                 <li key={source.url}>
@@ -310,8 +367,8 @@ export default async function BlogPostPage({ params }: PageProps) {
                 )}
 
                 {relatedPosts.length > 0 && (
-                    <section className="mt-16 pt-8 border-t border-gray-200">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-6">📖 관련 글</h2>
+                    <section className="mt-16 pt-8 border-t border-gray-200" aria-labelledby="related-heading">
+                        <h2 id="related-heading" className="text-2xl font-bold text-gray-900 mb-6">관련 글</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             {relatedPosts.map((related) => (
                                 <Link
@@ -320,7 +377,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                                     className="group bg-gray-50 rounded-xl p-5 hover:bg-indigo-50 transition-colors"
                                 >
                                     <span className="text-xs text-indigo-600 font-bold">
-                                        {blogCategories.find(c => c.name === related.category)?.icon} {related.category}
+                                        {categoryLabel(related.category)}
                                     </span>
                                     <h3 className="font-bold text-gray-900 mt-2 group-hover:text-indigo-600 transition-colors line-clamp-2">
                                         {related.title}
@@ -336,31 +393,20 @@ export default async function BlogPostPage({ params }: PageProps) {
 
                 <div className="mt-12 pt-8 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4">
                     <Link href="/blog" className="flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-medium">
-                        ← 블로그 목록으로
+                        &larr; 블로그 목록으로
                     </Link>
-                    <div className="flex gap-4">
-                        <Link href="/" className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-700 transition-colors">
-                            🔍 공고 검색하기
-                        </Link>
-                    </div>
+                    <Link href="/" className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-700 transition-colors">
+                        공고 검색하기
+                    </Link>
                 </div>
                     </article>
 
                     <aside className="space-y-8 sticky top-6">
-                        <RelatedNoticesRSS 
-                            currentId="blog-static" 
-                            category="real_estate" 
-                            courtName="로옥션 분석팀" 
+                        <RelatedNoticesRSS
+                            currentId="blog-static"
+                            category="real_estate"
+                            courtName="로옥션 편집팀"
                         />
-                        <div className="bg-indigo-600 rounded-2xl p-6 text-white shadow-xl">
-                            <h4 className="font-bold text-lg mb-2">처음 공고를 확인한다면</h4>
-                            <p className="text-xs text-indigo-100 mb-4 leading-relaxed">
-                                검색 결과는 출발점입니다. 일정과 조건은 법원 공고 원문과 첨부 문서에서 다시 확인하세요.
-                            </p>
-                            <Link href="/" className="inline-block bg-white text-indigo-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-indigo-50 transition-colors">
-                                공고 검색하기 &rarr;
-                            </Link>
-                        </div>
                     </aside>
                 </div>
             </div>
@@ -379,10 +425,9 @@ export default async function BlogPostPage({ params }: PageProps) {
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-8">
-            <AdSenseLoader />
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                 <article className="lg:col-span-2">
-            <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8">
+            <nav aria-label="현재 위치" className="flex items-center gap-2 text-sm text-gray-500 mb-8">
                 <Link href="/" className="hover:text-indigo-600">홈</Link>
                 <span>/</span>
                 <Link href="/blog" className="hover:text-indigo-600">블로그</Link>
@@ -391,23 +436,16 @@ export default async function BlogPostPage({ params }: PageProps) {
             </nav>
 
             <header className="mb-10">
-                <div className="flex items-center gap-3 mb-4">
+                <div className="flex items-center gap-3 mb-4 flex-wrap">
                     <span className="bg-emerald-100 text-emerald-700 text-sm font-bold px-3 py-1 rounded-full">
-                        📊 {dynamicPost.category || '시장분석'}
+                        {dynamicPost.category || '시장분석'}
                     </span>
                     <span className="text-gray-400 text-sm">
                         {readingTime}분 읽기
                     </span>
                     <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-1 rounded">
-                        🤖 AI 자동 생성
+                        AI 초안
                     </span>
-                    <ViewTracker 
-                        tableName="blog_posts" 
-                        idColumn="slug" 
-                        idValue={slug} 
-                        initialCount={dynamicPost.view_count || 0}
-                        className="text-gray-400 bg-gray-50 px-2.5 py-1 rounded-full border border-gray-100"
-                    />
                 </div>
                 <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 leading-tight mb-4">
                     {dynamicPost.title}
@@ -417,8 +455,8 @@ export default async function BlogPostPage({ params }: PageProps) {
                 </p>
                 <div className="flex items-center justify-between flex-wrap gap-4 pb-6 border-b border-gray-200">
                     <div className="flex items-center gap-4 text-sm text-gray-500">
-                        <span>🤖 {dynamicPost.author || 'AI 애널리스트'}</span>
-                        <span>📅 {dynamicPost.published_at}</span>
+                        <span>{dynamicPost.author || '로옥션'}</span>
+                        <span>{dynamicPost.published_at}</span>
                     </div>
                     <div className="flex gap-2 flex-wrap">
                         {tags.map((tag: string) => (
@@ -435,54 +473,35 @@ export default async function BlogPostPage({ params }: PageProps) {
                 <MarkdownRenderer content={dynamicPost.content} />
             </div>
 
-            {/* References and Sources for E-E-A-T */}
-            <div className="mt-12 pt-6 border-t border-gray-100">
-                <details className="cursor-pointer group bg-gray-50 rounded-xl p-4 border border-gray-100">
-                    <summary className="text-base font-bold text-gray-800 flex items-center gap-2 hover:text-indigo-600 transition-colors">
-                        📚 본문 자료 출처 및 분석 방법론
-                    </summary>
-                    <div className="mt-4 space-y-3 text-sm text-gray-600 leading-relaxed">
-                        <p>본 칼럼은 <strong>로옥션 AI 분석 엔진</strong>을 통해 최신 시장 통계 및 법원 데이터를 종합하여 생성되었습니다:</p>
-                        <ul className="list-disc pl-5 space-y-1">
-                            <li>대한민국 법원 실시간 경매 공고 데이터 (Grounding Data)</li>
-                            <li>실시간 지역별 낙찰가율 및 경쟁률 통계</li>
-                            <li>정부 부처 보도자료 및 부동산 정책 데이터베이스</li>
-                        </ul>
-                        <p className="text-xs text-gray-500 mt-2">본 정보는 AI 생성 정보이므로 입찰 등 실무 적용 시 법원 원문 확인이 필수적입니다.</p>
-                    </div>
-                </details>
+            <div className="mt-12 rounded-xl border border-amber-200 bg-amber-50 p-6 text-sm leading-6 text-amber-950">
+                <h2 className="font-bold mb-2">작성 안내</h2>
+                <p>
+                    이 글은 로옥션이 수집한 공고 데이터를 바탕으로 만든 초안이며, 편집팀의 사실 확인 절차는{' '}
+                    <Link href="/editorial-policy" className="font-semibold underline">편집·검수 원칙</Link>을 따릅니다.
+                </p>
             </div>
 
             <div className="mt-12 pt-8 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4">
                 <Link href="/blog" className="flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-medium">
-                    ← 블로그 목록으로
+                    &larr; 블로그 목록으로
                 </Link>
                 <div className="flex gap-4">
                     <Link href="/" className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-700 transition-colors">
-                        🔍 공고 검색하기
+                        공고 검색하기
                     </Link>
                     <Link href="/trend" className="bg-emerald-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-emerald-700 transition-colors">
-                        📊 최신 리포트 보기
+                        주간 칼럼 보기
                     </Link>
                 </div>
             </div>
                 </article>
 
                 <aside className="space-y-8 sticky top-6">
-                    <RelatedNoticesRSS 
-                        currentId="blog-dynamic" 
-                        category="real_estate" 
-                        courtName="AI 애널리스트" 
+                    <RelatedNoticesRSS
+                        currentId="blog-dynamic"
+                        category="real_estate"
+                        courtName="로옥션"
                     />
-                    <div className="bg-emerald-600 rounded-2xl p-6 text-white shadow-xl">
-                        <h4 className="font-bold text-lg mb-2">📊 AI 리포트 활용법</h4>
-                        <p className="text-xs text-emerald-100 mb-4 leading-relaxed">
-                            매일 아침 업데이트되는 AI 분석 리포트로 경매 시장의 흐름을 한눈에 파악하세요.
-                        </p>
-                        <Link href="/trend" className="inline-block bg-white text-emerald-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-emerald-50 transition-colors">
-                            트렌드 확인하기 &rarr;
-                        </Link>
-                    </div>
                 </aside>
             </div>
         </div>

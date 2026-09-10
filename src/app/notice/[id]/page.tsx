@@ -1,9 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import { permanentRedirect } from 'next/navigation';
 import Link from 'next/link';
-import Badge from '@/components/Badge';
 import DownloadFiles from '@/components/DownloadFiles';
-import ViewTracker from '@/components/ViewTracker';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import NoticeFAQ from '@/components/NoticeFAQ';
 import NoticeHero from '@/components/NoticeHero';
@@ -34,7 +32,7 @@ export async function generateMetadata({ params }: PageProps) {
 
     if (!notice) {
         return {
-            title: '종료되거나 삭제된 공고 | 로옥션(LawAuction)',
+            title: '종료되거나 삭제된 공고',
             description: '요청하신 법원 경매/공매 공고는 종료되었거나 삭제되었습니다. 홈에서 최신 공고를 확인해보세요.',
             robots: { index: false, follow: true },
         };
@@ -116,15 +114,7 @@ export default async function NoticeDetail({ params }: PageProps) {
                 <div className="lg:col-span-2 space-y-8">
                     <div className="bg-white shadow-soft rounded-2xl overflow-hidden border border-gray-200">
                         <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                                📌 상세 제원 및 정보
-                                <ViewTracker
-                                    tableName="court_notices"
-                                    idColumn="id"
-                                    idValue={id}
-                                    initialCount={notice.view_count || 0}
-                                />
-                            </h3>
+                            <h3 className="text-lg font-bold text-gray-900">공고 정보</h3>
                             <Link href="/" className="text-sm font-bold text-indigo-600 hover:underline">목록보기</Link>
                         </div>
                         <div className="p-6">
@@ -154,10 +144,10 @@ export default async function NoticeDetail({ params }: PageProps) {
                                     <dd><a href={notice.detail_link} target="_blank" rel="noreferrer" className="text-indigo-600 hover:text-indigo-900 underline font-bold">법원 바로가기 ↗</a></dd>
                                 </div>
                             </dl>
-                            <div className="mt-6 pt-6 border-t border-gray-100">
+                            <dl className="mt-6 pt-6 border-t border-gray-100 text-sm">
                                 <dt className="text-gray-500 font-medium mb-2">첨부파일</dt>
-                                <DownloadFiles fileInfo={notice.file_info} />
-                            </div>
+                                <dd><DownloadFiles fileInfo={notice.file_info} /></dd>
+                            </dl>
                         </div>
                     </div>
 
@@ -253,17 +243,16 @@ export default async function NoticeDetail({ params }: PageProps) {
                         date_posted: notice.date_posted || ''
                     }} />
 
-                    {/* Internal Engagement */}
+                    {/* Related reading */}
                     <div className="mt-12 bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-soft">
                         <div className="px-6 py-4 bg-gray-50 border-b border-gray-100">
-                            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">🌟 로옥션 핵심 투자 인사이트</h3>
+                            <h3 className="text-lg font-bold text-gray-900">관련 확인 가이드</h3>
                         </div>
                         <div className="p-6">
-                            <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {getRecentPosts(4).map((post) => (
+                            <ul className="space-y-2">
+                                {getRecentPosts(3).map((post) => (
                                     <li key={post.slug}>
-                                        <Link href={`/blog/${post.slug}`} className="flex items-center gap-2 text-sm text-gray-700 hover:text-indigo-600 font-medium transition-colors p-2 rounded-lg hover:bg-indigo-50 border border-transparent hover:border-indigo-100">
-                                            <span className="text-indigo-400">#</span>
+                                        <Link href={`/blog/${post.slug}`} className="text-sm text-gray-700 hover:text-indigo-600 font-medium transition-colors underline-offset-2 hover:underline">
                                             {post.title}
                                         </Link>
                                     </li>
@@ -281,24 +270,12 @@ export default async function NoticeDetail({ params }: PageProps) {
                         courtName={notice.court_name || notice.department} 
                     />
                     
-                    <div className="bg-indigo-600 rounded-2xl p-6 text-white shadow-xl overflow-hidden relative group">
-                        <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
-                        <h4 className="font-bold text-lg mb-2 tracking-tight">💰 수익률 시뮬레이션</h4>
-                        <p className="text-xs text-indigo-100 mb-6 leading-relaxed">
-                            매입 자금 조달부터 명도 비용까지, 투자 계획을 미리 세워보세요. 1분이면 충분합니다.
-                        </p>
-                        <a href="#calculator" className="inline-flex items-center justify-center gap-2 bg-white text-indigo-600 px-6 py-3 rounded-xl text-xs font-black hover:bg-indigo-50 transition-all shadow-md group">
-                            계산기로 이동
-                            <span className="group-hover:translate-x-1 transition-transform">&rarr;</span>
-                        </a>
-                    </div>
-                    
                     <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-soft">
-                        <h4 className="text-sm font-bold text-gray-900 mb-4">📢 공고 원본 필수 확인</h4>
+                        <h4 className="text-sm font-bold text-gray-900 mb-4">공고 원본 확인</h4>
                         <p className="text-xs text-gray-500 leading-relaxed mb-4">
-                            본 프로그램으로 제공되는 정보는 참고용이며, 최종적인 법적 책임은 이용자에게 있습니다. 입찰 전 법원 사이트의 <span className="font-bold text-red-500">원본 매각공고</span>를 반드시 재확인하시기 바랍니다.
+                            입찰 전 법원 사이트의 원본 공고를 확인해야 합니다. <Link href="/editorial-policy" className="text-indigo-600 underline underline-offset-2">데이터·편집 원칙</Link>
                         </p>
-                        <a href={notice.detail_link} target="_blank" className="block w-full text-center py-2.5 bg-gray-100 rounded-xl text-[11px] font-bold text-gray-700 hover:bg-gray-200 transition-colors border border-gray-200">
+                        <a href={notice.detail_link} target="_blank" rel="noreferrer" className="block w-full text-center py-2.5 bg-gray-100 rounded-xl text-[11px] font-bold text-gray-700 hover:bg-gray-200 transition-colors border border-gray-200">
                              원본 법원 공고 열기 &rarr;
                         </a>
                     </div>

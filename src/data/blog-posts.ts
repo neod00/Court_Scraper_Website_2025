@@ -1859,6 +1859,16 @@ NPL 투자의 핵심 역시 권리가 꼬여있지만 미래 가치가 높은 '�
 
 ];
 
+// 본문 글자 수(공백 제외). 목록·읽기 시간 표시에 사용한다.
+export const countContentChars = (content: string): number => {
+    return content.replace(/\s+/g, '').length;
+};
+
+// 읽기 시간(분) = max(1, round(공백 제외 글자 수 / 500)). 데이터에 적힌 고정값 대신 본문에서 계산한다.
+export const computeReadingTime = (content: string): number => {
+    return Math.max(1, Math.round(countContentChars(content) / 500));
+};
+
 // 슬러그로 게시물 찾기
 export const getPostBySlug = (slug: string): BlogPost | undefined => {
     if (!PUBLIC_BLOG_SLUGS.has(slug) || isRetiredBlogSlug(slug)) return undefined;
@@ -1868,10 +1878,10 @@ export const getPublicBlogPosts = (): BlogPost[] => {
     return blogPosts
         // 폐기 결정된 글은 화이트리스트에 들어 있더라도 공개하지 않는다 (이중 안전장치).
         .filter(post => PUBLIC_BLOG_SLUGS.has(post.slug) && !isRetiredBlogSlug(post.slug))
-        .map((post) => ({
-            ...post,
-            ...CURATED_BLOG_OVERRIDES[post.slug],
-        }));
+        .map((post) => {
+            const merged: BlogPost = { ...post, ...CURATED_BLOG_OVERRIDES[post.slug] };
+            return { ...merged, readingTime: computeReadingTime(merged.content) };
+        });
 };
 
 // 카테고리별 게시물 필터링

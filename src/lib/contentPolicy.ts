@@ -36,15 +36,6 @@ export function isRetiredBlogSlug(slug: string): boolean {
     return RETIRED_BLOG_SLUGS.has(slug);
 }
 
-export const PUBLIC_GUIDE_SLUGS = new Set([
-    'rehabilitation-asset-guide',
-    'bankruptcy-vs-auction',
-]);
-
 export function isPublicBlogSlug(slug: string): boolean {
     return PUBLIC_BLOG_SLUGS.has(slug);
-}
-
-export function isPublicGuideSlug(slug: string): boolean {
-    return PUBLIC_GUIDE_SLUGS.has(slug);
 }

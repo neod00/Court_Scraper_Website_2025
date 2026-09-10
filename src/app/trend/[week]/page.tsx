@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import {
     type WeeklyReport,
     hasEditorNote,
+    filterPublishedColumns,
     isValidWeekSlug,
     weekLabel,
     columnTitle,
@@ -17,6 +18,7 @@ import {
 } from '@/lib/weeklyColumn';
 
 export const revalidate = 3600;
+export const dynamicParams = true;
 
 const siteUrl = 'https://www.courtauction.site';
 
@@ -34,6 +36,23 @@ async function fetchReport(week: string): Promise<WeeklyReport | null> {
     return (data as WeeklyReport) ?? null;
 }
 
+/** 발행된(해석이 붙은) 칼럼 중 이 주차의 직전·직후 주차. */
+async function fetchAdjacentColumns(week: string): Promise<{ prev: WeeklyReport | null; next: WeeklyReport | null }> {
+    const { data } = await supabase
+        .from('weekly_reports')
+        .select('*')
+        .not('editor_note', 'is', null)
+        .order('week_start', { ascending: true });
+
+    const published = filterPublishedColumns((data as WeeklyReport[]) || []);
+    const idx = published.findIndex((r) => r.week_start === week);
+    if (idx === -1) return { prev: null, next: null };
+    return {
+        prev: idx > 0 ? published[idx - 1] : null,
+        next: idx < published.length - 1 ? published[idx + 1] : null,
+    };
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
     const { week } = await params;
     const report = await fetchReport(week);
@@ -41,7 +60,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     // 해석이 없는 주차는 색인하지 않는다 — 자동 집계만 있는 페이지는 색인 대상이 아니다.
     if (!report || !hasEditorNote(report)) {
         return {
-            title: '주간 칼럼을 찾을 수 없습니다 | 로옥션',
+            title: '주간 칼럼을 찾을 수 없습니다',
             robots: { index: false, follow: true },
         };
     }
@@ -51,7 +70,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         `${report.week_start} ~ ${report.week_end} 법원 회생·파산 자산매각 공고 집계와 편집자 해석.`;
 
     return {
-        title: `${title} | 로옥션 주간 칼럼`,
+        title: `${title} | 주간 칼럼`,
         description,
         alternates: { canonical: `${siteUrl}/trend/${report.week_start}` },
         openGraph: {
@@ -72,6 +91,8 @@ export default async function WeeklyColumnPage({ params }: PageProps) {
         notFound();
     }
 
+    const { prev, next } = await fetchAdjacentColumns(report.week_start);
+
     const title = columnTitle(report);
     const author = columnAuthor(report);
     const published = columnDate(report);
@@ -86,8 +107,10 @@ export default async function WeeklyColumnPage({ params }: PageProps) {
         description: columnExcerpt(report, 155),
         datePublished: published,
         dateModified: published,
-        author: { '@type': 'Person', name: author.split('·')[0].trim() },
-        publisher: { '@type': 'Organization', name: '로옥션(LawAuction)' },
+        author: report.editor_note_by?.trim()
+            ? { '@type': 'Person', name: author.split('·')[0].trim() }
+            : { '@type': 'Organization', name: '로옥션(LawAuction)', url: siteUrl },
+        publisher: { '@type': 'Organization', name: '로옥션(LawAuction)', url: siteUrl },
         mainEntityOfPage: { '@type': 'WebPage', '@id': `${siteUrl}/trend/${report.week_start}` },
     };
 
@@ -98,7 +121,7 @@ export default async function WeeklyColumnPage({ params }: PageProps) {
             <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8 flex-wrap">
                 <Link href="/" className="hover:text-indigo-600">홈</Link>
                 <span>/</span>
-                <Link href="/trend" className="hover:text-indigo-600">주간 통계</Link>
+                <Link href="/trend" className="hover:text-indigo-600">주간 칼럼</Link>
                 <span>/</span>
                 <span className="text-gray-900 font-medium">{weekLabel(report)}</span>
             </nav>
@@ -155,20 +178,20 @@ export default async function WeeklyColumnPage({ params }: PageProps) {
                 </div>
             </section>
 
+            {/* 자주 등장한 키워드 — 검색 결과 페이지는 색인 대상이 아니므로 링크하지 않는다 */}
             {tags.length > 0 && (
                 <section className="mt-10 pt-8 border-t border-gray-100">
                     <h2 className="text-sm font-bold text-gray-500 mb-3">이번 주 자주 등장한 키워드</h2>
                     <div className="flex flex-wrap gap-2">
                         {tags.map((item) => (
-                            <Link
+                            <span
                                 key={item.tag}
-                                href={`/?q=${encodeURIComponent(item.tag)}`}
-                                className="inline-flex items-center gap-1.5 bg-white hover:bg-indigo-50 border border-gray-200 hover:border-indigo-300 text-gray-600 hover:text-indigo-700 px-3 py-1.5 rounded-lg text-sm transition-colors"
+                                className="inline-flex items-center gap-1.5 bg-white border border-gray-200 text-gray-600 px-3 py-1.5 rounded-lg text-sm"
                             >
                                 <span className="text-indigo-400">#</span>
                                 {item.tag}
                                 <span className="text-[10px] text-gray-400 font-bold">{item.count}</span>
-                            </Link>
+                            </span>
                         ))}
                     </div>
                 </section>
@@ -178,15 +201,39 @@ export default async function WeeklyColumnPage({ params }: PageProps) {
             <section className="mt-10 bg-white border border-gray-200 rounded-xl p-6 text-sm leading-7 text-gray-600">
                 <h2 className="font-bold text-gray-900 mb-3">이 수치를 읽는 방법</h2>
                 <p>수집 건수는 해당 주간에 로옥션이 수집한 공고를 기준으로 집계했습니다. 분류와 법원 표기는 원문에 따라 달라질 수 있고, 정정·재공고로 실제 건수와 차이가 날 수 있습니다.</p>
-                <p className="mt-2">가격 적정성이나 권리관계를 판단한 결과가 아니며, 입찰 결과(낙찰 여부·낙찰가)는 수집 대상이 아닙니다. 참여 전 원문 공고와 첨부문서를 반드시 확인하세요.</p>
+                <p className="mt-2">가격 적정성이나 권리관계를 판단한 결과가 아니며, 입찰 결과는 수집 대상이 아닙니다. 참여 전 원문 공고와 첨부문서를 반드시 확인해야 합니다.</p>
                 <p className="mt-3">
                     <Link href="/editorial-policy" className="font-semibold text-indigo-700 underline">데이터·편집 원칙 자세히 보기</Link>
                 </p>
             </section>
 
+            {/* 지난 주 / 다음 주 칼럼 */}
+            {(prev || next) && (
+                <nav aria-label="인접 주차 칼럼" className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {prev ? (
+                        <Link
+                            href={`/trend/${prev.week_start}`}
+                            className="block bg-white border border-gray-200 rounded-xl p-4 hover:border-indigo-300 hover:shadow-sm transition-all"
+                        >
+                            <span className="block text-xs text-gray-400 mb-1">&larr; 지난 주 칼럼 · {weekLabel(prev)}</span>
+                            <span className="block text-sm font-bold text-gray-900 line-clamp-2">{columnTitle(prev)}</span>
+                        </Link>
+                    ) : <span />}
+                    {next && (
+                        <Link
+                            href={`/trend/${next.week_start}`}
+                            className="block bg-white border border-gray-200 rounded-xl p-4 hover:border-indigo-300 hover:shadow-sm transition-all sm:text-right"
+                        >
+                            <span className="block text-xs text-gray-400 mb-1">다음 주 칼럼 · {weekLabel(next)} &rarr;</span>
+                            <span className="block text-sm font-bold text-gray-900 line-clamp-2">{columnTitle(next)}</span>
+                        </Link>
+                    )}
+                </nav>
+            )}
+
             <div className="mt-10 flex flex-wrap gap-3">
                 <Link href="/trend" className="bg-gray-900 text-white font-bold px-6 py-3 rounded-xl hover:bg-gray-800 transition-colors text-sm">
-                    지난 주간 칼럼 보기
+                    주간 칼럼 목록
                 </Link>
                 <Link href="/datalab" className="bg-white text-gray-700 font-bold px-6 py-3 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors text-sm">
                     데이터랩 통계

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Badge from './Badge';
+import { CATEGORY_LABELS } from '@/lib/weeklyColumn';
 
 interface NoticeProps {
     id: string; // our db uuid
@@ -12,19 +13,41 @@ interface NoticeProps {
     view_count?: number | null;
 }
 
-export default function NoticeCard({ notice }: { notice: NoticeProps }) {
-    // Simple category mapping for display color
-    const getCategoryColor = (cat: string | null) => {
-        if (cat === 'real_estate') return 'blue';
-        if (cat === 'vehicle') return 'green';
-        return 'gray';
-    };
+type BadgeColor = 'blue' | 'green' | 'purple' | 'yellow' | 'gray';
 
-    const getCategoryName = (cat: string | null) => {
-        if (cat === 'real_estate') return '부동산';
-        if (cat === 'vehicle') return '차량/동산';
-        return '기타';
-    };
+const CATEGORY_COLORS: Record<string, BadgeColor> = {
+    real_estate: 'blue',
+    vehicle: 'green',
+    bond: 'purple',
+    stock: 'purple',
+    patent: 'yellow',
+    intangible: 'yellow',
+};
+
+function getCategoryColor(cat: string | null): BadgeColor {
+    return (cat && CATEGORY_COLORS[cat]) || 'gray';
+}
+
+function getCategoryName(cat: string | null): string {
+    return (cat && CATEGORY_LABELS[cat]) || '기타';
+}
+
+/**
+ * AI 요약의 첫 줄. "첨부파일 참고" 류의 대체 문구이거나 비어 있으면 null.
+ * 요약이 "1. **매각 대상**: ... 2. **매각 가격**: ..." 형식이면 매각 대상 구절만 뽑는다.
+ */
+function summaryLine(summary: string | null | undefined): string | null {
+    if (!summary) return null;
+    if (summary.includes('첨부파일')) return null;
+    const plain = summary.replace(/[*#]/g, '').replace(/\s+/g, ' ').trim();
+    if (!plain) return null;
+    const target = plain.match(/매각\s*대상\s*[:：]\s*(.+?)(?=\s+\d+\.\s|$)/);
+    const line = target ? `매각 대상: ${target[1].trim()}` : plain;
+    return line.length > 120 ? `${line.slice(0, 120)}…` : line;
+}
+
+export default function NoticeCard({ notice }: { notice: NoticeProps }) {
+    const line = summaryLine(notice.ai_summary);
 
     return (
         <Link href={`/notice/${notice.id}`} className="block">
@@ -35,21 +58,24 @@ export default function NoticeCard({ notice }: { notice: NoticeProps }) {
                         <Badge color={getCategoryColor(notice.category)}>
                             {getCategoryName(notice.category)}
                         </Badge>
-                        <span className="text-xs font-semibold text-gray-400 tracking-wide bg-gray-50 px-2 py-1 rounded-md">
+                        <time
+                            dateTime={notice.date_posted}
+                            className="text-xs font-semibold text-gray-400 tracking-wide bg-gray-50 px-2 py-1 rounded-md"
+                        >
                             {notice.date_posted}
-                        </span>
+                        </time>
                     </div>
                     <h3 className="text-[1.05rem] leading-snug font-bold text-gray-900 line-clamp-2 mb-2 group-hover:text-blue-600 transition-colors">
                         {notice.title}
                     </h3>
-                    {notice.ai_summary && (
+                    {line && (
                         <p className="text-xs text-gray-500 line-clamp-2 mb-1 leading-relaxed">
-                            {notice.ai_summary.replace(/[*#\n]/g, ' ').replace(/\s+/g, ' ').substring(0, 120)}
+                            {line}
                         </p>
                     )}
                     <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
-                        <span className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
-                            <span className="text-gray-400">🏛️</span> {notice.department || '관할법원 정보 없음'}
+                        <span className="text-xs text-gray-500 font-medium">
+                            {notice.department || '관할법원 정보 없음'}
                         </span>
                         <div className="flex items-center gap-3">
                             {notice.view_count !== undefined && notice.view_count !== null && (

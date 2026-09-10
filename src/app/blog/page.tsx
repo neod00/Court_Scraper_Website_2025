@@ -3,15 +3,28 @@ import type { Metadata } from 'next';
 import { blogCategories, getFeaturedPosts, getPublicBlogPosts } from '@/data/blog-posts';
 import { supabase } from '@/lib/supabase';
 import { ALLOW_DATABASE_BLOG_POSTS } from '@/lib/contentPolicy';
-import AdSenseLoader from '@/components/AdSenseLoader';
 
-export const dynamic = 'force-dynamic';
+const siteUrl = 'https://www.courtauction.site';
+const pageTitle = '블로그: 법원 경매·회생·파산 매각 공고 확인 가이드';
+const pageDescription =
+    '법원 경매와 회생·파산 자산매각 공고를 읽는 데 필요한 절차, 확인 문서, 법령 근거를 로옥션 편집팀이 확인해 정리한 글입니다. 수치는 로옥션이 수집한 공고를 직접 집계한 값입니다.';
 
 export const metadata: Metadata = {
-    title: '블로그 | 법원 자산매각 공고 확인 가이드',
-    description: '법원 경매와 회생·파산 자산매각 공고의 절차와 공식 확인자료를 정리합니다.',
-    keywords: '경매가이드, 회생자산, 파산매각, 입찰전략, 권리분석, 부동산경매, 취득세',
+    title: pageTitle,
+    description: pageDescription,
+    // 카테고리 필터(?category=)는 같은 목록의 부분집합이므로 정규 URL은 항상 /blog 입니다.
     alternates: { canonical: '/blog' },
+    openGraph: {
+        title: pageTitle,
+        description: pageDescription,
+        url: `${siteUrl}/blog`,
+        type: 'website',
+    },
+    twitter: {
+        card: 'summary',
+        title: pageTitle,
+        description: pageDescription,
+    },
 };
 
 // Unified post type for both static and dynamic posts
@@ -21,11 +34,11 @@ interface UnifiedPost {
     description: string;
     author: string;
     publishedAt: string;
+    reviewedAt: string;
     category: string;
     tags: string[];
     readingTime: number;
     featured: boolean;
-    viewCount: number;
     source: 'static' | 'dynamic';
 }
 
@@ -33,17 +46,21 @@ interface PageProps {
     searchParams: Promise<{ category?: string }>;
 }
 
+function categoryLabel(name: string): string {
+    return blogCategories.find((category) => category.name === name)?.label ?? name;
+}
+
 export default async function BlogPage({ searchParams }: PageProps) {
     const { category: requestedCategory } = await searchParams;
     const selectedCategory = requestedCategory?.trim();
     const featuredPosts = getFeaturedPosts();
 
-    // Fetch dynamic blog posts from Supabase
+    // Fetch dynamic blog posts from Supabase (disabled while ALLOW_DATABASE_BLOG_POSTS is false)
     let dynamicPosts: UnifiedPost[] = [];
     if (ALLOW_DATABASE_BLOG_POSTS) try {
         const { data } = await supabase
             .from('blog_posts')
-            .select('slug, title, description, author, published_at, category, tags, reading_time, featured, view_count')
+            .select('slug, title, description, author, published_at, updated_at, category, tags, reading_time, featured')
             .eq('is_published', true)
             .order('published_at', { ascending: false })
             .limit(50);
@@ -53,13 +70,13 @@ export default async function BlogPage({ searchParams }: PageProps) {
                 slug: p.slug,
                 title: p.title,
                 description: p.description,
-                author: p.author || 'AI 애널리스트',
+                author: p.author || '로옥션',
                 publishedAt: p.published_at,
+                reviewedAt: p.updated_at || p.published_at,
                 category: p.category || '시장분석',
                 tags: p.tags || [],
                 readingTime: p.reading_time || 5,
                 featured: p.featured || false,
-                viewCount: p.view_count || 0,
                 source: 'dynamic' as const,
             }));
         }
@@ -67,24 +84,26 @@ export default async function BlogPage({ searchParams }: PageProps) {
         // blog_posts table may not exist yet, continue with static only
     }
 
-    // Convert static posts to unified format
+    // Convert static posts to unified format (readingTime is computed from the body in getPublicBlogPosts)
     const staticPosts: UnifiedPost[] = getPublicBlogPosts().map(p => ({
         slug: p.slug,
         title: p.title,
         description: p.description,
         author: p.author,
         publishedAt: p.publishedAt,
+        reviewedAt: p.reviewedAt ?? p.updatedAt,
         category: p.category,
         tags: p.tags,
         readingTime: p.readingTime,
         featured: p.featured,
-        viewCount: 0,
         source: 'static' as const,
     }));
 
-    // Merge and sort by date (newest first)
+    // Merge and sort by the last confirmed date, then by publish date (newest first)
     const mergedPosts = [...dynamicPosts, ...staticPosts]
-        .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+        .sort((a, b) =>
+            (new Date(b.reviewedAt).getTime() - new Date(a.reviewedAt).getTime())
+            || (new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()));
 
     const availableCategoryNames = new Set(mergedPosts.map((post) => post.category));
     const allCategories = blogCategories.filter((category) => availableCategoryNames.has(category.name));
@@ -95,44 +114,44 @@ export default async function BlogPage({ searchParams }: PageProps) {
         ? mergedPosts.filter((post) => post.category === validSelectedCategory)
         : mergedPosts;
 
+    const chipBase = 'px-4 py-2 rounded-full text-sm font-medium transition-colors';
+    const chipActive = 'bg-indigo-600 text-white';
+    const chipIdle = 'bg-gray-100 text-gray-700 hover:bg-indigo-600 hover:text-white';
+
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
-            <AdSenseLoader />
-            {/* 헤더 */}
-            <header className="text-center mb-12">
-                <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                    📝 회생·파산 자산매각 블로그
+            <header className="text-center mb-10">
+                <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                    법원 경매·회생·파산 매각 공고 확인 가이드
                 </h1>
                 <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                    법원 경매와 회생·파산 자산매각 공고를 이해하는 데 필요한 기본 개념을 정리합니다.
-                    실제 참여 전에는 원문 공고와 최신 법령을 반드시 확인하세요.
+                    공고를 읽을 때 필요한 절차 구분, 확인 문서, 법령 근거를 정리한 글입니다.
+                    글에 나오는 수치는 로옥션이 수집한 공고를 집계한 값이며, 실제 참여 전에는 원문 공고와 최신 법령을 확인해야 합니다.
                 </p>
             </header>
 
-            {/* 카테고리 필터 */}
-            <nav className="flex flex-wrap justify-center gap-3 mb-12">
-                <Link
-                    href="/blog"
-                    className={`${!validSelectedCategory ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700'} px-4 py-2 rounded-full font-medium hover:bg-indigo-700 hover:text-white transition-colors`}
-                >
+            {/* 카테고리 필터: 정규 URL은 /blog 이므로 필터 링크는 nofollow */}
+            <nav aria-label="카테고리 필터" className="flex flex-wrap justify-center gap-3 mb-12">
+                <Link href="/blog" className={`${chipBase} ${!validSelectedCategory ? chipActive : chipIdle}`}>
                     전체
                 </Link>
                 {allCategories.map((cat) => (
                     <Link
                         key={cat.name}
                         href={`/blog?category=${encodeURIComponent(cat.name)}`}
-                        className={`${validSelectedCategory === cat.name ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700'} px-4 py-2 rounded-full font-medium hover:bg-indigo-700 hover:text-white transition-colors`}
+                        rel="nofollow"
+                        className={`${chipBase} ${validSelectedCategory === cat.name ? chipActive : chipIdle}`}
                     >
-                        {cat.icon} {cat.label}
+                        {cat.label}
                     </Link>
                 ))}
             </nav>
 
-            {/* 추천 글 섹션 */}
+            {/* 주요 글 */}
             {!validSelectedCategory && featuredPosts.length > 0 && (
-                <section className="mb-16">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                        ⭐ 추천 글
+                <section className="mb-16" aria-labelledby="featured-heading">
+                    <h2 id="featured-heading" className="text-2xl font-bold text-gray-900 mb-6">
+                        먼저 읽을 글
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {featuredPosts.map((post) => (
@@ -145,7 +164,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
                                     {post.readingTime}분 읽기
                                 </div>
                                 <span className="text-indigo-200 text-sm font-medium">
-                                    {blogCategories.find(c => c.name === post.category)?.icon} {post.category}
+                                    {categoryLabel(post.category)}
                                 </span>
                                 <h3 className="text-2xl font-bold mt-2 mb-4 group-hover:translate-x-1 transition-transform">
                                     {post.title}
@@ -154,8 +173,8 @@ export default async function BlogPage({ searchParams }: PageProps) {
                                     {post.description}
                                 </p>
                                 <div className="flex items-center gap-3 text-sm text-indigo-200">
-                                    <span>{post.publishedAt}</span>
-                                    <span>•</span>
+                                    <span>최종 확인 {post.reviewedAt ?? post.updatedAt}</span>
+                                    <span aria-hidden="true">·</span>
                                     <span>{post.author}</span>
                                 </div>
                             </Link>
@@ -164,104 +183,11 @@ export default async function BlogPage({ searchParams }: PageProps) {
                 </section>
             )}
 
-            {/* 📊 AI 시장 데이터 분석 리포트 섹션 */}
-            {dynamicPosts.filter(p => p.category === '시장분석').length > 0 && (
-                <section className="mb-16">
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                            📊 AI 시장 데이터 분석 리포트
-                        </h2>
-                        <span className="text-xs text-emerald-600 font-bold bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">Market Insight</span>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {dynamicPosts.filter(p => p.category === '시장분석').slice(0, 6).map((post) => (
-                            <Link
-                                key={post.slug}
-                                href={`/blog/${post.slug}`}
-                                className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:border-emerald-200 transition-all duration-300"
-                            >
-                                <div className="h-1.5 bg-gradient-to-r from-emerald-500 to-teal-500" />
-                                <div className="p-6">
-                                    <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors line-clamp-2 leading-snug">
-                                        {post.title}
-                                    </h3>
-                                    <p className="text-gray-500 text-sm line-clamp-2 mb-4 leading-relaxed">
-                                        {post.description}
-                                    </p>
-                                    <div className="flex items-center justify-between text-[11px] text-gray-400 font-medium">
-                                        <div className="flex items-center gap-3">
-                                            <span>{post.publishedAt}</span>
-                                            <span className="flex items-center gap-1">
-                                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                </svg>
-                                                {post.viewCount.toLocaleString()}
-                                            </span>
-                                        </div>
-                                        <div className="flex gap-1">
-                                            {post.tags.slice(0, 2).map(tag => (
-                                                <span key={tag} className="bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">
-                                                    #{tag}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
-                </section>
-            )}
-
-            {/* 💡 전문가 입찰 전략 가이드 섹션 */}
-            {dynamicPosts.filter(p => p.category === '입찰가이드').length > 0 && (
-                <section className="mb-16">
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                            💡 전문가 입찰 전략 가이드
-                        </h2>
-                        <span className="text-xs text-indigo-600 font-bold bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">Expert Guide</span>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {dynamicPosts.filter(p => p.category === '입찰가이드').slice(0, 6).map((post) => (
-                            <Link
-                                key={post.slug}
-                                href={`/blog/${post.slug}`}
-                                className="group bg-slate-50 rounded-2xl border border-dashed border-slate-200 p-6 hover:bg-white hover:border-solid hover:border-indigo-300 hover:shadow-xl transition-all duration-300"
-                            >
-                                <div className="flex items-start justify-between mb-4">
-                                    <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
-                                        📌
-                                    </div>
-                                    <span className="text-[10px] font-bold text-slate-400 bg-white px-2 py-1 rounded-md shadow-sm uppercase tracking-tighter italic">Recommended</span>
-                                </div>
-                                <h3 className="text-lg font-bold text-slate-900 mb-3 group-hover:text-indigo-600 transition-colors leading-snug">
-                                    {post.title}
-                                </h3>
-                                <p className="text-slate-500 text-sm line-clamp-2 mb-4 leading-relaxed">
-                                    {post.description}
-                                </p>
-                                <div className="flex items-center gap-2 mt-auto">
-                                    <div className="flex -space-x-2">
-                                        {[1, 2].map(i => (
-                                            <div key={i} className="w-6 h-6 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-[8px] font-bold text-slate-400">
-                                                AI
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <span className="text-[11px] text-slate-400 font-medium">전문 애널리스트팀</span>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
-                </section>
-            )}
-
             {/* 전체 글 목록 */}
-            <section>
-                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                    📚 전체 글 목록
+            <section aria-labelledby="all-posts-heading">
+                <h2 id="all-posts-heading" className="text-2xl font-bold text-gray-900 mb-6">
+                    {validSelectedCategory ? `${categoryLabel(validSelectedCategory)} 글` : '전체 글'}
+                    <span className="ml-2 text-base font-medium text-gray-500">{allPosts.length}편</span>
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {allPosts.map((post) => (
@@ -270,36 +196,26 @@ export default async function BlogPage({ searchParams }: PageProps) {
                             href={`/blog/${post.slug}`}
                             className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:border-indigo-200 transition-all duration-300"
                         >
-                            {/* 카드 상단 컬러 바 */}
-                            <div className={`h-2 ${post.source === 'dynamic' ? 'bg-gradient-to-r from-emerald-500 to-teal-500' : 'bg-gradient-to-r from-indigo-500 to-blue-500'}`} />
+                            <div className="h-2 bg-gradient-to-r from-indigo-500 to-blue-500" />
 
                             <div className="p-6">
                                 <div className="flex items-center justify-between mb-3">
-                                    <span className={`text-xs font-bold px-2 py-1 rounded ${post.source === 'dynamic' ? 'bg-emerald-100 text-emerald-700' : 'bg-indigo-100 text-indigo-700'}`}>
-                                        {post.source === 'dynamic' ? '📊' : (allCategories.find(c => c.name === post.category)?.icon || '📝')} {post.category}
+                                    <span className="text-xs font-bold px-2 py-1 rounded bg-indigo-100 text-indigo-700">
+                                        {categoryLabel(post.category)}
                                     </span>
                                     <span className="text-xs text-gray-400">
-                                        {post.readingTime}분
+                                        {post.readingTime}분 읽기
                                     </span>
                                 </div>
                                 <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors line-clamp-2">
                                     {post.title}
                                 </h3>
-                                <p className="text-gray-600 text-sm line-clamp-2 mb-4">
+                                <p className="text-gray-600 text-sm line-clamp-3 mb-4">
                                     {post.description}
                                 </p>
-                                <div className="flex items-center justify-between text-xs text-gray-400">
-                                    <div className="flex items-center gap-3">
-                                        <span>{post.publishedAt}</span>
-                                        <span className="flex items-center gap-1">
-                                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
-                                            {post.viewCount.toLocaleString()}
-                                        </span>
-                                    </div>
-                                    <div className="flex gap-1">
+                                <div className="flex items-center justify-between gap-3 text-xs text-gray-500">
+                                    <span>최종 확인 {post.reviewedAt}</span>
+                                    <div className="flex gap-1 flex-wrap justify-end">
                                         {post.tags.slice(0, 2).map(tag => (
                                             <span key={tag} className="bg-gray-100 px-2 py-0.5 rounded">
                                                 #{tag}
@@ -313,29 +229,31 @@ export default async function BlogPage({ searchParams }: PageProps) {
                 </div>
             </section>
 
-            {/* 하단 CTA */}
-            <div className="mt-16 bg-gray-50 rounded-2xl p-8 text-center">
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                    💡 블로그 글이 도움이 되셨나요?
-                </h3>
-                <p className="text-gray-600 mb-6">
-                    실제 매각 공고를 검색하고 분석해 보세요. 배운 지식을 바로 적용할 수 있습니다.
+            {/* 함께 보기 */}
+            <section className="mt-16 bg-gray-50 rounded-2xl p-8" aria-labelledby="more-heading">
+                <h2 id="more-heading" className="text-xl font-bold text-gray-900 mb-2">
+                    함께 보기
+                </h2>
+                <p className="text-sm text-gray-600 mb-6">
+                    글에서 다룬 용어와 수치는 용어사전, 주간 칼럼, 데이터랩에서 다시 확인할 수 있습니다.
+                    모든 글은 로옥션 편집팀이 작성하고 법령 원문과 수집 공고에 대조해 확인합니다.{' '}
+                    <Link href="/editorial-policy" className="font-semibold text-indigo-700 hover:underline">편집 원칙 보기</Link>
                 </p>
-                <div className="flex justify-center gap-4 flex-wrap">
-                    <Link
-                        href="/"
-                        className="bg-indigo-600 text-white font-bold px-8 py-3 rounded-lg hover:bg-indigo-700 transition-colors"
-                    >
-                        🔍 공고 검색하기
+                <div className="flex gap-3 flex-wrap">
+                    <Link href="/" className="bg-indigo-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors">
+                        공고 검색
                     </Link>
-                    <Link
-                        href="/glossary"
-                        className="bg-white text-gray-700 font-bold px-8 py-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-                    >
-                        📚 용어사전 보기
+                    <Link href="/glossary" className="bg-white text-gray-700 font-bold px-6 py-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+                        용어사전
+                    </Link>
+                    <Link href="/trend" className="bg-white text-gray-700 font-bold px-6 py-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+                        주간 칼럼
+                    </Link>
+                    <Link href="/datalab" className="bg-white text-gray-700 font-bold px-6 py-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+                        데이터랩
                     </Link>
                 </div>
-            </div>
+            </section>
         </div>
     );
 }

@@ -39,9 +39,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     }
 
     return {
-        title: `${categoryInfo.icon} ${categoryInfo.name} 매각 공고 | 대법원 자산매각`,
+        title: `${categoryInfo.name} 매각 공고`,
         description: categoryInfo.description,
-        keywords: `${categoryInfo.name}, 매각공고, 회생, 파산, 경매, ${categoryInfo.relatedTerms.join(', ')}`,
+        keywords: `${categoryInfo.name}, 매각공고, 회생, 파산, ${categoryInfo.relatedTerms.join(', ')}`,
         alternates: { canonical: `/category/${categoryInfo.slug}` },
         robots: { index: false, follow: true },
     };
@@ -94,9 +94,11 @@ export default async function CategoryPage({ params }: PageProps) {
                 }
 
                 if (trimmed.startsWith('### ')) {
+                    // categories.ts(공용 파일)의 '투자 팁' 소제목은 표시 시 중립 표현으로 바꿉니다.
+                    const heading = trimmed.replace('### ', '').replace(/투자 팁/g, '확인 사항');
                     return (
                         <h3 key={idx} className="text-xl font-bold text-gray-800 mt-6 mb-3">
-                            {trimmed.replace('### ', '')}
+                            {heading}
                         </h3>
                     );
                 }
@@ -184,13 +186,13 @@ export default async function CategoryPage({ params }: PageProps) {
                         href={categoryInfo.dbCategory ? `/?cat=${categoryInfo.dbCategory}` : `/?q=${encodeURIComponent(categoryInfo.slug === 'bonds' ? '채권' : '특허')}`}
                         className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-700 transition-colors"
                     >
-                        🔍 {categoryInfo.name} 공고 검색하기
+                        {categoryInfo.name} 공고 검색
                     </Link>
                     <Link
                         href="/glossary"
                         className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-bold hover:bg-gray-200 transition-colors"
                     >
-                        📖 용어사전
+                        용어사전
                     </Link>
                 </div>
             </header>
@@ -199,18 +201,16 @@ export default async function CategoryPage({ params }: PageProps) {
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-8 border border-blue-100 text-gray-700 leading-relaxed text-[15px] shadow-sm">
                 <p>
                     이 페이지는 대한민국 법원에 공개된 회생·파산 관련 <strong>{categoryInfo.name}</strong> 자산매각 공고를 모아 보여줍니다.
-                    공고마다 매각 방식, 권리관계, 자산 상태와 계약 조건이 다르며 법원 공고라는 이유만으로 권리나 하자가 자동으로 정리되는 것은 아닙니다.
-                    <br/><br/>
-                    목록은 매일 여러 차례 갱신됩니다. AI 요약은 첨부 문서에서 주요 항목을 찾기 위한 보조 자료이며 독립적인 권리분석이 아닙니다.
-                    실제 입찰을 검토할 때는 공고 원문, 첨부파일, 담당자 안내와 현장 상태를 직접 확인하세요.
+                    공고마다 매각 방식, 권리관계, 자산 상태와 계약 조건이 다르며, AI 요약은 첨부 문서에서 주요 항목을 찾기 위한 보조 자료입니다.
+                    확인 방법은 <Link href="/editorial-policy" className="underline hover:text-indigo-600">데이터·편집 원칙</Link>에 정리되어 있습니다.
                 </p>
             </div>
 
             {/* 최근 공고 */}
             {notices.length > 0 && (
                 <section className="mb-12">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                        📌 최근 {categoryInfo.name} 공고
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                        최근 {categoryInfo.name} 공고
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {notices.map((notice) => (
@@ -237,10 +237,10 @@ export default async function CategoryPage({ params }: PageProps) {
                 </div>
             </section>
 
-            {/* 투자 팁 */}
+            {/* 확인 사항 */}
             <section className="bg-amber-50 rounded-2xl p-8 mb-12">
-                <h2 className="text-2xl font-bold text-amber-900 mb-6 flex items-center gap-2">
-                    💡 {categoryInfo.name} 투자 팁
+                <h2 className="text-2xl font-bold text-amber-900 mb-6">
+                    {categoryInfo.name} 공고 확인 사항
                 </h2>
                 <ul className="space-y-3">
                     {categoryInfo.tips.map((tip, idx) => (
@@ -258,7 +258,7 @@ export default async function CategoryPage({ params }: PageProps) {
             {categoryInfo.relatedTerms.length > 0 && (
                 <section className="mb-12">
                     <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                        📖 관련 용어
+                        관련 용어
                     </h2>
                     <div className="flex flex-wrap gap-3">
                         {categoryInfo.relatedTerms.map((term) => {
@@ -277,11 +277,11 @@ export default async function CategoryPage({ params }: PageProps) {
                 </section>
             )}
 
-            {/* 관련 가이드 */}
+            {/* 관련 편집 글 */}
             {categoryInfo.relatedGuides.some((guide) => isPublicBlogSlug(guide.slug)) && (
                 <section className="mb-12">
                     <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                        📚 추천 가이드
+                        관련 편집 글
                     </h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {categoryInfo.relatedGuides.filter((guide) => isPublicBlogSlug(guide.slug)).map((guide) => (
@@ -305,7 +305,7 @@ export default async function CategoryPage({ params }: PageProps) {
             {/* 다른 카테고리 */}
             <section>
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                    🗂️ 다른 카테고리 둘러보기
+                    다른 카테고리
                 </h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {categories.filter(c => c.slug !== category).map((cat) => (

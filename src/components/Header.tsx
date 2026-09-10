@@ -4,16 +4,17 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 
+const navLinks = [
+  { href: '/', label: '홈' },
+  { href: '/trend', label: '주간 칼럼' },
+  { href: '/datalab', label: '데이터랩' },
+  { href: '/blog', label: '블로그' },
+  { href: '/glossary', label: '용어사전' },
+  { href: '/about', label: '소개' },
+];
+
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const navLinks = [
-    { href: '/', label: '홈' },
-    { href: '/blog', label: '블로그' },
-    { href: '/faq', label: 'FAQ' },
-    { href: '/editorial-policy', label: '편집 원칙' },
-    { href: '/about', label: '소개' },
-  ];
 
   return (
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
@@ -21,24 +22,25 @@ export default function Header() {
         <div className="flex justify-between items-center h-16">
           {/* Logo Area */}
           <div className="flex-shrink-0 flex items-center">
-            <Link href="/" className="flex items-center gap-2.5 group">
+            <Link href="/" className="flex items-center gap-2.5 group" aria-label="로옥션(LawAuction) 홈">
               <div className="relative w-8 h-8 group-hover:scale-110 transition-transform duration-300">
                 <Image
                   src="/logo.png"
-                  alt="LawAuction Logo"
+                  alt="로옥션(LawAuction) 로고"
                   fill
                   className="object-contain"
                   priority
                 />
               </div>
-              <span className="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-700">
-                LawAuction
+              <span className="flex items-baseline gap-1.5">
+                <span className="text-2xl font-black tracking-tight text-slate-900">로옥션</span>
+                <span className="text-xs font-semibold tracking-wide text-slate-500">LawAuction</span>
               </span>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex md:items-center md:space-x-1">
+          <nav className="hidden md:flex md:items-center md:space-x-1" aria-label="주요 메뉴">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -48,12 +50,14 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
-          </div>
+          </nav>
 
           {/* Mobile menu button */}
           <div className="flex items-center md:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-expanded={isMenuOpen}
+              aria-controls="mobile-nav"
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
             >
               <span className="sr-only">메뉴 열기</span>
@@ -73,7 +77,7 @@ export default function Header() {
 
       {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="md:hidden border-t border-gray-200">
+        <nav id="mobile-nav" className="md:hidden border-t border-gray-200" aria-label="모바일 메뉴">
           <div className="pt-2 pb-3 space-y-1">
             {navLinks.map((link) => (
               <Link
@@ -86,7 +90,7 @@ export default function Header() {
               </Link>
             ))}
           </div>
-        </div>
+        </nav>
       )}
     </header>
   );

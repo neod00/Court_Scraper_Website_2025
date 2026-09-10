@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { glossaryTerms, getTermBySlug } from '@/data/glossary';
+import { glossaryTerms, getTermBySlug, getTermDisplayName, GLOSSARY_CORPUS_NOTE, GLOSSARY_REVIEWED_AT } from '@/data/glossary';
 
 interface PageProps {
     params: Promise<{
@@ -19,10 +19,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         };
     }
 
+    const name = getTermDisplayName(term);
     return {
-        title: `${term.term} - 회생·파산 용어사전 | 대법원 자산매각 공고`,
+        title: `${name} - 회생·파산 자산매각 용어사전`,
         description: term.shortDescription,
-        keywords: `${term.term}, ${term.relatedTerms.join(', ')}, 법률용어, 경매용어`,
+        keywords: `${name}, ${term.relatedTerms.join(', ')}, 법률용어, 경매용어`,
         alternates: { canonical: `/glossary/${term.slug}` },
         robots: { index: false, follow: true },
     };
@@ -47,13 +48,7 @@ export default async function GlossaryDetailPage({ params }: PageProps) {
         .map(relatedName => glossaryTerms.find(t => t.term === relatedName))
         .filter(Boolean);
 
-    const categoryIcons: Record<string, string> = {
-        '절차': '⚙️',
-        '권리': '🔒',
-        '비용': '💰',
-        '문서': '📄',
-        '기타': '📌',
-    };
+    const displayName = getTermDisplayName(term);
 
     return (
         <article className="max-w-4xl mx-auto px-4 py-8">
@@ -63,18 +58,19 @@ export default async function GlossaryDetailPage({ params }: PageProps) {
                 <span>/</span>
                 <Link href="/glossary" className="hover:text-indigo-600">용어사전</Link>
                 <span>/</span>
-                <span className="text-gray-900 font-medium">{term.term}</span>
+                <span className="text-gray-900 font-medium">{displayName}</span>
             </nav>
 
             {/* 헤더 */}
             <header className="mb-10">
                 <div className="flex items-center gap-3 mb-4">
-                    <span className="bg-indigo-100 text-indigo-700 text-sm font-bold px-3 py-1 rounded-full flex items-center gap-1">
-                        {categoryIcons[term.category]} {term.category}
+                    <span className="bg-indigo-100 text-indigo-700 text-sm font-bold px-3 py-1 rounded-full">
+                        {term.category}
                     </span>
+                    <span className="text-sm text-gray-500">검수 {GLOSSARY_REVIEWED_AT}</span>
                 </div>
-                <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 mb-4">
-                    {term.term}
+                <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">
+                    {displayName}
                 </h1>
                 <p className="text-xl text-gray-600 leading-relaxed">
                     {term.shortDescription}
@@ -139,9 +135,15 @@ export default async function GlossaryDetailPage({ params }: PageProps) {
                                 return (
                                     <ol key={idx} className="list-decimal list-inside my-4 space-y-2">
                                         {items.map((item, i) => (
-                                            <li key={i} className="text-gray-700">
-                                                {item.replace(/^\d+\.\s*/, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}
-                                            </li>
+                                            <li
+                                                key={i}
+                                                className="text-gray-700"
+                                                dangerouslySetInnerHTML={{
+                                                    __html: item
+                                                        .replace(/^\s*\d+\.\s*/, '')
+                                                        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900">$1</strong>'),
+                                                }}
+                                            />
                                         ))}
                                     </ol>
                                 );
@@ -150,9 +152,15 @@ export default async function GlossaryDetailPage({ params }: PageProps) {
                             return (
                                 <ul key={idx} className="list-disc list-inside my-4 space-y-2">
                                     {items.map((item, i) => (
-                                        <li key={i} className="text-gray-700">
-                                            {item.replace(/^-\s*/, '')}
-                                        </li>
+                                        <li
+                                            key={i}
+                                            className="text-gray-700"
+                                            dangerouslySetInnerHTML={{
+                                                __html: item
+                                                    .replace(/^\s*-\s*/, '')
+                                                    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900">$1</strong>'),
+                                            }}
+                                        />
                                     ))}
                                 </ul>
                             );
@@ -181,8 +189,8 @@ export default async function GlossaryDetailPage({ params }: PageProps) {
             {/* 관련 용어 */}
             {relatedTermData.length > 0 && (
                 <section className="mb-10">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                        🔗 관련 용어
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                        관련 용어
                     </h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {relatedTermData.map((related) => related && (
@@ -192,7 +200,7 @@ export default async function GlossaryDetailPage({ params }: PageProps) {
                                 className="group bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-indigo-200 transition-all"
                             >
                                 <h3 className="font-bold text-gray-900 group-hover:text-indigo-600 transition-colors mb-2">
-                                    {related.term}
+                                    {getTermDisplayName(related)}
                                 </h3>
                                 <p className="text-sm text-gray-600 line-clamp-2">
                                     {related.shortDescription}
@@ -203,26 +211,32 @@ export default async function GlossaryDetailPage({ params }: PageProps) {
                 </section>
             )}
 
+            {/* 통계 기준 */}
+            <p className="text-sm text-gray-500 leading-relaxed mb-8">
+                {GLOSSARY_CORPUS_NOTE}{' '}
+                집계 방법은 <Link href="/editorial-policy" className="underline hover:text-indigo-600">데이터·편집 원칙</Link>에서 확인할 수 있습니다.
+            </p>
+
             {/* 하단 네비게이션 */}
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 border-t border-gray-200">
                 <Link
                     href="/glossary"
                     className="flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-medium"
                 >
-                    ← 용어사전 목록으로
+                    용어사전 목록으로
                 </Link>
                 <div className="flex gap-4">
                     <Link
                         href="/"
                         className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-700 transition-colors"
                     >
-                        🔍 공고 검색하기
+                        공고 검색
                     </Link>
                     <Link
-                        href="/guide"
+                        href="/blog"
                         className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-bold hover:bg-gray-200 transition-colors"
                     >
-                        📚 입찰 가이드
+                        편집 콘텐츠
                     </Link>
                 </div>
             </div>

@@ -1,0 +1,322 @@
+{
+ "schema_version": 1,
+ "month": "2026-08",
+ "month_label": "2026년 8월",
+ "period": {
+  "start": "2026-08-01",
+  "end": "2026-08-31"
+ },
+ "snapshot_date": "2026-09-10",
+ "totals": {
+  "n": 399,
+  "prev_month": "2026-07",
+  "prev_month_n": 422,
+  "diff": -23,
+  "diff_pct": -5.5,
+  "prev_comparable": true,
+  "weekly_avg": 90.1,
+  "weekly_counts": [
+   {
+    "week_start": "2026-08-03",
+    "week_end": "2026-08-09",
+    "n": 92,
+    "partial": false
+   },
+   {
+    "week_start": "2026-08-10",
+    "week_end": "2026-08-16",
+    "n": 98,
+    "partial": false
+   },
+   {
+    "week_start": "2026-08-17",
+    "week_end": "2026-08-23",
+    "n": 99,
+    "partial": false
+   },
+   {
+    "week_start": "2026-08-24",
+    "week_end": "2026-08-30",
+    "n": 93,
+    "partial": false
+   },
+   {
+    "week_start": "2026-08-31",
+    "week_end": "2026-09-06",
+    "n": 17,
+    "partial": true
+   }
+  ]
+ },
+ "courts": {
+  "top": [
+   {
+    "name": "서울회생법원",
+    "n": 170,
+    "pct": 42.6,
+    "rank": 1,
+    "prev_n": 204,
+    "prev_rank": 1
+   },
+   {
+    "name": "대전회생법원",
+    "n": 51,
+    "pct": 12.8,
+    "rank": 2,
+    "prev_n": 29,
+    "prev_rank": 4
+   },
+   {
+    "name": "수원회생법원",
+    "n": 41,
+    "pct": 10.3,
+    "rank": 3,
+    "prev_n": 59,
+    "prev_rank": 2
+   },
+   {
+    "name": "창원지방법원",
+    "n": 32,
+    "pct": 8.0,
+    "rank": 4,
+    "prev_n": 10,
+    "prev_rank": 9
+   },
+   {
+    "name": "인천지방법원",
+    "n": 31,
+    "pct": 7.8,
+    "rank": 5,
+    "prev_n": 32,
+    "prev_rank": 3
+   },
+   {
+    "name": "대구회생법원",
+    "n": 24,
+    "pct": 6.0,
+    "rank": 6,
+    "prev_n": 18,
+    "prev_rank": 6
+   },
+   {
+    "name": "의정부지방법원",
+    "n": 17,
+    "pct": 4.3,
+    "rank": 7,
+    "prev_n": 25,
+    "prev_rank": 5
+   },
+   {
+    "name": "부산회생법원",
+    "n": 14,
+    "pct": 3.5,
+    "rank": 8,
+    "prev_n": 12,
+    "prev_rank": 7
+   }
+  ],
+  "other_n": 19,
+  "distinct_n": 13
+ },
+ "categories": [
+  {
+   "key": "real_estate",
+   "label": "부동산",
+   "n": 145,
+   "pct": 36.3
+  },
+  {
+   "key": "asset",
+   "label": "자산",
+   "n": 98,
+   "pct": 24.6
+  },
+  {
+   "key": "bond",
+   "label": "채권",
+   "n": 45,
+   "pct": 11.3
+  },
+  {
+   "key": "etc",
+   "label": "기타",
+   "n": 38,
+   "pct": 9.5
+  },
+  {
+   "key": "vehicle",
+   "label": "차량/동산",
+   "n": 40,
+   "pct": 10.0
+  },
+  {
+   "key": "patent",
+   "label": "특허",
+   "n": 17,
+   "pct": 4.3
+  },
+  {
+   "key": "electronics",
+   "label": "전자장비",
+   "n": 12,
+   "pct": 3.0
+  },
+  {
+   "key": "stock",
+   "label": "주식",
+   "n": 4,
+   "pct": 1.0
+  }
+ ],
+ "price": {
+  "priced_n": 168,
+  "pct": 42.1,
+  "median": 4000000,
+  "p25": 1000000,
+  "p75": 12000000,
+  "ge_100m_n": 6,
+  "max": 1700000000,
+  "bands": [
+   {
+    "label": "1천만 원 미만",
+    "n": 114,
+    "pct": 67.9
+   },
+   {
+    "label": "1천만~1억 원",
+    "n": 48,
+    "pct": 28.6
+   },
+   {
+    "label": "1억~5억 원",
+    "n": 4,
+    "pct": 2.4
+   },
+   {
+    "label": "5억~10억 원",
+    "n": 0,
+    "pct": 0.0
+   },
+   {
+    "label": "10억 원 이상",
+    "n": 2,
+    "pct": 1.2
+   }
+  ]
+ },
+ "schedule": {
+  "with_auction_date_n": 169,
+  "pct": 42.4,
+  "excluded_n": 2,
+  "in_month_n": 116,
+  "next_month_n": 52,
+  "other_n": 1,
+  "by_month": [
+   {
+    "month": "2026-08",
+    "n": 116
+   },
+   {
+    "month": "2026-09",
+    "n": 52
+   },
+   {
+    "month": "2026-10",
+    "n": 1
+   }
+  ],
+  "top_dates": [
+   {
+    "date": "2026-08-21",
+    "n": 17
+   },
+   {
+    "date": "2026-08-25",
+    "n": 14
+   },
+   {
+    "date": "2026-08-28",
+    "n": 11
+   }
+  ]
+ },
+ "cases": {
+  "titled_with_case_n": 35,
+  "distinct_cases_n": 22,
+  "multi_case_n": 6,
+  "multi_case_examples": [
+   {
+    "court": "대구회생법원",
+    "case_no": "2025하단11310",
+    "n": 8
+   },
+   {
+    "court": "대구회생법원",
+    "case_no": "2024하단1552",
+    "n": 3
+   },
+   {
+    "court": "대구회생법원",
+    "case_no": "2025하단11729",
+    "n": 2
+   }
+  ]
+ },
+ "notable": [
+  {
+   "id": "1faa3109-8129-4c25-962e-a6e5d0eab59a",
+   "court": "서울회생법원",
+   "title": "파산재단 자산매각공고",
+   "min_price": 1700000000,
+   "target": "차량 쏘나타 등 / 56대, 택시면허 법인택시면허 / 61대",
+   "rounds_noted": true
+  },
+  {
+   "id": "f6af6485-bd73-4665-8700-d073a43d659c",
+   "court": "대전회생법원",
+   "title": "파산재단 자산 매각공고(기계기구)",
+   "min_price": 280000000,
+   "target": "충청남도 부여군 내산면 묘원리 236-19 천보생물기술환경연구소 제1동, 기계기구 포함",
+   "rounds_noted": true
+  },
+  {
+   "id": "466eba29-9aac-4432-9a48-41f26345f1ce",
+   "court": "서울회생법원",
+   "title": "재고 등 매각 공고",
+   "min_price": 120000000,
+   "target": "인천 계양구 서운산단로1길 59, 3층 물류창의 채무자 소유 재고 및 원재료 일체",
+   "rounds_noted": true
+  },
+  {
+   "id": "c7a0a82a-6759-42c0-afc4-d0108e0ddd00",
+   "court": "서울회생법원",
+   "title": "부동산 매각 공고",
+   "min_price": 112348000,
+   "target": "전남 무안군 해제면 창매리 269-1 전 1,495㎡, 창매리 269-5 전 92㎡, 창매리 269-6 전 122㎡, 창매리 269-7 전 21…",
+   "rounds_noted": true
+  },
+  {
+   "id": "0d223d62-ad5e-44f5-92bb-7147ee183e7d",
+   "court": "서울회생법원",
+   "title": "자산 매각 및 포기 공고",
+   "min_price": 100000000,
+   "target": "채권(전도금, 선급금, 합의금 등)",
+   "rounds_noted": true
+  }
+ ],
+ "data_quality": {
+  "summary_fallback_n": 221,
+  "summary_fallback_pct": 55.4,
+  "summary_quality_n": 155,
+  "summary_quality_pct": 38.8,
+  "min_price_n": 168,
+  "auction_date_n": 169,
+  "unclassified_n": 0
+ },
+ "editor_note": "2026년 8월에는 공고 399건을 수집했습니다(집계 기준일 2026-09-10). 7월 422건보다 23건(5.5%) 적고, 주당 평균은 90.1건입니다. 8월 3일 주부터 4주 연속 92~99건으로 주별 편차가 가장 작았습니다.\n\n서울회생법원은 170건(42.6%)으로 7월 204건보다 줄었습니다. 대전회생법원이 51건(12.8%)으로 7월 29건에서 늘어 4위에서 2위가 됐고, 수원회생법원은 41건으로 3위, 창원지방법원은 7월 10건에서 32건으로 늘어 9위에서 4위가 됐습니다. 자동 분류로는 부동산 145건(36.3%), 자산 98건(24.6%), 채권 45건(11.3%), 차량/동산 40건(10.0%) 순입니다.\n\n최저매각가가 기재된 공고는 168건(42.1%)이며 중앙값 400만 원, 상위 25% 경계 1,200만 원입니다. 1억 원 이상은 6건으로 여섯 달 중 가장 적고, 10억 원 이상은 2건입니다. 게시일 이후의 입찰 기일이 기재된 공고는 169건(42.4%)이고 52건은 9월 기일입니다. 8월 21일에 17건, 25일에 14건이 몰렸습니다. 제목에 사건번호가 적힌 공고는 35건(22개 사건)이며, 대구회생법원 2025하단11310 사건은 8건으로 나뉘어 공고돼 여섯 달 중 한 사건이 가장 많이 나뉜 사례입니다.\n\n요약 추출 실패는 221건(55.4%)입니다. 집계 기준일 이후의 정정·재공고는 반영하지 않습니다.",
+ "editor_note_title": "",
+ "editor_note_by": "로옥션",
+ "editor_note_status": "ai-draft",
+ "status": "draft",
+ "published_at": null
+}

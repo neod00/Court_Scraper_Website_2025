@@ -92,7 +92,7 @@ export default function ROICalculatorPage() {
     const [vacancyRate, setVacancyRate] = useState<string>('5');
     const [annualMaintenance, setAnnualMaintenance] = useState<string>('');
 
-    // 매도 수익률 계산
+    // 매도 손익 계산
     const calculateResale = () => {
         const purchase = parseNumber(purchasePrice);
         if (!purchase) return null;
@@ -125,7 +125,7 @@ export default function ROICalculatorPage() {
         };
     };
 
-    // 임대 수익률 계산
+    // 임대 손익 계산
     const calculateRental = () => {
         const purchase = parseNumber(purchasePrice);
         if (!purchase) return null;
@@ -181,20 +181,20 @@ export default function ROICalculatorPage() {
                 <span>/</span>
                 <Link href="/tools" className="hover:text-indigo-600">도구</Link>
                 <span>/</span>
-                <span className="text-gray-900 font-medium">투자 수익률 계산기</span>
+                <span className="text-gray-900 font-medium">매도·임대 손익 계산기</span>
             </nav>
 
             {/* 헤더 */}
             <header className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                    📈 투자 수익률 계산기
+                <h1 className="text-3xl font-bold text-gray-900">
+                    매도·임대 손익 계산기
                 </h1>
                 <p className="text-gray-600 mt-2">
-                    법원 매각 자산의 매도 차익 또는 임대 수익률을 시뮬레이션합니다.
+                    매도가 또는 임대 조건과 총비용을 비교해 손익을 단순 계산합니다.
                 </p>
             </header>
 
-            {/* 투자 유형 탭 */}
+            {/* 계산 유형 탭 */}
             <div className="flex border-b border-gray-200 mb-8">
                 <button
                     onClick={() => setInvestmentType('resale')}
@@ -203,7 +203,7 @@ export default function ROICalculatorPage() {
                         : 'border-transparent text-gray-500 hover:text-gray-700'
                         }`}
                 >
-                    💰 매도 차익형
+                    매도 차익형
                 </button>
                 <button
                     onClick={() => setInvestmentType('rental')}
@@ -212,7 +212,7 @@ export default function ROICalculatorPage() {
                         : 'border-transparent text-gray-500 hover:text-gray-700'
                         }`}
                 >
-                    🏠 임대 수익형
+                    임대형
                 </button>
             </div>
 
@@ -259,7 +259,7 @@ export default function ROICalculatorPage() {
                                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">개월</span>
                                     </div>
                                 </div>
-                                <InputField label="매도 비용" value={sellingCost} onChange={setSellingCost} hint="중개수수료, 양도세 등" />
+                                <InputField label="매도 비용" value={sellingCost} onChange={setSellingCost} hint="중개수수료 등(양도소득세는 별도)" />
                             </div>
                         </div>
                     )}
@@ -286,7 +286,7 @@ export default function ROICalculatorPage() {
                                         />
                                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">%</span>
                                     </div>
-                                    <p className="text-xs text-gray-400 mt-1">보통 5~10%</p>
+                                    <p className="text-xs text-gray-400 mt-1">예시값</p>
                                 </div>
                                 <InputField label="연간 유지보수비" value={annualMaintenance} onChange={setAnnualMaintenance} hint="재산세, 보험료 등" />
                             </div>
@@ -300,14 +300,14 @@ export default function ROICalculatorPage() {
                         ? 'bg-gradient-to-br from-violet-600 to-purple-700'
                         : 'bg-gradient-to-br from-blue-600 to-indigo-700'
                         }`}>
-                        <h2 className="text-lg font-bold mb-6 flex items-center gap-2">
-                            📊 {investmentType === 'resale' ? '매도 수익 분석' : '임대 수익 분석'}
+                        <h2 className="text-lg font-bold mb-6">
+                            {investmentType === 'resale' ? '매도 손익 계산 결과' : '임대 손익 계산 결과'}
                         </h2>
 
                         {investmentType === 'resale' && resaleResult ? (
                             <div className="space-y-4">
                                 <div className={`rounded-xl p-4 ${resaleResult.isProfitable ? 'bg-white/10' : 'bg-red-500/20'}`}>
-                                    <div className="text-purple-200 text-sm">순 수익</div>
+                                    <div className="text-purple-200 text-sm">매도 손익(비용 차감 후)</div>
                                     <div className={`text-3xl font-bold ${resaleResult.isProfitable ? '' : 'text-red-200'}`}>
                                         {resaleResult.netProfit >= 0 ? '+' : ''}{resaleResult.netProfit.toLocaleString()}원
                                     </div>
@@ -315,18 +315,18 @@ export default function ROICalculatorPage() {
 
                                 <div className="grid grid-cols-2 gap-3">
                                     <div className="bg-white/10 rounded-lg p-3">
-                                        <div className="text-purple-200 text-xs">총 수익률 (ROI)</div>
+                                        <div className="text-purple-200 text-xs">총비용 대비 손익 비율</div>
                                         <div className="text-xl font-bold">{resaleResult.roi.toFixed(1)}%</div>
                                     </div>
                                     <div className="bg-white/10 rounded-lg p-3">
-                                        <div className="text-purple-200 text-xs">연 환산 수익률</div>
+                                        <div className="text-purple-200 text-xs">연 환산 손익 비율</div>
                                         <div className="text-xl font-bold">{resaleResult.annualizedROI.toFixed(1)}%</div>
                                     </div>
                                 </div>
 
                                 <div className="space-y-2 text-sm">
                                     <div className="flex justify-between">
-                                        <span className="text-purple-200">총 투자비</span>
+                                        <span className="text-purple-200">총비용</span>
                                         <span>{resaleResult.totalInvestment.toLocaleString()}원</span>
                                     </div>
                                     <div className="flex justify-between">
@@ -338,95 +338,93 @@ export default function ROICalculatorPage() {
                                         <span>-{resaleResult.totalSellExpense.toLocaleString()}원</span>
                                     </div>
                                     <div className="flex justify-between border-t border-white/20 pt-2">
-                                        <span className="text-purple-200">월평균 수익</span>
+                                        <span className="text-purple-200">월평균 손익</span>
                                         <span className="font-bold">{Math.round(resaleResult.monthlyProfit).toLocaleString()}원</span>
                                     </div>
                                 </div>
 
-                                {/* 판정 */}
-                                <div className={`rounded-lg p-3 text-center text-sm font-bold ${resaleResult.annualizedROI >= 15 ? 'bg-green-500/30 text-green-100' :
-                                    resaleResult.annualizedROI >= 5 ? 'bg-yellow-500/30 text-yellow-100' :
-                                        'bg-red-500/30 text-red-100'
-                                    }`}>
-                                    {resaleResult.annualizedROI >= 15 ? '🟢 우수한 투자 기회' :
-                                        resaleResult.annualizedROI >= 5 ? '🟡 보통 수준의 수익률' :
-                                            resaleResult.annualizedROI >= 0 ? '🟠 낮은 수익률 주의' :
-                                                '🔴 투자 손실 예상'}
+                                {/* 계산 조건 */}
+                                <div className="rounded-lg p-3 text-xs bg-white/10 text-purple-100">
+                                    {resaleResult.isProfitable
+                                        ? '입력한 매도가가 총비용과 매도 비용의 합계를 넘는 경우의 계산값입니다.'
+                                        : '입력한 매도가가 총비용과 매도 비용의 합계에 미치지 못합니다.'}
+                                    {' '}양도소득세와 보유 기간 중 비용은 포함되지 않았습니다.
                                 </div>
                             </div>
                         ) : investmentType === 'rental' && rentalResult ? (
                             <div className="space-y-4">
                                 <div className="bg-white/10 rounded-xl p-4">
-                                    <div className="text-blue-200 text-sm">순 수익률 (Net Yield)</div>
+                                    <div className="text-blue-200 text-sm">임대 순수입 비율(총비용 대비)</div>
                                     <div className="text-3xl font-bold">{rentalResult.netYield.toFixed(2)}%</div>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-3">
                                     <div className="bg-white/10 rounded-lg p-3">
-                                        <div className="text-blue-200 text-xs">총 수익률</div>
+                                        <div className="text-blue-200 text-xs">임대료 합계 비율(총비용 대비)</div>
                                         <div className="text-xl font-bold">{rentalResult.grossYield.toFixed(2)}%</div>
                                     </div>
                                     <div className="bg-white/10 rounded-lg p-3">
-                                        <div className="text-blue-200 text-xs">자기자본 수익률</div>
+                                        <div className="text-blue-200 text-xs">보증금 차감 후 비용 대비 순수입 비율</div>
                                         <div className="text-xl font-bold">{rentalResult.netYieldOnEquity.toFixed(2)}%</div>
                                     </div>
                                 </div>
 
                                 <div className="space-y-2 text-sm">
                                     <div className="flex justify-between">
-                                        <span className="text-blue-200">총 투자비</span>
+                                        <span className="text-blue-200">총비용</span>
                                         <span>{rentalResult.totalInvestment.toLocaleString()}원</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-blue-200">실투자금 (보증금 차감)</span>
+                                        <span className="text-blue-200">보증금 차감 후 비용</span>
                                         <span>{rentalResult.actualInvestment.toLocaleString()}원</span>
                                     </div>
                                     <div className="flex justify-between border-t border-white/20 pt-2">
-                                        <span className="text-blue-200">연간 순수익</span>
+                                        <span className="text-blue-200">연간 순수입</span>
                                         <span className="font-bold">{Math.round(rentalResult.annualNetIncome).toLocaleString()}원</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-blue-200">월 순수익</span>
+                                        <span className="text-blue-200">월 순수입</span>
                                         <span className="font-bold">{Math.round(rentalResult.monthlyNetIncome).toLocaleString()}원</span>
                                     </div>
                                     {rentalResult.paybackYears > 0 && (
                                         <div className="flex justify-between">
-                                            <span className="text-blue-200">투자 회수 기간</span>
+                                            <span className="text-blue-200">비용 회수 기간(단순 계산)</span>
                                             <span className="font-bold">{rentalResult.paybackYears.toFixed(1)}년</span>
                                         </div>
                                     )}
                                 </div>
 
-                                {/* 판정 */}
-                                <div className={`rounded-lg p-3 text-center text-sm font-bold ${rentalResult.netYield >= 6 ? 'bg-green-500/30 text-green-100' :
-                                    rentalResult.netYield >= 3 ? 'bg-yellow-500/30 text-yellow-100' :
-                                        'bg-red-500/30 text-red-100'
-                                    }`}>
-                                    {rentalResult.netYield >= 6 ? '🟢 높은 임대 수익률' :
-                                        rentalResult.netYield >= 3 ? '🟡 적정 수준의 수익률' :
-                                            rentalResult.netYield >= 0 ? '🟠 시중 예금금리와 비교 필요' :
-                                                '🔴 임대 손실 예상'}
+                                {/* 계산 조건 */}
+                                <div className="rounded-lg p-3 text-xs bg-white/10 text-blue-100">
+                                    {rentalResult.isProfitable
+                                        ? '입력한 임대료에서 공실률과 비용을 뺀 연간 순수입이 양수인 경우의 계산값입니다.'
+                                        : '입력한 임대료에서 공실률과 비용을 빼면 연간 순수입이 0 이하입니다.'}
+                                    {' '}재산세, 종합부동산세, 임대소득세는 포함되지 않았습니다.
                                 </div>
                             </div>
                         ) : (
                             <div className="text-center py-12 opacity-70">
-                                <div className="text-5xl mb-4">📊</div>
-                                <p>매입가와 수익 조건을 입력하면</p>
-                                <p>수익률이 자동으로 분석됩니다</p>
+                                <p>매입가와 조건을 입력하면</p>
+                                <p>손익이 계산됩니다</p>
                             </div>
                         )}
                     </div>
                 </div>
             </div>
 
-            {/* 안내사항 */}
+            {/* 계산 근거와 한계 */}
             <div className="mt-8 bg-amber-50 rounded-xl p-6 border border-amber-100">
-                <h3 className="font-bold text-amber-900 mb-3">⚠️ 안내사항</h3>
+                <h2 className="text-base font-bold text-amber-900 mb-3">계산 근거와 한계</h2>
+                <p className="text-sm text-amber-800 leading-relaxed mb-3">
+                    이 계산기는 세율을 내장하지 않고, 입력한 취득세·등기 비용·수리비 등을 그대로 더해 총비용을 구한 뒤 매도가 또는 임대료와 비교하는 산술 계산만 수행합니다.
+                    취득세는 지방세법 제11조·제12조와 지방세법 시행령을 바탕으로 한 취득세 계산기(2026년 1월 기준)의 결과를 입력할 수 있으며,
+                    세율 검토 필요 시 위택스(wetax.go.kr)와 국가법령정보센터(law.go.kr)에서 확인해야 합니다.
+                </p>
                 <ul className="text-sm text-amber-800 space-y-1">
-                    <li>• 본 계산기는 투자 판단을 위한 참고 도구이며, 실제 수익을 보장하지 않습니다.</li>
-                    <li>• 양도소득세, 종합부동산세 등 추가 세금은 별도로 계산해야 합니다.</li>
-                    <li>• 시장 변동, 금리 변화 등 외부 요인에 의해 실제 수익률이 달라질 수 있습니다.</li>
-                    <li>• 중요한 투자 결정 전에는 반드시 전문가(세무사, 공인중개사)와 상담하세요.</li>
+                    <li>• 결과는 입력값이 그대로 실현된다는 가정의 계산값이며, 로옥션은 특정 결과를 예측하거나 권하지 않습니다.</li>
+                    <li>• 양도소득세, 종합부동산세, 임대소득세 등 추가 세금은 포함되지 않았습니다.</li>
+                    <li>• 시세, 임대료, 공실률, 금리는 시점과 지역에 따라 달라지므로 직접 확인한 값을 입력해야 합니다.</li>
+                    <li>• 세무 판단이 필요하면 세무사 등 자격 있는 전문가에게 확인해야 합니다.</li>
                 </ul>
             </div>
 
@@ -436,13 +434,13 @@ export default function ROICalculatorPage() {
                     href="/tools/acquisition-tax"
                     className="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors"
                 >
-                    🧮 취득세 계산기
+                    취득세 계산기
                 </Link>
                 <Link
                     href="/tools/vehicle-transfer"
                     className="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors"
                 >
-                    🚗 차량 이전비 계산기
+                    차량 이전비 계산기
                 </Link>
             </div>
         </div>
