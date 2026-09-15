@@ -5,6 +5,12 @@ on:
     # Run at 14:00 UTC every Friday (23:00 KST Friday)
     - cron: '0 14 * * 5'
   workflow_dispatch:  # Manual trigger
+    inputs:
+      date:
+        description: '이 날짜가 속한 주(월~금)의 집계 행을 생성 (YYYY-MM-DD). 비우면 직전 주'
+        required: false
+        type: string
+        default: ''
 
 jobs:
   generate-report:
@@ -29,5 +35,15 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          INPUT_DATE: ${{ inputs.date }}
         run: |
-          python scripts/weekly_trend_generator.py
+          set -euo pipefail
+          if [ -n "${INPUT_DATE}" ]; then
+            if ! [[ "${INPUT_DATE}" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+              echo "date 입력 형식 오류: YYYY-MM-DD 가 필요합니다." >&2
+              exit 1
+            fi
+            python scripts/weekly_trend_generator.py --date "${INPUT_DATE}"
+          else
+            python scripts/weekly_trend_generator.py
+          fi

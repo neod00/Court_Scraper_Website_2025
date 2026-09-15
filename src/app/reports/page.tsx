@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import {
     getPublishedReports,
+    isAutoReport,
     reportTitle,
     reportAuthor,
     reportExcerpt,
@@ -13,7 +14,7 @@ import {
 const siteUrl = 'https://www.courtauction.site';
 
 const hubDescription =
-    '로옥션이 매달 수집한 법원 회생·파산 자산매각 공고를 법원·자산 유형·최저매각가·입찰 일정 기준으로 집계하고, 편집자 노트를 더한 월간 리포트입니다.';
+    '로옥션이 매달 수집한 법원 회생·파산 자산매각 공고를 법원·자산 유형·최저매각가·입찰 일정 기준으로 집계하고, 수치 검증을 거친 편집자 노트를 더한 월간 리포트입니다.';
 
 export function generateMetadata(): Metadata {
     const reports = getPublishedReports();
@@ -79,6 +80,7 @@ export default function ReportsHubPage() {
                 <p className="text-gray-600 leading-relaxed text-[15px] max-w-2xl">
                     로옥션이 한 달 동안 수집한 법원 회생·파산 자산매각 공고를 법원, 자산 유형, 최저매각가, 입찰 일정 기준으로
                     집계합니다. 집계 수치는 집계 기준일에 고정하고, 그 달의 편집자 노트를 붙여 발행합니다.
+                    &lsquo;자동 작성 · 수치 검증&rsquo; 표시가 붙은 리포트의 노트는 집계를 바탕으로 자동 작성한 뒤 수치를 집계와 대조해 검증한 것이며, 운영자가 사후 검토합니다.
                 </p>
             </header>
 
@@ -101,6 +103,11 @@ export default function ReportsHubPage() {
                                     <span>대상 기간 {report.period.start} ~ {report.period.end}</span>
                                     <span>발행일 {publishedDate(report)}</span>
                                     <span>{reportAuthor(report)}</span>
+                                    {isAutoReport(report) && (
+                                        <span className="inline-flex items-center rounded border border-gray-300 px-1.5 py-0.5 text-[11px] font-semibold text-gray-600">
+                                            자동 작성 · 수치 검증
+                                        </span>
+                                    )}
                                 </div>
                                 <h3 className="text-xl font-bold text-gray-900 leading-snug mb-2">
                                     <Link href={`/reports/${report.month}`} className="hover:text-indigo-700">
@@ -134,7 +141,7 @@ export default function ReportsHubPage() {
                     <li>금액은 공고에 기재된 최저매각가만 사용하고, 기재된 건수와 비율을 함께 적습니다. 극단값에 흔들리는 합계·평균은 싣지 않습니다.</li>
                     <li>사건 묶음은 제목에 적힌 사건번호로만 셉니다. 법원마다 제목 관행이 달라 사건번호가 없는 공고는 묶지 못합니다.</li>
                     <li>공고 요약은 첨부문서에서 AI가 추출한 것이며, 추출에 실패한 비율을 리포트마다 표기합니다. 입찰 결과(매수인·매수 금액)와 감정평가액은 수집하지 않습니다.</li>
-                    <li>편집자 노트는 운영자가 집계를 읽고 쓴 해석입니다. 초안 작성에 AI를 보조로 쓰더라도 발행 전에 운영자가 사실을 확인합니다.</li>
+                    <li>편집자 노트는 사람이 쓴 것과 자동 작성한 것이 있습니다. 자동 작성 노트는 집계만을 근거로 쓰고, 본문 수치가 집계와 일치하는지와 금지 표현·개인명·원인 단정이 없는지를 검증해 통과한 경우에만 발행하며, 목록과 본문에 &lsquo;자동 작성 · 수치 검증&rsquo;으로 표시합니다. 발행 후 운영자가 검토해 오류를 정정합니다.</li>
                 </ul>
             </section>
 
@@ -148,7 +155,7 @@ export default function ReportsHubPage() {
             </div>
 
             <p className="text-xs text-gray-500 leading-6">
-                이 리포트는 공고 집계와 편집자의 해석이며, 개별 공고의 내용과 조건은 원문에서 확인해야 합니다.{' '}
+                이 리포트는 공고 집계와 그에 대한 노트이며, 개별 공고의 내용과 조건은 원문에서 확인해야 합니다.{' '}
                 <Link href="/editorial-policy" className="underline hover:text-indigo-700">데이터·편집 원칙</Link>
             </p>
         </div>

@@ -1,7 +1,7 @@
 // 주간 데이터 칼럼 공용 로직 (단일 출처).
 //
 // 원칙: 자동 집계 수치만 있는 주차는 색인 대상이 아니다.
-// 편집자가 쓴 해석(editor_note)이 붙은 주차만 개별 URL로 색인하고 사이트맵에 넣는다.
+// 데이터 노트(editor_note: 사람이 쓴 해석 또는 자동 작성·검증된 노트)가 붙은 주차만 개별 URL로 색인하고 사이트맵에 넣는다.
 // 공고 페이지의 품질 게이트(noticeQuality.ts)와 같은 원리다.
 
 export interface WeeklyReport {
@@ -18,7 +18,7 @@ export interface WeeklyReport {
     editor_note_at?: string | null;
 }
 
-/** 편집자 해석이 실질적으로 담겼는지 — 색인/링크 가능 여부의 단일 판정 기준. */
+/** 데이터 노트가 실질적으로 담겼는지(사람 작성·자동 작성 공통) — 색인/링크 가능 여부의 단일 판정 기준. */
 export function hasEditorNote(report: Pick<WeeklyReport, 'editor_note'> | null | undefined): boolean {
     const note = report?.editor_note;
     if (!note) return false;
@@ -59,6 +59,18 @@ export function columnTitle(report: WeeklyReport): string {
 
 export function columnAuthor(report: WeeklyReport): string {
     return report.editor_note_by?.trim() || '로옥션';
+}
+
+/**
+ * 자동 발행 칼럼의 작성자 표기. scripts/write_weekly_column.py 의 AUTO_AUTHOR 와 반드시 일치.
+ * 이 값이 editor_note_by 에 들어 있으면 "집계 기반 자동 작성 + 수치 검증" 칼럼이며,
+ * 페이지에 자동 작성 고지를 붙이고 JSON-LD author 를 Organization 으로 낸다.
+ */
+export const AUTO_COLUMN_AUTHOR = '로옥션 데이터 데스크';
+
+/** 자동 작성·검증 후 발행된 칼럼인지 (사람이 쓴 칼럼과 고지·저자 표기를 구분한다). */
+export function isAutoColumn(report: Pick<WeeklyReport, 'editor_note_by'> | null | undefined): boolean {
+    return (report?.editor_note_by ?? '').trim() === AUTO_COLUMN_AUTHOR;
 }
 
 /** 발행일: 해석 작성 시각이 있으면 그것, 없으면 주차 종료일. */

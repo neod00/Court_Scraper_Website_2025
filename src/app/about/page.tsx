@@ -43,13 +43,14 @@ export default function AboutPage() {
                         </li>
                         <li>
                             <strong className="text-gray-800">주간 데이터 칼럼</strong> — 한 주 동안 수집한
-                            공고 집계에 운영자의 해석을 붙여 발행합니다. 해석이 붙지 않은 주차는 발행하지 않습니다.{' '}
+                            공고 집계에 데이터 노트를 붙여 발행합니다. 노트는 집계를 바탕으로 자동 작성·검증하며 그 사실을
+                            표시합니다. 노트가 붙지 않은 주차는 발행하지 않습니다.{' '}
                             <Link href="/trend" className="text-indigo-600 hover:underline">주간 칼럼 보기</Link>
                         </li>
                         <li>
                             <strong className="text-gray-800">월간 리포트</strong> — 한 달치 공고를 법원·자산
-                            유형·최저매각가 분포·입찰 일정으로 나누어 정리한 보고서입니다. 운영자 검토를
-                            마친 달부터 순차적으로 공개합니다.
+                            유형·최저매각가 분포·입찰 일정으로 나누어 정리한 보고서입니다. 검증을 통과한 달부터
+                            순차적으로 공개하고, 자동 작성한 노트에는 그 사실을 표시합니다.
                         </li>
                         <li>
                             <strong className="text-gray-800">검수 편집 글</strong> — 공고를 읽는 방법과 관련
@@ -67,8 +68,8 @@ export default function AboutPage() {
                 <section>
                     <h2 className="text-xl font-semibold text-gray-800 mb-3">누가 운영하나요</h2>
                     <p className="text-gray-600 leading-relaxed mb-4">
-                        로옥션은 1인이 운영합니다. 운영자는 수집 프로그램의 유지, 데이터 검수, 주간 칼럼과
-                        월간 리포트의 작성·검토, 편집 글의 사실 확인, 오류 신고 처리를 맡습니다. 변호사·세무사
+                        로옥션은 1인이 운영합니다. 운영자는 수집 프로그램의 유지, 데이터 검수, 자동 발행된 주간 칼럼과
+                        월간 리포트의 사후 검토, 편집 글의 작성과 사실 확인, 오류 신고 처리를 맡습니다. 변호사·세무사
                         등 자격 있는 전문가를 표방하지 않으며, 개별 사건에 대한 법률·세무 판단을 제공하지
                         않습니다. 작성·검수 절차는{' '}
                         <Link href="/authors/lawauction-editorial-team" className="text-indigo-600 hover:underline">
@@ -110,11 +111,18 @@ export default function AboutPage() {
                             </dd>
                         </div>
                         <div>
+                            <dt className="font-semibold text-gray-800">칼럼·리포트의 자동 작성</dt>
+                            <dd>
+                                주간 칼럼(매주 토요일)과 월간 리포트(매월 2일)의 노트는 수집 공고의 집계만을 입력으로 자동 작성한 뒤,
+                                본문 수치가 집계와 일치하는지와 금지 표현·개인명·원인 단정이 없는지 프로그램이 검증해 통과한 경우에만
+                                발행하며, 해당 글에 자동 작성 고지를 붙입니다.
+                            </dd>
+                        </div>
+                        <div>
                             <dt className="font-semibold text-gray-800">사람 검수 주기</dt>
                             <dd>
-                                주간 칼럼은 매주 운영자가 집계를 읽고 해석을 쓴 뒤 발행합니다. 월간 리포트는
-                                매월 초안을 만들어 운영자가 검토한 뒤 공개합니다. 편집 글은 발행 시 원문·법령과
-                                대조하고, 이후 분기마다 다시 확인해 최종 확인일을 갱신합니다.
+                                자동 발행된 칼럼과 리포트는 운영자가 사후에 읽고 오류가 있으면 정정하거나 내립니다.
+                                편집 글은 발행 시 원문·법령과 대조하고, 이후 분기마다 다시 확인해 최종 확인일을 갱신합니다.
                             </dd>
                         </div>
                     </dl>

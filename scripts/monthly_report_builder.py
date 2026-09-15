@@ -19,6 +19,11 @@ court_notices(source_type='notice')를 달력 월 단위로 집계해 src/conten
   - status == 'published' 이고 editor_note 가 300자 이상일 때만 색인·사이트맵 대상
   - published_at 은 --publish 를 실행한 실제 시각(Asia/Seoul)으로만 찍힙니다. 소급 불가.
   - editor_note_status 가 'ai-draft' 인 리포트는 --reviewed 없이 발행되지 않습니다.
+  - 'ai-auto' 는 집계만으로 자동 작성돼 column_guard 검증(숫자·금지어·개인명·원인 단정)과 LLM 교차 검증을
+    통과한 노트입니다. --auto-publish / --auto-next (GitHub Actions monthly_report.yml) 가 만들고 바로 발행하며,
+    사이트는 이 값으로 '자동 작성 고지'를 붙입니다. 사람이 검토한 노트('reviewed')는 자동 작성이 덮어쓰지 않습니다.
+  - 자동 작성이 검증을 통과하지 못하면 drafts/monthly-reports/<월>.auto-failed.md 에 남기고 발행을 보류합니다.
+  - AUTO_PUBLISH_DISABLED=true 환경변수면 자동 발행을 건너뜁니다.
     (AI 초안은 사람이 읽고 고친 뒤 발행합니다. 읽지 않고 발행하면 자동 생성 글과 같습니다.)
     페이지 쪽 isPublishable 도 'ai-draft' 를 발행 불가로 보므로, JSON 을 손으로 고쳐도 초안은 노출되지 않습니다.
 
@@ -61,6 +66,14 @@ except Exception:  # Windows 등 tzdata 미설치 환경 — 한국은 DST 가 �
 FIRST_MONTH = "2026-03"            # 수집이 안정된 첫 달
 MIN_NOTE_LENGTH = 300              # monthlyReport.ts isPublishable 과 동일
 DEFAULT_AUTHOR = "로옥션"
+AUTO_AUTHOR = "로옥션 데이터 데스크"   # 자동 작성 노트의 작성자 표기 (weekly 와 동일)
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+FAILED_DIR = os.path.join(BASE_DIR, "drafts", "monthly-reports")
+
+from column_guard import (  # noqa: E402  (scripts/ 가 sys.path[0])
+    RULES_BLOCK, person_denylist, mask_payload, won_label,
+    verify_text, verify_title, llm_factcheck, generate_with_guard, GuardFailed, auto_publish_disabled,
+)
 SCHEMA_VERSION = 1
 
 # 자동 분류 8종 (표시 순서 고정). 라벨은 monthlyReport.ts 와 같아야 한다.
@@ -139,11 +152,13 @@ def month_label(month: str) -> str:
 
 # ── 조회 (읽기 전용) ───────────────────────────────────────────────────
 
-def fetch_month(sb: Client, month: str, with_summary: bool = True) -> list:
+def fetch_month(sb: Client, month: str, with_summary: bool = True, extra_cols: str = "") -> list:
     start, end = month_bounds(month)
     cols = "id, title, department, category, date_posted, minimum_price, auction_date"
     if with_summary:
         cols += ", ai_summary"
+    if extra_cols:
+        cols += ", " + extra_cols
     rows, off, page = [], 0, 1000
     while True:
         res = (sb.table("court_notices").select(cols)
@@ -638,6 +653,169 @@ def unpublish(month: str):
     print(f"[발행 취소] {month} — 색인·사이트맵에서 빠집니다. 다시 발행하면 새 시각이 찍힙니다.")
 
 
+# ── 자동 작성·발행 ─────────────────────────────────────────────────────
+
+def _openai():
+    if not OPENAI_API_KEY:
+        raise SystemExit("OPENAI_API_KEY 가 없습니다 (.env.local 또는 Actions secrets 확인).")
+    from openai import OpenAI
+    return OpenAI(api_key=OPENAI_API_KEY)
+
+
+AUTO_NOTE_PROMPT = f"""당신은 로옥션(LawAuction)의 월간 리포트 노트를 쓰는 데이터 데스크입니다. 로옥션은 대한민국 법원의 회생·파산 자산매각 공고를 수집해 달 단위로 집계합니다.
+아래 JSON 은 한 달의 집계(총계·주별 건수·법원별·자산 유형별·최저매각가 분포·입찰 일정·사건 묶음·주요 공고·데이터 품질)입니다. 이 데이터만으로 그 달 공고의 특징을 설명하는 노트를 씁니다. 페이지에 표가 모두 있으므로 수치 나열이 아니라 수치의 의미(전월과의 차이, 법원 순위 변화, 금액이 확인된 공고의 비율, 한 사건이 여러 건으로 나뉜 사례, 요약 추출 실패 비율)를 씁니다.
+
+{RULES_BLOCK}
+
+분량과 구성: 본문은 공백 제외 400~700자(목표 550자 안팎), 문단 4개, 각 문단 2~3문장. 400자에 못 미치면 발행되지 않습니다. 비율·배수·증감은 집계에 적힌 값(diff, diff_pct, pct, rank, prev_rank 등)만 옮기고 직접 계산하지 않습니다.
+  문단 1: 총건수와 전월 대비 증감(diff, diff_pct), 주별 건수의 특징(weekly_counts).
+  문단 2: 법원별 상위와 순위 변화(rank, prev_rank), 자산 유형별 비중(pct).
+  문단 3: 최저매각가 분포(priced_n, pct, median, p25, p75, ge_100m_n)와 주요 공고(주요_공고의 법원·제목·최저매각가_표기), 사건 묶음(사건_묶음).
+  문단 4: 데이터의 한계 — 요약 추출 실패 비율(summary_fallback_pct), 금액이 확인된 공고 비율, 수집하지 않는 것. '요약 추출 실패' 비율 또는 '금액이 확인된 공고' 비율을 데이터 한계로 반드시 한 문장 이상 밝힙니다.
+제목: 40자 이내, 그 달의 구체적 사실 하나를 담은 담백한 제목. 제목의 숫자도 데이터에 있는 값만 씁니다.
+출력: {{"title": "...", "body": "..."}} JSON 만. body 의 문단은 빈 줄로 구분합니다."""
+
+
+def _note_payload(report: dict) -> dict:
+    r = report
+    notable = []
+    for n in (r.get("notable") or [])[:5]:
+        notable.append({
+            "법원": n.get("court"), "제목": n.get("title"),
+            "최저매각가": n.get("min_price"), "최저매각가_표기": won_label(n.get("min_price")),
+            "매각_대상": n.get("target"),
+        })
+    payload = {
+        "대상월": r.get("month_label"), "기간": r.get("period"), "집계_기준일": r.get("snapshot_date"),
+        "총계": r.get("totals"), "법원별": r.get("courts"), "자산_유형별(자동_분류)": r.get("categories"),
+        "최저매각가_분포": r.get("price"), "입찰_일정": r.get("schedule"), "사건_묶음": r.get("cases"),
+        "주요_공고": notable, "데이터_품질": r.get("data_quality"),
+        "수집하지_않는_것": "낙찰 결과(낙찰 여부·낙찰가), 감정평가액, 입찰자 수",
+    }
+    return mask_payload(payload)
+
+
+def _prev_month_kst() -> str:
+    today = datetime.now(KST).date()
+    return shift_month(today.strftime("%Y-%m"), -1)
+
+
+def _write_failed_note(month: str, err: GuardFailed) -> str:
+    os.makedirs(FAILED_DIR, exist_ok=True)
+    path = os.path.join(FAILED_DIR, f"{month}.auto-failed.md")
+    last = err.last_draft or {}
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(f"# 자동 발행 보류: {month}\n# 검증을 통과하지 못했습니다. 문제점:\n")
+        for p in err.problems:
+            f.write(f"#  - {p}\n")
+        f.write(f"\n# 제목: {last.get('title', '')}\n{last.get('body', '')}\n")
+    return path
+
+
+def ai_note(month: str, dry_run: bool = False, client=None, sb: Client = None) -> dict:
+    """집계 JSON 만으로 노트를 자동 작성·검증한다. 기존 'ai-draft'/'ai-auto' 노트가 검증을 통과하면 그대로 쓴다.
+    'reviewed'(사람 검토) 노트는 절대 덮어쓰지 않는다. dry_run 이면 파일에 저장하지 않는다. GuardFailed 를 던질 수 있다."""
+    r = load_report(month)
+    if not r:
+        raise SystemExit(f"리포트 파일이 없습니다: {report_path(month)}  (먼저 --month {month})")
+    if r.get("editor_note_status") == "reviewed" and (r.get("editor_note") or "").strip():
+        print(f"[{month}] 사람이 검토한 노트가 있어 그대로 둡니다.")
+        return r
+
+    sb = sb or _supabase()
+    rows = fetch_month(sb, month, with_summary=True, extra_cols="sale_org, manager")
+    denylist = person_denylist(rows)
+    payload = _note_payload(r)
+    client = client or _openai()
+
+    existing = (r.get("editor_note") or "").strip()
+    keep = False
+    if existing and r.get("editor_note_status") in ("ai-draft", "ai-auto"):
+        problems = verify_text(existing, payload, denylist, min_chars=400, max_chars=700)
+        title = (r.get("editor_note_title") or "").strip()
+        if title:
+            problems += verify_title(title, payload, denylist)
+        if not problems:
+            problems = [f"[교차검증] {p}" for p in llm_factcheck(client, existing, payload)]
+        if problems:
+            print(f"[{month}] 기존 노트가 검증을 통과하지 못해 다시 작성합니다:")
+            for p in problems:
+                print(f"    - {p}")
+        else:
+            keep = True
+            print(f"[{month}] 기존 노트가 검증을 통과해 그대로 씁니다 ({len(existing)}자).")
+
+    if not keep:
+        print(f"[{month}] 노트 자동 작성 시작")
+        title, body, _log = generate_with_guard(
+            client, AUTO_NOTE_PROMPT, payload, denylist, min_chars=400, max_chars=700,
+        )
+        r["editor_note"] = body
+        r["editor_note_title"] = title
+    r["editor_note_by"] = AUTO_AUTHOR
+    r["editor_note_status"] = "ai-auto"
+
+    if dry_run:
+        print(f"  [dry-run] 제목: {r.get('editor_note_title') or '(기본 제목)'}\n")
+        print(r["editor_note"])
+        print()
+        return r
+    save_report(r)
+    print(f"[노트 저장] {month}: {len(r['editor_note'])}자, 상태 ai-auto")
+    return r
+
+
+def auto_publish(month: str, dry_run: bool = False) -> int:
+    """집계(없으면 생성) → 노트 자동 작성·검증 → 발행. 종료 코드를 돌려준다."""
+    if auto_publish_disabled():
+        print("AUTO_PUBLISH_DISABLED 가 켜져 있어 자동 발행을 건너뜁니다.")
+        return 0
+    if not is_month(month):
+        raise SystemExit(f"월 형식 오류: {month} (YYYY-MM)")
+    if month >= datetime.now(KST).strftime("%Y-%m"):
+        print(f"[{month}] 아직 끝나지 않은 달은 발행하지 않습니다.")
+        return 0
+    sb = _supabase()
+    r = load_report(month)
+    if not r:
+        if dry_run:
+            print(f"[{month}] 집계 파일이 없어 dry-run 에서는 메모리에서만 집계합니다.")
+        build(sb, month)
+        r = load_report(month)
+    if r.get("status") == "published" and r.get("published_at"):
+        print(f"[{month}] 이미 발행된 리포트입니다 ({r['published_at']}).")
+        return 0
+    try:
+        ai_note(month, dry_run=dry_run, sb=sb)
+    except GuardFailed as e:
+        path = _write_failed_note(month, e)
+        print(f"[{month}] [보류] 검증 실패 — {path}")
+        return 1
+    if dry_run:
+        print(f"[{month}] dry-run: 발행하지 않았습니다.")
+        return 0
+    publish(month, reviewed=False)   # 'ai-auto' 는 통과, 'ai-draft' 만 막힌다
+    return 0
+
+
+def auto_next(dry_run: bool = False) -> int:
+    """직전 달까지 중 발행되지 않은 가장 오래된 달 하나를 자동 발행한다 (주 1편 백필)."""
+    if auto_publish_disabled():
+        print("AUTO_PUBLISH_DISABLED 가 켜져 있어 자동 발행을 건너뜁니다.")
+        return 0
+    prev = _prev_month_kst()
+    m = FIRST_MONTH
+    while m <= prev:
+        r = load_report(m)
+        if not r or not (r.get("status") == "published" and r.get("published_at")):
+            print(f"[auto-next] 대상: {m}")
+            return auto_publish(m, dry_run=dry_run)
+        m = shift_month(m, 1)
+    print("[auto-next] 발행되지 않은 달이 없습니다.")
+    return 0
+
+
+
 def main():
     ap = argparse.ArgumentParser(description="월간 리포트 집계 빌더 (DB 읽기 전용)")
     g = ap.add_mutually_exclusive_group(required=True)
@@ -648,11 +826,15 @@ def main():
     g.add_argument("--publish", metavar="YYYY-MM", help="발행 (published_at=지금)")
     g.add_argument("--unpublish", metavar="YYYY-MM", help="발행 취소")
     g.add_argument("--reindex", action="store_true", help="index.ts 만 다시 생성")
+    g.add_argument("--ai-note", metavar="YYYY-MM", help="[자동] 집계만으로 노트 자동 작성·검증 (상태 ai-auto)")
+    g.add_argument("--auto-publish", metavar="YYYY-MM", help="[자동] 집계 → 노트 자동 작성·검증 → 발행")
+    g.add_argument("--auto-next", action="store_true", help="[자동] 직전 달까지 중 미발행 가장 오래된 달 하나를 발행")
     ap.add_argument("--file", help="--set-note 와 함께: 노트 텍스트 파일 ('#'로 시작하는 줄은 무시)")
     ap.add_argument("--title", help="--set-note 와 함께: 리포트 제목 (비우면 기본 제목)")
     ap.add_argument("--author", help="--set-note 와 함께: 작성자 표기")
     ap.add_argument("--ai-draft", action="store_true", help="--set-note 와 함께: AI 초안으로 표시 (검토 전)")
     ap.add_argument("--reviewed", action="store_true", help="--publish 와 함께: AI 초안을 검토했음을 확인")
+    ap.add_argument("--dry-run", action="store_true", help="--ai-note/--auto-publish/--auto-next 와 함께: 파일에 저장하지 않음")
     args = ap.parse_args()
 
     if args.month:
@@ -672,6 +854,15 @@ def main():
     elif args.reindex:
         write_index()
         print("index.ts 를 다시 생성했습니다.")
+    elif args.ai_note:
+        try:
+            ai_note(args.ai_note, dry_run=args.dry_run)
+        except GuardFailed as e:
+            raise SystemExit(f"[보류] 검증 실패 — {_write_failed_note(args.ai_note, e)}")
+    elif args.auto_publish:
+        raise SystemExit(auto_publish(args.auto_publish, dry_run=args.dry_run))
+    elif args.auto_next:
+        raise SystemExit(auto_next(dry_run=args.dry_run))
 
 
 if __name__ == "__main__":

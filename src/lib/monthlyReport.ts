@@ -6,6 +6,8 @@
 // 원칙: 자동 집계 수치만 있는 달은 색인 대상이 아니다.
 // 편집자 노트(300자 이상)가 붙고 status 가 'published' 인 달만 개별 URL로 공개·색인하고
 // 사이트맵에 넣는다. 주간 칼럼(weeklyColumn.ts)·공고 품질 게이트(noticeQuality.ts)와 같은 원리다.
+// 노트는 사람이 쓴 것('' | 'reviewed')과 집계 기반 자동 작성·수치 검증을 통과한 것('ai-auto')을 모두 허용하되,
+// 자동 작성분은 페이지에 고지를 붙인다(isAutoReport). 검토 전 AI 초안('ai-draft')만 막는다.
 
 import { REPORT_FILES } from '@/content/reports';
 
@@ -111,7 +113,13 @@ export interface MonthlyReport {
     editor_note: string;
     editor_note_title: string;
     editor_note_by: string;
-    editor_note_status: string; // '' | 'ai-draft' | 'reviewed'
+    /**
+     * ''         — 사람이 쓴 노트(또는 상태 미기록)
+     * 'ai-draft' — AI 초안, 사람 검토 전. 발행 게이트에서 막는다.
+     * 'ai-auto'  — 집계 기반 자동 작성 + 수치 검증을 통과해 발행된 노트(사후 검토). 자동 작성 고지를 붙인다.
+     * 'reviewed' — 사람이 검토·확정한 노트.
+     */
+    editor_note_status: string;
     status: 'draft' | 'published';
     published_at: string | null; // --publish 실행 시각(ISO). 소급하지 않는다.
 }
@@ -205,9 +213,18 @@ export function isPublishable(report: MonthlyReport | null | undefined): report 
     // published_at 은 --publish 가 찍는 실제 발행 시각이다. 이 값이 없으면 발행 절차를 거치지 않은 것이므로
     // (JSON 을 손으로 published 로 바꾼 경우) 사이트맵·JSON-LD 에 날짜 없는 페이지를 내보내지 않는다.
     if (!report.published_at) return false;
-    // 검토 전 AI 초안은 status 와 무관하게 발행으로 보지 않는다 (builder --publish 도 --reviewed 없이는 막는다).
+    // 검토 전 AI 초안('ai-draft')만 막는다. ''(사람 작성)·'reviewed'·'ai-auto'(자동 작성 + 수치 검증 통과)는 발행 가능.
+    // builder --publish 도 같은 규칙이다 ('ai-draft' 는 --reviewed 없이는 막고, 'ai-auto' 는 통과).
     if (report.editor_note_status === 'ai-draft') return false;
     return (report.editor_note ?? '').trim().length >= MIN_EDITOR_NOTE_LENGTH;
+}
+
+/**
+ * 자동 작성·검증 후 발행된 리포트인지. scripts/monthly_report_builder.py 가 ai_note 로 붙인 노트는
+ * editor_note_status='ai-auto' 로 저장된다. 페이지는 이 값으로 자동 작성 고지와 JSON-LD author(Organization)를 결정한다.
+ */
+export function isAutoReport(report: Pick<MonthlyReport, 'editor_note_status'> | null | undefined): boolean {
+    return report?.editor_note_status === 'ai-auto';
 }
 
 export function getPublishedReports(): PublishedReport[] {

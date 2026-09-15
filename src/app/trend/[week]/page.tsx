@@ -15,6 +15,7 @@ import {
     columnParagraphs,
     parseJsonColumn,
     categoryLabel,
+    isAutoColumn,
 } from '@/lib/weeklyColumn';
 
 export const revalidate = 3600;
@@ -67,7 +68,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
     const title = columnTitle(report);
     const description = columnExcerpt(report, 155) ||
-        `${report.week_start} ~ ${report.week_end} 법원 회생·파산 자산매각 공고 집계와 편집자 해석.`;
+        `${report.week_start} ~ ${report.week_end} 법원 회생·파산 자산매각 공고 집계와 데이터 노트.`;
 
     return {
         title: `${title} | 주간 칼럼`,
@@ -99,6 +100,8 @@ export default async function WeeklyColumnPage({ params }: PageProps) {
     const paragraphs = columnParagraphs(report);
     const categories = parseJsonColumn<Record<string, number>>(report.category_breakdown, {});
     const tags = parseJsonColumn<{ tag: string; count: number }[]>(report.trending_tags, []);
+    // 자동 작성·검증 칼럼: 저자는 조직(로옥션)으로 내고, 본문 위에 자동 작성 고지를 붙인다.
+    const isAuto = isAutoColumn(report);
 
     const jsonLd = {
         '@context': 'https://schema.org',
@@ -107,7 +110,7 @@ export default async function WeeklyColumnPage({ params }: PageProps) {
         description: columnExcerpt(report, 155),
         datePublished: published,
         dateModified: published,
-        author: report.editor_note_by?.trim()
+        author: !isAuto && report.editor_note_by?.trim()
             ? { '@type': 'Person', name: author.split('·')[0].trim() }
             : { '@type': 'Organization', name: '로옥션(LawAuction)', url: siteUrl },
         publisher: { '@type': 'Organization', name: '로옥션(LawAuction)', url: siteUrl },
@@ -135,10 +138,31 @@ export default async function WeeklyColumnPage({ params }: PageProps) {
                 </h1>
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500">
                     <span className="font-medium text-gray-700">{author}</span>
+                    {isAuto && (
+                        <span className="inline-flex items-center rounded border border-gray-300 px-1.5 py-0.5 text-[11px] font-semibold text-gray-600">
+                            자동 작성 · 수치 검증
+                        </span>
+                    )}
                     <span>{published}</span>
                     <span>집계 기간 {report.week_start} ~ {report.week_end}</span>
                 </div>
             </header>
+
+            {/* 자동 작성 고지 — 자동 발행 칼럼에만 붙는다 */}
+            {isAuto && (
+                <aside
+                    aria-label="자동 작성 고지"
+                    className="mb-8 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm leading-6 text-amber-900"
+                >
+                    <p>
+                        이 칼럼은 로옥션이 수집한 해당 주 공고 집계를 바탕으로 자동 작성됐고, 본문의 수치가 집계와 일치하는지
+                        검증한 뒤 발행됩니다. 원인 해석과 조언은 담지 않으며, 운영자가 사후 검토해 오류를 정정합니다.{' '}
+                        <Link href="/editorial-policy" className="font-semibold underline hover:text-amber-950">
+                            자동 작성·검증 기준 보기
+                        </Link>
+                    </p>
+                </aside>
+            )}
 
             {/* 이번 주 집계 수치 */}
             <section className="mb-10 bg-gray-50 rounded-2xl border border-gray-200 p-6">
@@ -168,9 +192,9 @@ export default async function WeeklyColumnPage({ params }: PageProps) {
                 )}
             </section>
 
-            {/* 편집자 해석 */}
+            {/* 해석 본문 — 자동 작성 칼럼은 '데이터 노트'로 구분해 부른다 */}
             <section className="prose-none">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">편집자 노트</h2>
+                <h2 className="text-xl font-bold text-gray-900 mb-4">{isAuto ? '데이터 노트' : '편집자 노트'}</h2>
                 <div className="space-y-5 text-[15px] leading-8 text-gray-700">
                     {paragraphs.map((p, i) => (
                         <p key={i}>{p}</p>

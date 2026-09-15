@@ -12,6 +12,7 @@ import {
     columnParagraphs,
     parseJsonColumn,
     categoryLabel,
+    isAutoColumn,
 } from '@/lib/weeklyColumn';
 
 export const revalidate = 600;
@@ -19,8 +20,8 @@ export const revalidate = 600;
 const siteUrl = 'https://www.courtauction.site';
 
 export const metadata: Metadata = {
-    title: '주간 데이터 칼럼 | 법원 자산매각 집계와 해석',
-    description: '로옥션이 매주 수집한 법원 회생·파산 자산매각 공고 집계에 편집자 해석을 더한 주간 칼럼입니다.',
+    title: '주간 데이터 칼럼 | 법원 자산매각 집계와 데이터 노트',
+    description: '로옥션이 매주 수집한 법원 회생·파산 자산매각 공고 집계에 수치 검증을 거친 데이터 노트를 더한 주간 칼럼입니다.',
     keywords: '주간통계, 자산매각, 회생파산, 매각공고, 법원경매, 주간칼럼',
     alternates: { canonical: '/trend' },
 };
@@ -75,7 +76,8 @@ export default async function TrendPage() {
             description: columnExcerpt(featuredColumn, 155),
             datePublished: columnDate(featuredColumn),
             dateModified: columnDate(featuredColumn),
-            author: featuredColumn.editor_note_by?.trim()
+            // 자동 작성 칼럼의 저자는 조직(로옥션)으로 낸다.
+            author: !isAutoColumn(featuredColumn) && featuredColumn.editor_note_by?.trim()
                 ? { '@type': 'Person', name: columnAuthor(featuredColumn).split('·')[0].trim() }
                 : { '@type': 'Organization', name: '로옥션(LawAuction)', url: siteUrl },
             publisher: { '@type': 'Organization', name: '로옥션(LawAuction)', url: siteUrl },
@@ -98,7 +100,8 @@ export default async function TrendPage() {
                     주간 데이터 칼럼
                 </h1>
                 <p className="text-gray-500 max-w-2xl mx-auto leading-relaxed text-sm">
-                    매주 수집한 법원 회생·파산 자산매각 공고를 집계하고, 그 주에 무엇이 눈에 띄었는지 편집자가 정리합니다.
+                    매주 수집한 법원 회생·파산 자산매각 공고를 집계하고, 그 주 집계에서 무엇이 눈에 띄었는지 데이터 노트로 정리합니다.
+                    &lsquo;자동 작성 · 수치 검증&rsquo; 표시가 붙은 칼럼은 집계를 바탕으로 자동 작성한 뒤 본문 수치가 집계와 일치하는지 검증해 발행하며, 운영자가 사후 검토합니다.
                     수치는 탐색을 위한 참고 정보이며 실제 내용은 원문 공고에서 확인해야 합니다.
                 </p>
             </header>
@@ -177,10 +180,15 @@ export default async function TrendPage() {
                                     <h3 className="text-xl font-bold text-gray-900">{columnTitle(featuredColumn)}</h3>
                                     <span className="text-xs text-gray-400">{columnDate(featuredColumn)}</span>
                                 </div>
-                                <p className="text-sm text-gray-500 mb-6">
-                                    {columnAuthor(featuredColumn)}
+                                <p className="text-sm text-gray-500 mb-6 flex flex-wrap items-center gap-x-2 gap-y-1">
+                                    <span>{columnAuthor(featuredColumn)}</span>
+                                    {isAutoColumn(featuredColumn) && (
+                                        <span className="inline-flex items-center rounded border border-gray-300 px-1.5 py-0.5 text-[11px] font-semibold text-gray-600">
+                                            자동 작성 · 수치 검증
+                                        </span>
+                                    )}
                                     {featuredColumn.week_start !== latestReport.week_start && (
-                                        <span className="text-gray-400"> · {weekLabel(featuredColumn)} 집계 기준</span>
+                                        <span className="text-gray-400">{weekLabel(featuredColumn)} 집계 기준</span>
                                     )}
                                 </p>
                                 <div className="space-y-4 text-[15px] leading-8 text-gray-700">
@@ -239,7 +247,7 @@ export default async function TrendPage() {
                 </div>
             )}
 
-            {/* 지난 주간 칼럼 — 편집자 해석이 달린 주차만 개별 글로 발행됩니다 */}
+            {/* 지난 주간 칼럼 — 데이터 노트(editor_note)가 있는 주차만 개별 글로 발행됩니다 */}
             {olderColumns.length > 0 && (
                 <section className="mt-16 border-t border-gray-200 pt-10">
                     <div className="flex items-center gap-3 mb-6 flex-wrap">
@@ -267,8 +275,13 @@ export default async function TrendPage() {
                                 <p className="text-xs text-gray-500 leading-relaxed line-clamp-3 mb-3">
                                     {columnExcerpt(report)}
                                 </p>
-                                <div className="flex items-center justify-between text-xs text-gray-400">
-                                    <span>{columnDate(report)}</span>
+                                <div className="flex items-center justify-between gap-2 text-xs text-gray-400">
+                                    <span className="flex items-center gap-1.5">
+                                        {columnDate(report)}
+                                        {isAutoColumn(report) && (
+                                            <span className="rounded border border-gray-200 px-1 py-px text-[10px] font-semibold text-gray-500">자동 작성</span>
+                                        )}
+                                    </span>
                                     <span className="font-medium group-hover:text-indigo-600 transition-colors">읽기 &rarr;</span>
                                 </div>
                             </Link>

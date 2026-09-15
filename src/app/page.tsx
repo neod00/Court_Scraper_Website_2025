@@ -14,6 +14,7 @@ import {
   columnDate,
   columnAuthor,
   weekLabel,
+  isAutoColumn,
 } from '@/lib/weeklyColumn';
 
 interface PageProps {
@@ -162,7 +163,7 @@ export default async function Home({ searchParams }: PageProps) {
     {
       href: '/trend',
       label: '주간 칼럼',
-      text: '주 단위 공고 건수와 법원별·자산 유형별 집계에 편집자가 검토한 해석을 붙여 정리합니다.',
+      text: '주 단위 공고 건수와 법원별·자산 유형별 집계에 수치 검증을 거친 데이터 노트를 붙여 정리합니다. 자동 작성한 칼럼은 그 사실을 표시합니다.',
     },
     {
       href: '/datalab',
@@ -230,7 +231,14 @@ export default async function Home({ searchParams }: PageProps) {
                   <dd className="mt-1 text-sm font-bold text-gray-900">{latestColumn.top_department || '집계 없음'}</dd>
                 </div>
               </dl>
-              <p className="mt-4 text-xs text-gray-500">{columnAuthor(latestColumn)} · {columnDate(latestColumn)}</p>
+              <p className="mt-4 text-xs text-gray-500 flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span>{columnAuthor(latestColumn)} · {columnDate(latestColumn)}</span>
+                {isAutoColumn(latestColumn) && (
+                  <span className="inline-flex items-center rounded border border-gray-300 px-1.5 py-0.5 text-[11px] font-semibold text-gray-600">
+                    자동 작성 · 수치 검증
+                  </span>
+                )}
+              </p>
               <Link href={`/trend/${latestColumn.week_start}`} className="mt-3 inline-block text-sm font-semibold text-indigo-700 hover:underline">
                 칼럼 읽기
               </Link>

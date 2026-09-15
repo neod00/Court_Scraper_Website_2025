@@ -7,6 +7,7 @@ import {
     getPublishedReports,
     getReport,
     isPublishable,
+    isAutoReport,
     reportTitle,
     reportAuthor,
     reportExcerpt,
@@ -104,6 +105,8 @@ export default async function MonthlyReportPage({ params }: PageProps) {
     const paragraphs = reportParagraphs(report);
     const { totals, courts, categories, price, schedule, cases, notable, data_quality: quality } = report;
     const url = `${siteUrl}/reports/${report.month}`;
+    // 자동 작성·검증 리포트: 저자는 조직(로옥션)으로 내고, 상단에 자동 작성 고지를 붙인다.
+    const isAuto = isAutoReport(report);
 
     const jsonLd = {
         '@context': 'https://schema.org',
@@ -115,7 +118,7 @@ export default async function MonthlyReportPage({ params }: PageProps) {
         temporalCoverage: `${report.period.start}/${report.period.end}`,
         inLanguage: 'ko-KR',
         author:
-            author === '로옥션'
+            isAuto || author === '로옥션'
                 ? { '@type': 'Organization', name: '로옥션(LawAuction)', url: siteUrl }
                 : { '@type': 'Person', name: author.split('·')[0].trim() },
         publisher: { '@type': 'Organization', name: '로옥션(LawAuction)', url: siteUrl },
@@ -161,10 +164,34 @@ export default async function MonthlyReportPage({ params }: PageProps) {
                     </div>
                     <div>
                         <dt className="text-xs text-gray-500">발행일</dt>
-                        <dd className="font-medium text-gray-800">{published} · {author}</dd>
+                        <dd className="font-medium text-gray-800 flex flex-wrap items-center gap-x-2 gap-y-1">
+                            <span>{published} · {author}</span>
+                            {isAuto && (
+                                <span className="inline-flex items-center rounded border border-gray-300 px-1.5 py-0.5 text-[11px] font-semibold text-gray-600">
+                                    자동 작성 · 수치 검증
+                                </span>
+                            )}
+                        </dd>
                     </div>
                 </dl>
             </header>
+
+            {/* 자동 작성 고지 — 자동 발행 리포트에만 붙는다 */}
+            {isAuto && (
+                <aside
+                    aria-label="자동 작성 고지"
+                    className="mb-10 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm leading-6 text-amber-900"
+                >
+                    <p>
+                        이 리포트의 편집자 노트는 로옥션이 수집한 해당 달 공고 집계를 바탕으로 자동 작성됐고, 본문의 수치가
+                        집계와 일치하는지 검증한 뒤 발행됩니다. 원인 해석과 조언은 담지 않으며, 운영자가 사후 검토해 오류를
+                        정정합니다. 1~6절의 표와 수치는 집계 프로그램이 계산한 값입니다.{' '}
+                        <Link href="/editorial-policy" className="font-semibold underline hover:text-amber-950">
+                            자동 작성·검증 기준 보기
+                        </Link>
+                    </p>
+                </aside>
+            )}
 
             {/* 1. 한눈에 */}
             <section className="mb-12" aria-labelledby="sec-overview">
@@ -487,7 +514,11 @@ export default async function MonthlyReportPage({ params }: PageProps) {
             <section className="mb-12" aria-labelledby="sec-note">
                 <h2 id="sec-note" className={sectionHeading}>7. 편집자 노트</h2>
                 <p className="text-xs text-gray-500 mb-4">
-                    {author} · {published} 발행 · 위 집계를 읽고 쓴 해석입니다. {MIN_EDITOR_NOTE_LENGTH}자 미만의 노트는 발행하지 않습니다.
+                    {author} · {published} 발행 ·{' '}
+                    {isAuto
+                        ? '위 집계를 바탕으로 자동 작성하고 수치를 집계와 대조해 검증한 노트입니다.'
+                        : '위 집계를 읽고 쓴 해석입니다.'}{' '}
+                    {MIN_EDITOR_NOTE_LENGTH}자 미만의 노트는 발행하지 않습니다.
                 </p>
                 <div className="space-y-5 text-[15px] leading-8 text-gray-700">
                     {paragraphs.map((p, i) => (
@@ -523,10 +554,14 @@ export default async function MonthlyReportPage({ params }: PageProps) {
                     <li>수치는 집계 기준일({report.snapshot_date})에 고정했습니다. 기준일 이후 수집된 공고나 정정은 반영하지 않습니다.</li>
                     <li>자산 유형은 제목과 요약의 키워드로 자동 분류한 값이고, 금액은 공고에 기재된 최저매각가만 사용합니다. 입찰 결과(매수인·매수 금액)와 감정평가액은 수집하지 않습니다.</li>
                     <li>공고 요약은 첨부문서에서 AI가 추출한 것이며, 추출에 실패한 공고는 최저매각가·기일·매각 대상 집계에서 빠집니다. 요약 추출 실패 비율이 높은 달일수록 기재 비율이 낮게 나옵니다.</li>
-                    <li>편집자 노트는 운영자가 집계를 읽고 쓴 해석입니다. 초안 작성에 AI를 보조로 쓰더라도 발행 전에 운영자가 사실을 확인합니다.</li>
+                    <li>
+                        {isAuto
+                            ? '편집자 노트는 위 집계만을 근거로 자동 작성한 뒤, 본문의 수치·법원명·사건번호가 집계와 일치하는지와 금지 표현·개인명·원인 단정이 없는지를 검증해 통과한 경우에만 발행합니다. 발행 후 운영자가 검토하며, 오류가 확인되면 정정하고 정정 이력에 남깁니다.'
+                            : '편집자 노트는 운영자가 집계를 읽고 쓴 해석입니다. 초안 작성에 AI를 보조로 썼더라도 발행 전에 운영자가 수치를 집계와 대조했습니다.'}
+                    </li>
                 </ul>
                 <p className="mt-4 text-xs text-gray-500 leading-6">
-                    이 리포트는 공고 집계와 편집자의 해석이며, 개별 공고의 내용과 조건은 원문에서 확인해야 합니다.{' '}
+                    이 리포트는 공고 집계와 그에 대한 노트이며, 개별 공고의 내용과 조건은 원문에서 확인해야 합니다.{' '}
                     <Link href="/editorial-policy" className="underline hover:text-indigo-700">데이터·편집 원칙</Link>
                 </p>
             </section>

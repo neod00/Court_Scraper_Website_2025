@@ -30,6 +30,18 @@
   --draft ... --blank       AI 보조 없이 빈 초안
   --unpublish 2026-08-17    발행 취소 (색인에서 빠짐)
 
+자동 발행 (GitHub Actions weekly_column.yml, 매주 토요일 09:30 KST):
+  python scripts/write_weekly_column.py --auto              직전 완료 주차 + 백필 1주차(2026-08-03 이후) 자동 작성·검증·발행
+  python scripts/write_weekly_column.py --auto --dry-run    생성·검증만 하고 저장하지 않음
+  python scripts/write_weekly_column.py --auto --week 2026-08-31   특정 주차만
+  python scripts/write_weekly_column.py --auto --no-backfill       백필 없이 직전 주차만
+  - 집계 payload(_collect_signals)만으로 gpt-4o-mini 가 초안을 쓰고, column_guard 가
+    숫자·사건번호·금지어·원인 단정·개인명·분량을 코드로 검증한 뒤 LLM 교차 검증까지 통과해야 저장합니다.
+  - 저장되는 작성자는 AUTO_AUTHOR("로옥션 데이터 데스크")이며 사이트는 이 값으로 '자동 작성 고지'를 붙입니다.
+  - 통과하지 못하면 drafts/weekly-columns/<week>.auto-failed.md 에 남기고 종료 코드 1 (발행 보류).
+  - 사람이 쓴 칼럼(작성자 != AUTO_AUTHOR)은 --auto 가 절대 덮어쓰지 않습니다. 고치려면 --unpublish 후 --draft/--publish.
+  - 환경변수 AUTO_PUBLISH_DISABLED=true 면 아무것도 하지 않습니다.
+
 AI의 역할은 (1) 살펴볼 지점 제시와 (3) 문장 다듬기까지입니다.
 무엇이 중요한지 판단하고 사실을 검증하는 것은 사람의 몫이며, 그것이 이 칼럼의 가치입니다.
 2단계를 건너뛰면 예전의 자동 생성 글과 같아집니다.
@@ -73,6 +85,13 @@ def _openai():
 
 MIN_LENGTH = 200  # src/lib/weeklyColumn.ts 의 hasEditorNote 기준과 반드시 일치
 DEFAULT_AUTHOR = "로옥션"
+AUTO_AUTHOR = "로옥션 데이터 데스크"   # src/lib/weeklyColumn.ts AUTO_COLUMN_AUTHOR 와 반드시 일치
+AUTO_BACKFILL_FLOOR = "2026-08-03"     # 이 주차 이전은 자동 백필하지 않는다
+
+from column_guard import (  # noqa: E402  (scripts/ 가 sys.path[0])
+    RULES_BLOCK, person_denylist, mask_payload, won_label,
+    generate_with_guard, GuardFailed, auto_publish_disabled,
+)
 
 CATEGORY_LABELS = {
     "real_estate": "부동산", "vehicle": "차량/동산", "asset": "자산",
@@ -523,6 +542,170 @@ def unpublish(week_start: str):
     print(f"[발행 취소] {week_start} — 해석이 삭제되어 색인에서 빠집니다.")
 
 
+# ── 자동 발행 ─────────────────────────────────────────────────────────
+
+AUTO_WRITER_PROMPT = f"""당신은 로옥션(LawAuction)의 주간 데이터 칼럼을 쓰는 데이터 데스크입니다. 로옥션은 대한민국 법원의 회생·파산 자산매각 공고를 수집해 주(월~금) 단위로 집계합니다.
+아래 JSON 은 한 주의 집계와 직전 4주 비교입니다. 이 데이터만으로 독자에게 이번 주 공고의 특징을 설명하는 칼럼을 씁니다.
+
+{RULES_BLOCK}
+
+분량과 구성: 본문은 공백 제외 450~800자(목표 600자 안팎), 문단 4개. 각 문단은 2~3문장, 120자 이상으로 씁니다. 400자에 못 미치면 발행되지 않습니다.
+  문단 1: 이번 주 총건수와 직전 4주 주당 평균의 차이, 법원별로 평균과 달라진 곳('비교값'과 '법원별_급증'의 배수·증감 값을 그대로 씁니다).
+  문단 2: 한 사건에서 여러 건이 공고된 사례('한사건_다건공고')와, 제목에 사건번호가 적힌 공고 비율('제목에_사건번호_비율') — 건수만으로 사건 수를 알 수 없다는 점.
+  문단 3: 금액이 확인된 공고의 비율('금액_확인_공고')과 최고가 공고('최고가_3건'의 법원·제목·최저매각가_표기), 분류별 특징('분야별_건수').
+  문단 4: 데이터의 한계 — 요약 추출 실패 비율('요약_추출_실패'), 수집하지 않는 것, 회차별 가격은 원문이 기준이라는 점. 페이지에 총건수·최다 법원·분류별 건수 표가 이미 있으므로 수치를 나열하지 말고, 수치가 무엇을 뜻하는지를 씁니다(예: 한 사건의 물건이 나뉘어 여러 건으로 공고된 경우, 직전 4주 주당 평균과의 차이, 금액이 확인된 공고의 비율, 제목만으로 물건을 알기 어려운 공고).
+제목: 40자 이내, 이번 주의 구체적 사실 하나를 담은 담백한 제목(예: "대구회생법원 15건 중 13건은 사건 3개였다"). 제목의 숫자도 데이터에 있는 값만 씁니다.
+출력: {{"title": "...", "body": "..."}} JSON 만. body 의 문단은 빈 줄로 구분합니다."""
+
+
+def _today_kst():
+    return (datetime.now(timezone.utc) + timedelta(hours=9)).date()
+
+
+def _auto_rows(week_start: str, week_end: str) -> list:
+    """개인명 거부 목록·요약 실패 건수 계산용 원본 행 (프롬프트에는 넣지 않는다)."""
+    res = (supabase.table("court_notices")
+           .select("title, department, sale_org, manager, ai_summary, minimum_price")
+           .eq("source_type", "notice")
+           .gte("date_posted", week_start).lte("date_posted", week_end)
+           .limit(2000).execute())
+    return res.data or []
+
+
+def _auto_targets(today, backfill: bool = True) -> list:
+    """(a) 가장 최근에 끝난 주차에 해석이 없으면 그 주차, (b) AUTO_BACKFILL_FLOOR 이후 해석 없는 가장 오래된 주차."""
+    res = (supabase.table("weekly_reports")
+           .select("week_start, week_end, total_notices, editor_note")
+           .order("week_end", desc=True).limit(80).execute())
+    rows = [r for r in (res.data or []) if r.get("week_end") and r["week_end"] < today.isoformat()]
+
+    def missing(r):
+        return not (r.get("editor_note") or "").strip() and (r.get("total_notices") or 0) > 0
+
+    targets = []
+    if rows and missing(rows[0]):
+        targets.append(rows[0]["week_start"])
+    if backfill:
+        older = [r for r in rows if missing(r) and r["week_start"] >= AUTO_BACKFILL_FLOOR]
+        if older:
+            oldest = min(older, key=lambda r: r["week_start"])
+            if oldest["week_start"] not in targets:
+                targets.append(oldest["week_start"])
+    return targets
+
+
+def _titled_count(signals: dict) -> int:
+    """'4/122건' 형태의 제목에_사건번호_표기 값에서 앞 숫자."""
+    m = re.match(r"(\d+)/", str(signals.get("제목에_사건번호_표기") or ""))
+    return int(m.group(1)) if m else 0
+
+
+def _auto_payload(week_start: str, row: dict, rows: list) -> dict:
+    signals = _collect_signals(week_start, row["week_end"])
+    for item in signals.get("최고가_3건", []):
+        item["최저매각가_표기"] = won_label(item.get("최저매각가"))
+    total = len(rows)
+    priced = sum(1 for r in rows if str(r.get("minimum_price") or "0").isdigit() and int(r.get("minimum_price") or 0) > 0)
+    fallback = sum(1 for r in rows if "첨부파일" in (r.get("ai_summary") or "") or not r.get("ai_summary"))
+    # 모델이 비율·배수를 직접 계산하지 않도록 비교값을 미리 계산해 넣는다 (가드의 허용 숫자에도 포함된다).
+    total_now = signals.get("이번주_총건수") or 0
+    avg_prior = signals.get("직전4주_주당평균") or 0
+    comparisons = {
+        "총건수_직전4주평균_대비_증감": round(total_now - avg_prior, 1),
+        "총건수_직전4주평균_대비_배수": round(total_now / avg_prior, 1) if avg_prior else None,
+    }
+    for item in signals.get("법원별_급증", []):
+        avg = item.get("직전4주평균") or 0
+        item["배수"] = round(item["이번주"] / avg, 1) if avg else None
+        item["증감"] = round(item["이번주"] - avg, 1)
+    payload = {
+        "주차": _week_label(week_start),
+        "기간": f"{week_start} ~ {row['week_end']}",
+        **signals,
+        "비교값(미리_계산됨)": comparisons,
+        "제목에_사건번호_비율": f"{(_titled_count(signals) / total_now * 100) if total_now else 0:.1f}%",
+        "금액_확인_공고": {"건수": priced, "총건수": total, "비율": f"{(priced / total * 100) if total else 0:.1f}%"},
+        "요약_추출_실패": {"건수": fallback, "총건수": total, "비율": f"{(fallback / total * 100) if total else 0:.1f}%"},
+        "수집하지_않는_것": "낙찰 결과(낙찰 여부·낙찰가), 감정평가액, 입찰자 수",
+    }
+    return mask_payload(payload)
+
+
+def _write_failed(week_start: str, err: GuardFailed):
+    os.makedirs(DRAFT_DIR, exist_ok=True)
+    path = os.path.join(DRAFT_DIR, f"{week_start}.auto-failed.md")
+    last = err.last_draft or {}
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(f"# 자동 발행 보류: {week_start}\n# 검증을 통과하지 못했습니다. 문제점:\n")
+        for p in err.problems:
+            f.write(f"#  - {p}\n")
+        f.write("#\n# 시도 기록:\n")
+        for a in err.attempts_log:
+            f.write(f"#  시도 {a.get('attempt')}: {a.get('chars')}자, 문제 {len(a.get('problems') or [])}건\n")
+        f.write(f"\n제목: {last.get('title', '')}\n작성자: {AUTO_AUTHOR}\n---\n{last.get('body', '')}\n")
+    return path
+
+
+def auto(week: str = None, dry_run: bool = False, backfill: bool = True) -> int:
+    """자동 작성·검증·발행. 반환값은 종료 코드(보류된 주차가 있으면 1)."""
+    if auto_publish_disabled():
+        print("AUTO_PUBLISH_DISABLED 가 켜져 있어 자동 발행을 건너뜁니다.")
+        return 0
+    today = _today_kst()
+    targets = [week] if week else _auto_targets(today, backfill)
+    if not targets:
+        print(f"자동 발행할 주차가 없습니다 (기준일 {today}).")
+        return 0
+
+    client = _openai()
+    failed = 0
+    for ws in targets:
+        row = _fetch(ws)
+        if not row:
+            print(f"[{ws}] weekly_reports 행이 없습니다 — 건너뜁니다.")
+            failed += 1
+            continue
+        existing_note = (row.get("editor_note") or "").strip()
+        existing_by = (row.get("editor_note_by") or "").strip()
+        if existing_note and existing_by and existing_by != AUTO_AUTHOR:
+            print(f"[{ws}] 사람이 쓴 칼럼({existing_by})이 있어 덮어쓰지 않습니다.")
+            continue
+        if existing_note and not week:
+            print(f"[{ws}] 이미 발행된 자동 칼럼이 있어 건너뜁니다.")
+            continue
+
+        print(f"\n[{ws} ~ {row['week_end']}] {_week_label(ws)} 자동 작성 시작 (공고 {row.get('total_notices') or 0}건)")
+        rows = _auto_rows(ws, row["week_end"])
+        denylist = person_denylist(rows)
+        payload = _auto_payload(ws, row, rows)
+        try:
+            title, body, _log = generate_with_guard(
+                client, AUTO_WRITER_PROMPT, payload, denylist, min_chars=400, max_chars=800,
+            )
+        except GuardFailed as e:
+            path = _write_failed(ws, e)
+            print(f"  [보류] 검증 실패 — {path}")
+            failed += 1
+            continue
+
+        if dry_run:
+            print(f"  [dry-run] 제목: {title}\n")
+            print(body)
+            print()
+            continue
+
+        supabase.table("weekly_reports").update({
+            "editor_note": body,
+            "editor_note_title": title,
+            "editor_note_by": AUTO_AUTHOR,
+            "editor_note_at": datetime.now(timezone.utc).isoformat(),
+        }).eq("week_start", ws).execute()
+        print(f"  [발행] {title} — https://www.courtauction.site/trend/{ws}")
+
+    return 1 if failed else 0
+
+
+
 def main():
     ap = argparse.ArgumentParser(description="주간 데이터 칼럼 작성 도구")
     g = ap.add_mutually_exclusive_group()
@@ -531,7 +714,11 @@ def main():
     g.add_argument("--draft", metavar="WEEK_START", help="[2단계] 메모를 문단으로 정리해 초안 생성")
     g.add_argument("--publish", metavar="WEEK_START", help="[3단계] 초안을 저장(발행)")
     g.add_argument("--unpublish", metavar="WEEK_START", help="발행 취소")
+    g.add_argument("--auto", action="store_true", help="[자동] 직전 완료 주차(+백필 1주차) 자동 작성·검증·발행")
     ap.add_argument("--blank", action="store_true", help="--draft와 함께: AI 보조 없이 빈 초안 생성")
+    ap.add_argument("--week", metavar="WEEK_START", help="--auto 와 함께: 특정 주차만 처리")
+    ap.add_argument("--dry-run", action="store_true", help="--auto 와 함께: 생성·검증만 하고 저장하지 않음")
+    ap.add_argument("--no-backfill", action="store_true", help="--auto 와 함께: 과거 주차 백필 없이 직전 주차만")
     args = ap.parse_args()
 
     if args.show:
@@ -544,6 +731,8 @@ def main():
         publish(args.publish)
     elif args.unpublish:
         unpublish(args.unpublish)
+    elif args.auto:
+        raise SystemExit(auto(args.week, dry_run=args.dry_run, backfill=not args.no_backfill))
     else:
         list_weeks()
 
