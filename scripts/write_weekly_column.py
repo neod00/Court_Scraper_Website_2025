@@ -553,7 +553,7 @@ AUTO_WRITER_PROMPT = f"""당신은 로옥션(LawAuction)의 주간 데이터 칼
   '이번주_각도'에 적힌 사실로 글을 시작하고, 나머지 문단은 데이터에서 그 주에 두드러진 것을 골라 씁니다. 매주 같은 순서·같은 문장 틀을 쓰지 않습니다.
   데이터의 한계는 한 문장으로 짧게, '고정_안내' 중 그 주 내용과 관련 있는 것 하나만 씁니다. "이로 인해", "따라서" 같은 연결어로 글을 맺지 않습니다.
   사건 묶음(한 사건에서 여러 건)을 쓸 때는 '사건_묶음_사실'의 문장을 그대로 옮깁니다. 건수와 사건 수를 직접 조합하지 않습니다.
-제목: 40자 이내, '이번주_각도'의 사실 하나를 담백하게. 제목의 숫자와 조합도 데이터에 적힌 그대로만 씁니다.
+제목: 40자 이내, '이번주_각도'의 사실 하나를 담백한 문장으로. '최고가 공고:', '사건 묶음:' 같은 각도 이름표나 콜론(:)을 제목에 붙이지 않고, '이번주'·'이번 주'로 시작하지 않습니다. 제목의 숫자와 조합도 데이터에 적힌 그대로만 씁니다.
 출력: {{"title": "...", "body": "..."}} JSON 만. body 의 문단은 빈 줄로 구분합니다."""
 
 
@@ -622,22 +622,62 @@ def _case_facts(signals: dict) -> list:
     return facts
 
 
+ANGLE_KINDS = ("cases", "spike", "top", "total")
+_RUN_ANGLES = []   # 한 번 실행에서 여러 주차를 쓸 때 앞 주차가 고른 각도
+
+
+def _title_kind(title: str) -> str:
+    """이미 발행된 칼럼 제목에서 각도 종류를 추정한다."""
+    t = title or ""
+    if "사건" in t:
+        return "cases"
+    if any(k in t for k in ("최고가", "억", "만 원", "원")):
+        return "top"
+    if any(k in t for k in ("배", "증가", "감소", "급증", "평균")):
+        return "spike"
+    return "total"
+
+
+def _recent_angle_kinds(limit: int = 3) -> list:
+    """최근 발행 순(editor_note_at)으로 자동·수동 칼럼 제목의 각도 종류."""
+    try:
+        res = (supabase.table("weekly_reports")
+               .select("editor_note_title, editor_note_at")
+               .not_.is_("editor_note_at", "null")
+               .order("editor_note_at", desc=True).limit(limit).execute())
+        return [_title_kind(r.get("editor_note_title") or "") for r in (res.data or [])]
+    except Exception:
+        return []
+
+
 def _angle(week_start: str, signals: dict) -> str:
-    """그 주에 글을 시작할 사실 하나. 매주 같은 첫 문단이 되지 않도록 두드러진 것을 고른다."""
+    """그 주에 글을 시작할 사실 하나.
+    최근 발행된 칼럼 2편과 이번 실행에서 이미 고른 각도는 피한다. 모두 겹치면 가장 오래전에 쓴 각도를 고른다."""
     spikes = signals.get("법원별_급증") or []
     cases = _case_facts(signals)
     top = (signals.get("최고가_3건") or [None])[0]
-    options = []
+    options = {}
     if cases:
-        options.append("사건 묶음: " + cases[0])
+        options["cases"] = "사건 묶음: " + cases[0]
     if spikes:
         s0 = spikes[0]
-        options.append(f"법원별 변화: {s0.get('법원')} {s0.get('이번주')}건 (직전 4주 평균 {s0.get('직전4주평균')}건)")
+        options["spike"] = f"법원별 변화: {s0.get('법원')} {s0.get('이번주')}건 (직전 4주 평균 {s0.get('직전4주평균')}건)"
     if top:
-        options.append(f"최고가 공고: {top.get('법원')} '{top.get('제목')}' 최저매각가 {top.get('최저매각가_표기') or top.get('최저매각가')}")
-    options.append(f"총건수: 이번 주 {signals.get('이번주_총건수')}건, 직전 4주 주당 평균 {signals.get('직전4주_주당평균')}건")
-    idx = int(week_start.replace("-", "")) % len(options) if len(options) > 1 else 0
-    return options[idx]
+        options["top"] = f"최고가 공고: {top.get('법원')} '{top.get('제목')}' 최저매각가 {top.get('최저매각가_표기') or top.get('최저매각가')}"
+    options["total"] = f"총건수: 이번 주 {signals.get('이번주_총건수')}건, 직전 4주 주당 평균 {signals.get('직전4주_주당평균')}건"
+
+    recent = list(reversed(_RUN_ANGLES)) + _recent_angle_kinds(3)   # 최신 순
+    avoid = set(recent[:2])
+    # 기본 우선순위를 주차마다 돌려, 피할 것이 없을 때도 매주 같은 순서가 되지 않게 한다
+    shift = int(week_start.replace("-", "")) % len(ANGLE_KINDS)
+    order = [k for k in ANGLE_KINDS[shift:] + ANGLE_KINDS[:shift] if k in options]
+    fresh = [k for k in order if k not in avoid]
+    if fresh:
+        kind = fresh[0]
+    else:  # 전부 최근에 썼으면 가장 오래전에 쓴 것
+        kind = max(order, key=lambda k: recent.index(k) if k in recent else len(recent))
+    _RUN_ANGLES.append(kind)
+    return options[kind]
 
 
 def _auto_payload(week_start: str, row: dict, rows: list) -> dict:

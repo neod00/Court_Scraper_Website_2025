@@ -360,6 +360,10 @@ def verify_title(title, payload, denylist, max_len=40) -> list:
         problems.append("제목에 집계 데이터에 없는 숫자: " + ", ".join(extra))
     for frag in _case_claims_unsupported(title, payload):
         problems.append(f"제목의 사건 묶음 조합이 데이터와 다릅니다: '{frag}'")
+    if re.match(r"^[^:：]{1,12}[:：]", title):
+        problems.append("제목에 '○○:' 같은 이름표가 있습니다 (문장으로 쓰세요)")
+    if re.match(r"^이번\s?주", title):
+        problems.append("제목이 '이번주/이번 주'로 시작합니다 (구체적 사실로 시작하세요)")
     if "○○" in title or any(ch in title for ch in "#*|"):
         problems.append("제목에 마스킹 기호나 마크다운 기호가 있습니다")
     return problems
@@ -661,6 +665,12 @@ def _selftest() -> int:
     print("[8] 조합 제목(틀림) →", bad_combo, "| (맞음) →", good_combo or "통과")
     if not bad_combo or good_combo:
         print("    FAIL: 사건 묶음 조합 검사")
+        ok = False
+
+    lab = verify_title("이번주 최고가 공고: 서울회생법원 12억 원", payload, set())
+    print("[9] 이름표 제목 →", lab)
+    if len([x for x in lab if "이름표" in x or "이번주" in x]) < 2:
+        print("    FAIL: 제목 이름표/이번주 검사")
         ok = False
 
     print("\nSELFTEST", "PASS" if ok else "FAIL")
