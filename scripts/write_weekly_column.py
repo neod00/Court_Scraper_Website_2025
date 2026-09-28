@@ -89,7 +89,7 @@ AUTO_AUTHOR = "로옥션 데이터 데스크"   # src/lib/weeklyColumn.ts AUTO_C
 AUTO_BACKFILL_FLOOR = "2026-08-03"     # 이 주차 이전은 자동 백필하지 않는다
 
 from column_guard import (  # noqa: E402  (scripts/ 가 sys.path[0])
-    RULES_BLOCK, person_denylist, mask_payload, won_label,
+    RULES_BLOCK, person_denylist, mask_payload, won_label, FIXED_NOTES,
     generate_with_guard, GuardFailed, auto_publish_disabled,
 )
 
@@ -549,12 +549,11 @@ AUTO_WRITER_PROMPT = f"""당신은 로옥션(LawAuction)의 주간 데이터 칼
 
 {RULES_BLOCK}
 
-분량과 구성: 본문은 공백 제외 450~800자(목표 600자 안팎), 문단 4개. 각 문단은 2~3문장, 120자 이상으로 씁니다. 400자에 못 미치면 발행되지 않습니다.
-  문단 1: 이번 주 총건수와 직전 4주 주당 평균의 차이, 법원별로 평균과 달라진 곳('비교값'과 '법원별_급증'의 배수·증감 값을 그대로 씁니다).
-  문단 2: 한 사건에서 여러 건이 공고된 사례('한사건_다건공고')와, 제목에 사건번호가 적힌 공고 비율('제목에_사건번호_비율') — 건수만으로 사건 수를 알 수 없다는 점.
-  문단 3: 금액이 확인된 공고의 비율('금액_확인_공고')과 최고가 공고('최고가_3건'의 법원·제목·최저매각가_표기), 분류별 특징('분야별_건수').
-  문단 4: 데이터의 한계 — 요약 추출 실패 비율('요약_추출_실패'), 수집하지 않는 것, 회차별 가격은 원문이 기준이라는 점. 페이지에 총건수·최다 법원·분류별 건수 표가 이미 있으므로 수치를 나열하지 말고, 수치가 무엇을 뜻하는지를 씁니다(예: 한 사건의 물건이 나뉘어 여러 건으로 공고된 경우, 직전 4주 주당 평균과의 차이, 금액이 확인된 공고의 비율, 제목만으로 물건을 알기 어려운 공고).
-제목: 40자 이내, 이번 주의 구체적 사실 하나를 담은 담백한 제목(예: "대구회생법원 15건 중 13건은 사건 3개였다"). 제목의 숫자도 데이터에 있는 값만 씁니다.
+분량과 구성: 본문은 공백 제외 450~800자(목표 600자 안팎), 문단 3~4개, 각 문단 2~3문장. 400자에 못 미치면 발행되지 않습니다.
+  '이번주_각도'에 적힌 사실로 글을 시작하고, 나머지 문단은 데이터에서 그 주에 두드러진 것을 골라 씁니다. 매주 같은 순서·같은 문장 틀을 쓰지 않습니다.
+  데이터의 한계는 한 문장으로 짧게, '고정_안내' 중 그 주 내용과 관련 있는 것 하나만 씁니다. "이로 인해", "따라서" 같은 연결어로 글을 맺지 않습니다.
+  사건 묶음(한 사건에서 여러 건)을 쓸 때는 '사건_묶음_사실'의 문장을 그대로 옮깁니다. 건수와 사건 수를 직접 조합하지 않습니다.
+제목: 40자 이내, '이번주_각도'의 사실 하나를 담백하게. 제목의 숫자와 조합도 데이터에 적힌 그대로만 씁니다.
 출력: {{"title": "...", "body": "..."}} JSON 만. body 의 문단은 빈 줄로 구분합니다."""
 
 
@@ -600,6 +599,47 @@ def _titled_count(signals: dict) -> int:
     return int(m.group(1)) if m else 0
 
 
+def _case_facts(signals: dict) -> list:
+    """한사건_다건공고를 법원별로 묶어, 모델이 조합을 만들지 않고 그대로 옮길 문장을 만든다."""
+    by_court = {}
+    for item in signals.get("한사건_다건공고") or []:
+        key = str(item.get("법원_사건번호") or "")
+        court, _, case = key.rpartition(" ")
+        by_court.setdefault(court or "미상", []).append((case, int(item.get("공고건수") or 0)))
+    court_counts = signals.get("법원별_건수") or {}
+    facts = []
+    for court, cases in by_court.items():
+        cases.sort(key=lambda x: -x[1])
+        covered = sum(n for _, n in cases)
+        detail = ", ".join(f"{c} {n}건" for c, n in cases)
+        total = court_counts.get(court)
+        if total and len(cases) > 1:
+            facts.append(f"{court} {total}건 중 {covered}건은 사건 {len(cases)}개({detail})에서 나왔습니다.")
+        elif total:
+            facts.append(f"{court} {total}건 중 {covered}건은 한 사건({detail})에서 나왔습니다.")
+        else:
+            facts.append(f"{court}: {detail}.")
+    return facts
+
+
+def _angle(week_start: str, signals: dict) -> str:
+    """그 주에 글을 시작할 사실 하나. 매주 같은 첫 문단이 되지 않도록 두드러진 것을 고른다."""
+    spikes = signals.get("법원별_급증") or []
+    cases = _case_facts(signals)
+    top = (signals.get("최고가_3건") or [None])[0]
+    options = []
+    if cases:
+        options.append("사건 묶음: " + cases[0])
+    if spikes:
+        s0 = spikes[0]
+        options.append(f"법원별 변화: {s0.get('법원')} {s0.get('이번주')}건 (직전 4주 평균 {s0.get('직전4주평균')}건)")
+    if top:
+        options.append(f"최고가 공고: {top.get('법원')} '{top.get('제목')}' 최저매각가 {top.get('최저매각가_표기') or top.get('최저매각가')}")
+    options.append(f"총건수: 이번 주 {signals.get('이번주_총건수')}건, 직전 4주 주당 평균 {signals.get('직전4주_주당평균')}건")
+    idx = int(week_start.replace("-", "")) % len(options) if len(options) > 1 else 0
+    return options[idx]
+
+
 def _auto_payload(week_start: str, row: dict, rows: list) -> dict:
     signals = _collect_signals(week_start, row["week_end"])
     for item in signals.get("최고가_3건", []):
@@ -623,6 +663,9 @@ def _auto_payload(week_start: str, row: dict, rows: list) -> dict:
         "기간": f"{week_start} ~ {row['week_end']}",
         **signals,
         "비교값(미리_계산됨)": comparisons,
+        "사건_묶음_사실": _case_facts(signals),
+        "이번주_각도": _angle(week_start, signals),
+        "고정_안내": FIXED_NOTES,
         "제목에_사건번호_비율": f"{(_titled_count(signals) / total_now * 100) if total_now else 0:.1f}%",
         "금액_확인_공고": {"건수": priced, "총건수": total, "비율": f"{(priced / total * 100) if total else 0:.1f}%"},
         "요약_추출_실패": {"건수": fallback, "총건수": total, "비율": f"{(fallback / total * 100) if total else 0:.1f}%"},

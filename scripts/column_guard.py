@@ -37,7 +37,7 @@ FORBIDDEN_WORDS = [
 # 원인 단정·전망 표현. 하나라도 걸리면 문제로 본다.
 CAUSAL_PATTERNS = [
     r"때문", r"영향으로", r"영향을 (?:미|받)", r"로 보입니다", r"것으로 보",
-    r"추정", r"전망", r"예상됩니다", r"회복세", r"활발",
+    r"추정", r"전망", r"예상됩니다", r"회복세", r"활발", r"이로 인해", r"이로써", r"따라서",
 ]
 _CAUSAL_RE = [re.compile(p) for p in CAUSAL_PATTERNS]
 
@@ -50,6 +50,14 @@ RULES_BLOCK = """반드시 지킬 것:
 5. 데이터의 한계를 한 문장 이상 밝힙니다. 예: 금액이 확인된 공고는 일부라는 점, 사건 묶음은 제목에 사건번호가 있는 공고만 잡힌다는 점, 낙찰 결과는 수집하지 않는다는 점, 요약 추출에 실패한 공고 비율.
 6. 문체는 담담한 정보 전달체, '~입니다' 체입니다. 과장·수식어·감탄 없이 씁니다. 머리말·소제목·글머리표·마크다운 기호(#, *, -, |)를 쓰지 않습니다.
 7. 문단은 빈 줄로 구분합니다. 문단 안에서는 줄을 바꾸지 않습니다."""
+
+FIXED_NOTES = [
+    "회차별 가격과 입찰 조건은 공고 원문이 기준입니다.",
+    "한 사건의 물건이 여러 건으로 나뉘어 공고될 수 있어, 공고 건수가 곧 사건 수는 아닙니다.",
+    "사건 묶음은 제목에 사건번호가 적힌 공고에서만 확인됩니다.",
+    "로옥션은 낙찰 결과(낙찰 여부·낙찰가), 감정평가액, 입찰자 수를 수집하지 않습니다.",
+    "자산 분류는 제목과 요약의 키워드로 자동 부여한 값입니다.",
+]
 
 # ── 이름 처리 ─────────────────────────────────────────────────────────
 
@@ -256,6 +264,24 @@ def _snippet(text: str, m) -> str:
 
 # ── 검증 ─────────────────────────────────────────────────────────────
 
+_CASE_CLAIM_RE = re.compile(r"\d+\s*건[^.。\n]{0,15}?사건\s*\d+\s*개")
+
+
+def _case_claims_unsupported(text: str, payload) -> list:
+    """'15건 중 13건은 사건 3개' 같은 사건 묶음 조합 주장은 숫자 하나하나가 맞아도 조합이 틀릴 수 있다.
+    payload 의 '사건_묶음_사실' 문구에 (공백 제거 후) 그대로 들어 있는 조합만 허용한다."""
+    ptxt = json.dumps(payload, ensure_ascii=False).replace(" ", "")
+    bad = []
+    for m in _CASE_CLAIM_RE.finditer(text or ""):
+        frag = re.sub(r"\s", "", m.group(0))
+        nums = re.findall(r"\d+", frag)
+        # 조합의 숫자 순서가 payload 문구에 그대로 있어야 한다
+        pat = r"[^\d]{0,20}".join(nums)
+        if not re.search(pat, ptxt):
+            bad.append(m.group(0))
+    return bad
+
+
 def verify_text(text, payload, denylist, *, min_chars, max_chars, min_paras=3, max_paras=4) -> list:
     """빈 리스트 = 통과. 각 항목은 LLM 에 그대로 돌려줄 수 있는 한국어 문제 설명."""
     problems = []
@@ -284,6 +310,9 @@ def verify_text(text, payload, denylist, *, min_chars, max_chars, min_paras=3, m
     bad_cases = sorted(extract_case_numbers(text) - payload_cases)
     if bad_cases:
         problems.append("집계 데이터에 없는 사건번호: " + ", ".join(bad_cases))
+
+    for frag in _case_claims_unsupported(text, payload):
+        problems.append(f"사건 묶음 조합이 데이터와 다릅니다: '{frag}' ('사건_묶음_사실'의 문구를 그대로 쓰세요)")
 
     n_chars = len(re.sub(r"\s", "", text))
     if n_chars < min_chars:
@@ -329,6 +358,8 @@ def verify_title(title, payload, denylist, max_len=40) -> list:
     extra = sorted(extract_numbers(title) - allowed_numbers(payload), key=_numkey)
     if extra:
         problems.append("제목에 집계 데이터에 없는 숫자: " + ", ".join(extra))
+    for frag in _case_claims_unsupported(title, payload):
+        problems.append(f"제목의 사건 묶음 조합이 데이터와 다릅니다: '{frag}'")
     if "○○" in title or any(ch in title for ch in "#*|"):
         problems.append("제목에 마스킹 기호나 마크다운 기호가 있습니다")
     return problems
@@ -413,6 +444,8 @@ conflict=false 인 것 (문제가 아닙니다):
 - 1700000000 을 "17억 원"으로, 4000000 을 "400만 원"으로 쓴 것처럼 단위만 바꾼 것 (같은 값입니다)
 - 앞으로의 입찰 기일을 "예정"이라고 쓴 것
 - 데이터의 한계를 밝히는 문장 (금액이 확인된 공고는 일부, 낙찰 결과 미수집, 요약 추출 실패 비율 등)
+- 집계_데이터의 '고정_안내' 목록에 있는 안내 문장과 같은 뜻의 문장 (예: 회차별 가격은 원문이 기준, 한 사건의 물건이 여러 건으로 나뉘어 공고될 수 있음)
+- 단, 본문 맨 앞의 '제목:' 줄도 검증 대상입니다. 제목이 데이터와 어긋나면 conflict=true 입니다.
 - 데이터 키를 자연어로 바꿔 쓴 것 (median → 중앙값, priced_n → 금액이 확인된 공고, summary_fallback → 요약 추출 실패)
 - 문체·길이·표현의 어색함
 
@@ -466,7 +499,7 @@ class GuardFailed(Exception):
 
 
 def generate_with_guard(client, system_prompt, payload, denylist, *, min_chars, max_chars,
-                        max_attempts=3, model="gpt-4o-mini", log=print):
+                        max_attempts=4, model="gpt-4o-mini", log=print):
     """작성 → 코드 검증 → LLM 교차 검증을 max_attempts 회 반복. (title, body, attempts_log) 또는 GuardFailed."""
     feedback, previous, attempts_log, problems = None, None, [], []
     for attempt in range(1, max_attempts + 1):
@@ -475,7 +508,7 @@ def generate_with_guard(client, system_prompt, payload, denylist, *, min_chars, 
         problems = verify_title(title, payload, denylist)
         problems += verify_text(body, payload, denylist, min_chars=min_chars, max_chars=max_chars)
         if not problems:
-            problems = [f"[교차검증] {p}" for p in llm_factcheck(client, body, payload, model=model)]
+            problems = [f"[교차검증] {p}" for p in llm_factcheck(client, f"제목: {title}\n\n{body}", payload, model=model)]
         n_chars = len(re.sub(r"\s", "", body))
         attempts_log.append({"attempt": attempt, "title": title, "chars": n_chars, "problems": list(problems)})
         if log:
@@ -620,6 +653,14 @@ def _selftest() -> int:
 
     if won_label(4228161) != "422만 8,161원" or won_label(1700000000) != "17억 원" or won_label(787500) != "78만 7,500원":
         print("    FAIL: won_label", won_label(4228161), won_label(1700000000), won_label(787500))
+        ok = False
+
+    p2 = dict(payload, 사건_묶음_사실=["대구회생법원 15건 중 13건은 사건 3개(2025하단11310 8건, 2024하단1552 3건, 2024하단11573 2건)에서 나왔습니다."])
+    bad_combo = verify_title("대구회생법원 15건 중 8건은 사건 3개였다", p2, set())
+    good_combo = verify_title("대구회생법원 15건 중 13건은 사건 3개였다", p2, set())
+    print("[8] 조합 제목(틀림) →", bad_combo, "| (맞음) →", good_combo or "통과")
+    if not bad_combo or good_combo:
+        print("    FAIL: 사건 묶음 조합 검사")
         ok = False
 
     print("\nSELFTEST", "PASS" if ok else "FAIL")

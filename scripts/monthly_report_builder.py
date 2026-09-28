@@ -71,7 +71,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 FAILED_DIR = os.path.join(BASE_DIR, "drafts", "monthly-reports")
 
 from column_guard import (  # noqa: E402  (scripts/ 가 sys.path[0])
-    RULES_BLOCK, person_denylist, mask_payload, won_label,
+    RULES_BLOCK, person_denylist, mask_payload, won_label, FIXED_NOTES,
     verify_text, verify_title, llm_factcheck, generate_with_guard, GuardFailed, auto_publish_disabled,
 )
 SCHEMA_VERSION = 1
@@ -667,11 +667,10 @@ AUTO_NOTE_PROMPT = f"""당신은 로옥션(LawAuction)의 월간 리포트 노�
 
 {RULES_BLOCK}
 
-분량과 구성: 본문은 공백 제외 400~700자(목표 550자 안팎), 문단 4개, 각 문단 2~3문장. 400자에 못 미치면 발행되지 않습니다. 비율·배수·증감은 집계에 적힌 값(diff, diff_pct, pct, rank, prev_rank 등)만 옮기고 직접 계산하지 않습니다.
-  문단 1: 총건수와 전월 대비 증감(diff, diff_pct), 주별 건수의 특징(weekly_counts).
-  문단 2: 법원별 상위와 순위 변화(rank, prev_rank), 자산 유형별 비중(pct).
-  문단 3: 최저매각가 분포(priced_n, pct, median, p25, p75, ge_100m_n)와 주요 공고(주요_공고의 법원·제목·최저매각가_표기), 사건 묶음(사건_묶음).
-  문단 4: 데이터의 한계 — 요약 추출 실패 비율(summary_fallback_pct), 금액이 확인된 공고 비율, 수집하지 않는 것. '요약 추출 실패' 비율 또는 '금액이 확인된 공고' 비율을 데이터 한계로 반드시 한 문장 이상 밝힙니다.
+분량과 구성: 본문은 공백 제외 400~700자(목표 550자 안팎), 문단 3~4개, 각 문단 2~3문장. 400자에 못 미치면 발행되지 않습니다. 비율·배수·증감은 집계에 적힌 값(diff, diff_pct, pct, rank, prev_rank 등)만 옮기고 직접 계산하지 않습니다.
+  그 달에 가장 두드러진 사실(전월 대비 증감, 순위가 크게 바뀐 법원, 금액이 큰 공고, 여러 건으로 나뉜 사건 중 하나)로 글을 시작하고, 달마다 같은 순서·같은 문장 틀을 쓰지 않습니다.
+  데이터 한계는 한 문장으로, '고정_안내' 중 관련 있는 것 하나와 요약 추출 실패 비율(summary_fallback_pct)만 씁니다. summary_quality_pct 는 '요약이 충분히 추출된 공고 비율'이며 금액 확인 비율이 아닙니다(금액 확인 비율은 최저매각가_분포.pct).
+  사건 묶음은 '사건_묶음_사실'의 문장을 그대로 옮깁니다. "이로 인해", "따라서" 같은 연결어로 글을 맺지 않습니다.
 제목: 40자 이내, 그 달의 구체적 사실 하나를 담은 담백한 제목. 제목의 숫자도 데이터에 있는 값만 씁니다.
 출력: {{"title": "...", "body": "..."}} JSON 만. body 의 문단은 빈 줄로 구분합니다."""
 
@@ -691,6 +690,11 @@ def _note_payload(report: dict) -> dict:
         "최저매각가_분포": r.get("price"), "입찰_일정": r.get("schedule"), "사건_묶음": r.get("cases"),
         "주요_공고": notable, "데이터_품질": r.get("data_quality"),
         "수집하지_않는_것": "낙찰 결과(낙찰 여부·낙찰가), 감정평가액, 입찰자 수",
+        "사건_묶음_사실": [
+            f"{e.get('court')} {e.get('case_no')} 사건은 {e.get('n')}건으로 나뉘어 공고됐습니다."
+            for e in ((r.get("cases") or {}).get("multi_case_examples") or [])
+        ],
+        "고정_안내": FIXED_NOTES,
     }
     return mask_payload(payload)
 
