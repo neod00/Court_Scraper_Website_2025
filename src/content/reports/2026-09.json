@@ -1,0 +1,312 @@
+{
+ "schema_version": 1,
+ "month": "2026-09",
+ "month_label": "2026년 9월",
+ "period": {
+  "start": "2026-09-01",
+  "end": "2026-09-30"
+ },
+ "snapshot_date": "2026-10-02",
+ "totals": {
+  "n": 372,
+  "prev_month": "2026-08",
+  "prev_month_n": 399,
+  "diff": -27,
+  "diff_pct": -6.8,
+  "prev_comparable": true,
+  "weekly_avg": 86.8,
+  "weekly_counts": [
+   {
+    "week_start": "2026-08-31",
+    "week_end": "2026-09-06",
+    "n": 87,
+    "partial": true
+   },
+   {
+    "week_start": "2026-09-07",
+    "week_end": "2026-09-13",
+    "n": 123,
+    "partial": false
+   },
+   {
+    "week_start": "2026-09-14",
+    "week_end": "2026-09-20",
+    "n": 65,
+    "partial": false
+   },
+   {
+    "week_start": "2026-09-21",
+    "week_end": "2026-09-27",
+    "n": 45,
+    "partial": false
+   },
+   {
+    "week_start": "2026-09-28",
+    "week_end": "2026-10-04",
+    "n": 52,
+    "partial": true
+   }
+  ]
+ },
+ "courts": {
+  "top": [
+   {
+    "name": "서울회생법원",
+    "n": 161,
+    "pct": 43.3,
+    "rank": 1,
+    "prev_n": 170,
+    "prev_rank": 1
+   },
+   {
+    "name": "수원회생법원",
+    "n": 77,
+    "pct": 20.7,
+    "rank": 2,
+    "prev_n": 41,
+    "prev_rank": 3
+   },
+   {
+    "name": "대전회생법원",
+    "n": 41,
+    "pct": 11.0,
+    "rank": 3,
+    "prev_n": 51,
+    "prev_rank": 2
+   },
+   {
+    "name": "의정부지방법원",
+    "n": 22,
+    "pct": 5.9,
+    "rank": 4,
+    "prev_n": 17,
+    "prev_rank": 7
+   },
+   {
+    "name": "광주회생법원",
+    "n": 16,
+    "pct": 4.3,
+    "rank": 5,
+    "prev_n": 7,
+    "prev_rank": 9
+   },
+   {
+    "name": "울산지방법원",
+    "n": 13,
+    "pct": 3.5,
+    "rank": 6,
+    "prev_n": 3,
+    "prev_rank": 11
+   },
+   {
+    "name": "전주지방법원",
+    "n": 10,
+    "pct": 2.7,
+    "rank": 7,
+    "prev_n": 2,
+    "prev_rank": 12
+   },
+   {
+    "name": "인천지방법원",
+    "n": 9,
+    "pct": 2.4,
+    "rank": 8,
+    "prev_n": 31,
+    "prev_rank": 5
+   }
+  ],
+  "other_n": 23,
+  "distinct_n": 12
+ },
+ "categories": [
+  {
+   "key": "real_estate",
+   "label": "부동산",
+   "n": 147,
+   "pct": 39.5
+  },
+  {
+   "key": "asset",
+   "label": "자산",
+   "n": 86,
+   "pct": 23.1
+  },
+  {
+   "key": "bond",
+   "label": "채권",
+   "n": 37,
+   "pct": 9.9
+  },
+  {
+   "key": "etc",
+   "label": "기타",
+   "n": 44,
+   "pct": 11.8
+  },
+  {
+   "key": "vehicle",
+   "label": "차량/동산",
+   "n": 17,
+   "pct": 4.6
+  },
+  {
+   "key": "patent",
+   "label": "특허",
+   "n": 22,
+   "pct": 5.9
+  },
+  {
+   "key": "electronics",
+   "label": "전자장비",
+   "n": 10,
+   "pct": 2.7
+  },
+  {
+   "key": "stock",
+   "label": "주식",
+   "n": 9,
+   "pct": 2.4
+  }
+ ],
+ "price": {
+  "priced_n": 152,
+  "pct": 40.9,
+  "median": 5000000,
+  "p25": 1081267,
+  "p75": 18000000,
+  "ge_100m_n": 12,
+  "max": 588195500,
+  "bands": [
+   {
+    "label": "1천만 원 미만",
+    "n": 102,
+    "pct": 67.1
+   },
+   {
+    "label": "1천만~1억 원",
+    "n": 38,
+    "pct": 25.0
+   },
+   {
+    "label": "1억~5억 원",
+    "n": 9,
+    "pct": 5.9
+   },
+   {
+    "label": "5억~10억 원",
+    "n": 3,
+    "pct": 2.0
+   },
+   {
+    "label": "10억 원 이상",
+    "n": 0,
+    "pct": 0.0
+   }
+  ]
+ },
+ "schedule": {
+  "with_auction_date_n": 160,
+  "pct": 43.0,
+  "excluded_n": 5,
+  "in_month_n": 98,
+  "next_month_n": 61,
+  "other_n": 1,
+  "by_month": [
+   {
+    "month": "2026-09",
+    "n": 98
+   },
+   {
+    "month": "2026-10",
+    "n": 61
+   },
+   {
+    "month": "2026-12",
+    "n": 1
+   }
+  ],
+  "top_dates": [
+   {
+    "date": "2026-09-15",
+    "n": 14
+   },
+   {
+    "date": "2026-09-16",
+    "n": 11
+   },
+   {
+    "date": "2026-09-14",
+    "n": 8
+   }
+  ]
+ },
+ "cases": {
+  "titled_with_case_n": 18,
+  "distinct_cases_n": 16,
+  "multi_case_n": 1,
+  "multi_case_examples": [
+   {
+    "court": "대구회생법원",
+    "case_no": "2025하단11869",
+    "n": 3
+   }
+  ]
+ },
+ "notable": [
+  {
+   "id": "69c1708c-26bb-4dce-a2a3-252df19a011c",
+   "court": "대전회생법원",
+   "title": "파산재단 자산매각공고(채권)",
+   "min_price": 588195500,
+   "target": "(사건번호 생략) 손해배상(가)사건의 판결금원",
+   "rounds_noted": false
+  },
+  {
+   "id": "28aef0c0-3d77-4a93-91e1-b9ee4fc77581",
+   "court": "서울회생법원",
+   "title": "자산 매각 공고",
+   "min_price": 500000000,
+   "target": "전기차 충전기 약 2,940대, (법인명 생략) 파산재단에 속함. 각 충전기의 세부내역은 별지에 첨부",
+   "rounds_noted": true
+  },
+  {
+   "id": "06acde23-7932-4f68-a46e-9e738f0915c9",
+   "court": "서울회생법원",
+   "title": "자산 매각 공고",
+   "min_price": 500000000,
+   "target": "비상장주식, 발행회사명: (법인명 생략), 보통주식: 12,300주(지분율 41.00%)",
+   "rounds_noted": true
+  },
+  {
+   "id": "d6090bf5-5513-45f3-8017-183cbde3ccaa",
+   "court": "수원회생법원",
+   "title": "자산매각공고",
+   "min_price": 460000000,
+   "target": "용인시 기흥구 구갈동 663 기흥역파크푸르지오 제306동 제304호, 부동산, 임차인 임차보증금 4억 6,000만 원",
+   "rounds_noted": true
+  },
+  {
+   "id": "42e2adb5-862a-4eaa-8fd1-e2e2661db04a",
+   "court": "수원회생법원",
+   "title": "부동산 매각 공고",
+   "min_price": 236000000,
+   "target": "서울특별시 금천구 시흥동 827-58 금강펠리스 제202동 제4층 404호, 부동산",
+   "rounds_noted": true
+  }
+ ],
+ "data_quality": {
+  "summary_fallback_n": 203,
+  "summary_fallback_pct": 54.6,
+  "summary_quality_n": 149,
+  "summary_quality_pct": 40.1,
+  "min_price_n": 152,
+  "auction_date_n": 160,
+  "unclassified_n": 0
+ },
+ "editor_note": "2026년 9월의 총 공고 건수는 372건으로, 8월의 399건에 비해 감소했습니다. 주별로는 첫 주에 87건, 둘째 주에 123건, 셋째 주에 65건, 넷째 주에 45건이 발표되었습니다. 서울회생법원은 161건으로 가장 많은 공고를 기록하며 1위를 유지했습니다. 수원회생법원은 77건으로 2위로 올라섰고, 대전회생법원은 41건으로 3위를 차지했습니다. 대전회생법원은 8월의 51건에서 감소했습니다. 의정부지방법원과 광주회생법원은 각각 22건과 16건으로 순위가 상승했습니다. 인천지방법원은 9건으로 하락했습니다.\n\n입찰 일정이 포함된 공고는 160건으로, 전체의 43.0%를 차지합니다. 이 중 98건은 9월에 진행될 예정입니다. 최저매각가가 확인된 공고는 152건으로, 전체의 40.9%입니다. 최저매각가의 중앙값은 5,000,000원이며, 1천만 원 미만의 공고가 102건으로 가장 많습니다.\n\n사건 묶음으로는 대구회생법원에서 2025하단11869 사건이 3건으로 나뉘어 공고되었습니다. 데이터 품질 측면에서 요약 추출에 실패한 공고 비율은 54.6%입니다. 금액 확인 비율은 40.9%로, 일부 공고에서만 최저매각가가 확인되었습니다. 요약이 충분히 추출된 공고 비율은 40.1%입니다.",
+ "editor_note_title": "2026년 9월 공고 372건, 수원회생법원 건수 증가",
+ "editor_note_by": "로옥션 데이터 데스크",
+ "editor_note_status": "ai-auto",
+ "status": "published",
+ "published_at": "2026-10-02T15:41:28+09:00"
+}

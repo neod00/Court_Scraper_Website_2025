@@ -6,6 +6,7 @@ import r2026_05 from './2026-05.json';
 import r2026_06 from './2026-06.json';
 import r2026_07 from './2026-07.json';
 import r2026_08 from './2026-08.json';
+import r2026_09 from './2026-09.json';
 
 export const REPORT_FILES: unknown[] = [
     r2026_03,
@@ -14,4 +15,5 @@ export const REPORT_FILES: unknown[] = [
     r2026_06,
     r2026_07,
     r2026_08,
+    r2026_09,
 ];
