@@ -215,7 +215,13 @@ supabase
 ## 학습 기록
 
 ### 발견된 패턴
-- (여기에 스크래핑 중 발견된 패턴, 주의사항 기록)
+- **첨부 원문(content_text) 파이프라인 (2026-11-08)**: `scripts/notice_text.py`(공용 다운로드·추출·정리·마스킹) → `scripts/attachment_text_extractor.py`(LLM 없이 content_text 저장). 공고 상세의 '첨부 공고문 원문'·'회차별 최저입찰가' 표와 색인 게이트가 이 값을 쓴다.
+  - 저장 규칙: 공백 제외 400자 이상인 **마스킹된 원문만** 저장, 아니면 NULL. 그래서 `content_text IS NOT NULL` = 읽을 만한 원문 있음(sitemap 이 본문을 내려받지 않고 필터). 기준값은 `src/lib/noticeText.ts MIN_TEXT_CHARS` 와 함께 바꿀 것.
+  - 마스킹: 채무자·파산자·소유자·상속인·임차인·보증인 등 역할어 뒤 개인 이름은 성만 남김(김○○), 같은 이름의 재등장(3자 이상)도 가림, 주민번호 뒷자리 가림. 파산관재인·변호사 이름은 입찰 문의처라 유지. Python·TS 규칙이 두 군데 있으니 함께 고칠 것(`python scripts/notice_text.py` 로 자체 점검).
+  - 법원 파일 서버는 `downFile` 인자를 저장 파일명으로만 쓴다 → 다운로드 링크에 가린 파일명을 넣어도 같은 파일이 받아진다.
+- **GitHub Actions(해외 IP)에서 첨부 다운로드가 자주 끊김**: 2026-10 로그 기준 22건 중 15건 `RemoteDisconnected`. 한국 IP(로컬)에서는 같은 파일이 정상 다운로드됨. 대응: 재시도(5·15·40초), 다운로드 간 대기, 실패 시 대체 요약을 쓰지 않고 7일간 재시도(`ai_report_generator.RETRY_WINDOW_DAYS`). 그래도 남는 공백은 로컬에서 `python scripts/attachment_text_extractor.py --all-missing` 로 메운다.
+- **과거 결함**: 다운로드 실패 시에도 '첨부파일을 확인하라'는 대체 요약을 저장해 재시도 대상에서 영구 제외됐다(PDF 첨부 883건 중 479건). 원문이 채워진 뒤 `python scripts/ai_report_generator.py --refresh-fallback --limit N` 으로 다시 요약할 수 있다(OpenAI 비용 발생 — 실행 전 사용자 확인).
+- HWP 첨부는 `olefile` 로 BodyText 문단 레코드를 읽는다. 스캔 이미지 PDF 는 extractor 가 건너뛰고(무료 원칙), OCR 은 ai_report_generator 의 Vision 경로만 사용.
 
 ### 사이트 변경 이력
 - (사이트 구조 변경 시 업데이트)

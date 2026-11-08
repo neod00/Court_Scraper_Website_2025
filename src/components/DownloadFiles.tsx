@@ -1,5 +1,7 @@
 'use client';
 
+import { maskPersonNames } from '@/lib/noticeText';
+
 interface FileInfo {
     server_filename: string;
     original_filename: string;
@@ -20,7 +22,8 @@ export default function DownloadFiles({ fileInfo }: { fileInfo: any }) {
     const getDownloadUrl = (file: FileInfo) => {
         const params = new URLSearchParams({
             file: file.server_filename,
-            name: file.original_filename,
+            // 법원 서버는 이 값을 저장 파일명으로만 쓴다(2026-11 확인) — 개인 이름이 HTML 에 남지 않도록 가린 이름을 보낸다.
+            name: maskPersonNames(file.original_filename),
             path: '011'
         });
         return `/api/download?${params.toString()}`;
@@ -36,7 +39,7 @@ export default function DownloadFiles({ fileInfo }: { fileInfo: any }) {
                     rel="noopener noreferrer"
                     className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 max-w-xs truncate"
                 >
-                    📎 {file.original_filename}
+                    📎 {maskPersonNames(file.original_filename)}
                 </a>
             ))}
         </div>

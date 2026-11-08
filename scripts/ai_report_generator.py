@@ -10,6 +10,7 @@ Usage:
 """
 
 import os
+import re
 import sys
 import time
 import json
@@ -26,6 +27,22 @@ import fitz  # pymupdf
 from openai import OpenAI
 from supabase import create_client, Client
 from dotenv import load_dotenv
+from datetime import date, timedelta
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from notice_text import (  # noqa: E402  공용 다운로드(재시도)·정리·마스킹
+    download_attachment as fetch_attachment_bytes,
+    clean_text,
+    mask_personal_info,
+    visible_len,
+    MIN_STORE_CHARS,
+    MAX_STORE_CHARS,
+)
+
+# 첨부 다운로드가 전부 실패한 공고는 이 기간 동안 대체 요약을 쓰지 않고 다음 실행에서 다시 시도한다.
+# (2026-10 진단: Actions 에서 다운로드 실패 후 '첨부파일을 확인하라'는 대체 요약을 저장해
+#  재시도 대상에서 영구히 빠진 공고가 479건)
+RETRY_WINDOW_DAYS = 7
 
 # ── Environment Setup ──────────────────────────────────────────────
 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -60,39 +77,22 @@ def download_attachment(server_filename: str, original_filename: str, path: str 
     Returns the local temporary file path, or None on failure.
     """
     try:
-        encoded_server = quote(server_filename)
-        
-        # Encode original filename to EUC-KR then URL-encode (mirroring api/download/route.ts)
-        try:
-            euc_kr_bytes = original_filename.encode('euc-kr')
-            encoded_original = ''.join(f'%{byte:02X}' for byte in euc_kr_bytes)
-        except (UnicodeEncodeError, UnicodeDecodeError):
-            encoded_original = quote(original_filename)
-        
-        court_url = f"https://file.scourt.go.kr/AttachDownload?path={path}&file={encoded_server}&downFile={encoded_original}"
-        
         print(f"  📥 Downloading: {original_filename}")
-        response = requests.get(court_url, verify=False, timeout=30, headers={
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        })
-        
-        if response.status_code != 200:
-            print(f"  ❌ Download failed: HTTP {response.status_code}")
+        # 연결 끊김은 notice_text.download_attachment 가 간격을 늘려 재시도한다.
+        content = fetch_attachment_bytes(server_filename, original_filename, path, log=lambda m: print(f"  {m}"))
+        if not content:
+            print(f"  ❌ Download failed after retries")
             return None
-        
-        if len(response.content) < 100:
-            print(f"  ❌ Downloaded file too small ({len(response.content)} bytes)")
-            return None
-        
+
         # Determine file extension from original filename
         ext = os.path.splitext(original_filename)[1].lower() or '.pdf'
-        
+
         # Save to temp file
         tmp = tempfile.NamedTemporaryFile(delete=False, suffix=ext)
-        tmp.write(response.content)
+        tmp.write(content)
         tmp.close()
-        
-        print(f"  ✅ Downloaded: {len(response.content):,} bytes → {tmp.name}")
+
+        print(f"  ✅ Downloaded: {len(content):,} bytes → {tmp.name}")
         return tmp.name
         
     except Exception as e:
@@ -313,8 +313,15 @@ def process_single_notice(notice: Dict) -> bool:
     # Extract text from attachments
     extracted_text = ""
     temp_files = []
-    
-    if file_info and isinstance(file_info, list) and len(file_info) > 0:
+    attempted_files = 0
+    downloaded_files = 0
+
+    stored_text = notice.get('content_text') or ''
+    if visible_len(stored_text) >= MIN_STORE_CHARS and stored_text.strip() != (title or '').strip():
+        # attachment_text_extractor 가 이미 원문을 저장했으면 다시 내려받지 않는다.
+        print(f"  📄 Using stored original text: {len(stored_text)} chars")
+        extracted_text = stored_text
+    elif file_info and isinstance(file_info, list) and len(file_info) > 0:
         # Try to download and extract text from each PDF attachment
         for file_entry in file_info:
             server_fn = file_entry.get('server_filename', '')
@@ -326,15 +333,31 @@ def process_single_notice(notice: Dict) -> bool:
                 print(f"  ⏭️ Skipping non-PDF file: {original_fn}")
                 continue
             
+            attempted_files += 1
             local_path = download_attachment(server_fn, original_fn)
             if local_path:
+                downloaded_files += 1
                 temp_files.append(local_path)
                 file_text = extract_text_from_pdf(local_path)
                 if file_text:
                     extracted_text += f"\n--- {original_fn} ---\n{file_text}\n"
     else:
         print(f"  ℹ️ No attachments found for this notice")
-    
+
+    # 다운로드가 전부 실패했고 아직 재시도 기간이면, 대체 요약을 쓰지 않고 비워 둔다(다음 실행에서 재시도).
+    if attempted_files > 0 and downloaded_files == 0:
+        posted = str(notice.get('date_posted') or '')[:10]
+        if posted and posted >= (date.today() - timedelta(days=RETRY_WINDOW_DAYS)).isoformat():
+            print(f"  ⏳ All downloads failed — leaving summary empty to retry later (posted {posted})")
+            return False
+
+    # 새로 추출한 원문은 마스킹해 content_text 로도 저장한다(상세 페이지 '첨부 공고문 원문').
+    new_content_text = None
+    if extracted_text and extracted_text is not stored_text:
+        candidate = mask_personal_info(clean_text(re.sub(r"\n--- .+? ---\n", "\n\n", extracted_text)))
+        if visible_len(candidate) >= MIN_STORE_CHARS:
+            new_content_text = candidate[:MAX_STORE_CHARS]
+
     # Generate AI summary
     ai_data = generate_ai_summary(title, category, department, extracted_text)
     
@@ -357,6 +380,8 @@ def process_single_notice(notice: Dict) -> bool:
     update_data = {
         "ai_summary": summary
     }
+    if new_content_text:
+        update_data["content_text"] = new_content_text
     
     # Text parse digits only (since it's an integer stored as string in db or text)
     if min_price_raw:
@@ -395,26 +420,32 @@ def process_single_notice(notice: Dict) -> bool:
         return False
 
 
-def process_notices_without_summary(limit: int = 50):
+def process_notices_without_summary(limit: int = 50, refresh_fallback: bool = False):
     """
     Finds all notices without AI summaries (in target categories)
     and processes them.
+
+    refresh_fallback=True 이면 대신 '첨부파일을 확인하라'는 대체 요약만 있고 원문(content_text)은
+    저장된 공고를 골라 원문으로 다시 요약한다(다운로드 없음, OpenAI 비용 발생).
     """
     print("\n" + "=" * 60)
-    print("🚀 AI Report Generator - Starting")
+    print("🚀 AI Report Generator - Starting" + (" (refresh fallback summaries)" if refresh_fallback else ""))
     print("=" * 60)
-    
+
     try:
-        # 오늘 새로 들어온 공고만 처리 (ai_summary가 없는 것만)
-        result = supabase.table("court_notices") \
-            .select("id, site_id, source_type, title, category, department, file_info") \
-            .is_("ai_summary", "null") \
-            .in_("category", TARGET_CATEGORIES) \
+        cols = "id, site_id, source_type, title, category, department, file_info, content_text, date_posted"
+        query = supabase.table("court_notices").select(cols).in_("category", TARGET_CATEGORIES)
+        if refresh_fallback:
+            query = query.ilike("ai_summary", "%첨부파일%").not_.is_("content_text", "null")
+        else:
+            # 오늘 새로 들어온 공고만 처리 (ai_summary가 없는 것만)
+            query = query.is_("ai_summary", "null")
+        result = query \
             .order("date_posted", desc=True) \
             .order("created_at", desc=True) \
             .limit(limit) \
             .execute()
-        
+
         notices = result.data or []
         print(f"\n📊 Found {len(notices)} new notices needing AI summary")
         
@@ -453,6 +484,8 @@ def process_notices_without_summary(limit: int = 50):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate AI analysis reports for court notices")
     parser.add_argument("--limit", type=int, default=50, help="Maximum number of notices to process (default: 50)")
+    parser.add_argument("--refresh-fallback", action="store_true",
+                        help="대체 요약('첨부파일 확인')만 있고 원문이 저장된 공고를 원문으로 다시 요약 (OpenAI 비용 발생)")
     args = parser.parse_args()
-    
-    process_notices_without_summary(limit=args.limit)
+
+    process_notices_without_summary(limit=args.limit, refresh_fallback=args.refresh_fallback)

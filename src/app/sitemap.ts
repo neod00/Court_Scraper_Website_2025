@@ -8,6 +8,9 @@ export const revalidate = 3600;
 
 const baseUrl = 'https://www.courtauction.site';
 
+// 최근 N일 공고만 sitemap 에 싣는다. 오래된 공고 페이지도 열리고 색인될 수 있지만, 크롤 예산은 최신 공고에 쓴다.
+const NOTICE_SITEMAP_DAYS = 180;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // 정적 페이지에는 lastModified 를 붙이지 않는다 — 실제 수정일을 추적하지 않는 페이지에 날짜를 꾸며 넣지 않는다.
     const reviewedPages: MetadataRoute.Sitemap = [
@@ -72,5 +75,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         console.error('Error fetching weekly columns for sitemap:', error);
     }
 
-    return [...reviewedPages, ...reviewedBlogPages, ...weeklyColumnPages, ...monthlyReportPages];
+    // 공고 상세 — 첨부 원문(content_text)이 저장된 공고만. content_text 는 attachment_text_extractor 가
+    // '읽을 만한 원문'일 때만 채우므로 NULL 여부만으로 거르고, 본문은 내려받지 않는다(egress 절약).
+    // 페이지 자체도 noticeQuality 게이트로 한 번 더 확인해 robots 를 정한다.
+    let noticePages: MetadataRoute.Sitemap = [];
+    try {
+        const since = new Date(Date.now() - NOTICE_SITEMAP_DAYS * 86400000).toISOString().slice(0, 10);
+        const { data } = await supabase
+            .from('court_notices')
+            .select('id, date_posted')
+            .eq('source_type', 'notice')
+            .not('content_text', 'is', null)
+            .gte('date_posted', since)
+            .order('date_posted', { ascending: false })
+            .limit(5000);
+        noticePages = (data || []).map((n: { id: string; date_posted: string | null }) => ({
+            url: `${baseUrl}/notice/${n.id}`,
+            ...(n.date_posted ? { lastModified: new Date(n.date_posted) } : {}),
+            changeFrequency: 'monthly' as const,
+            priority: 0.6,
+        }));
+    } catch (error) {
+        console.error('Error fetching notices for sitemap:', error);
+    }
+
+    return [...reviewedPages, ...reviewedBlogPages, ...weeklyColumnPages, ...monthlyReportPages, ...noticePages];
 }

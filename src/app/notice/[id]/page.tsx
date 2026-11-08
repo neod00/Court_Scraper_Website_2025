@@ -6,12 +6,21 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 import NoticeFAQ from '@/components/NoticeFAQ';
 import NoticeHero from '@/components/NoticeHero';
 import RelatedNoticesRSS from '@/components/RelatedNoticesRSS';
+import SameEstateNotices from '@/components/SameEstateNotices';
 import CourtCostCalculator from '@/components/CourtCostCalculator';
 import { getRecentPosts } from '@/data/blog-posts';
 import { glossaryTerms } from '@/data/glossary';
-import { isQualityNotice } from '@/lib/noticeQuality';
+import { isQualityNotice, hasUsefulSummary } from '@/lib/noticeQuality';
 import { INDEX_AUTOMATED_NOTICE_PAGES } from '@/lib/contentPolicy';
 import { getCategoryByDbCategory } from '@/data/categories';
+import {
+    hasSubstantialText,
+    maskPersonNames,
+    parseRoundTable,
+    toTextBlocks,
+    textExcerpt,
+} from '@/lib/noticeText';
+import { OriginalTextSection, RoundTableSection } from '@/components/NoticeOriginalText';
 
 // Revalidate every hour
 export const revalidate = 3600;
@@ -22,11 +31,13 @@ interface PageProps {
     }>;
 }
 
+const siteUrl = 'https://www.courtauction.site';
+
 export async function generateMetadata({ params }: PageProps) {
     const { id } = await params;
     const { data: notice } = await supabase
         .from('court_notices')
-        .select('title, category, department, ai_summary')
+        .select('title, category, department, ai_summary, content_text')
         .eq('id', id)
         .single();
 
@@ -39,15 +50,17 @@ export async function generateMetadata({ params }: PageProps) {
     }
 
     const categoryName = notice.category === 'real_estate' ? '부동산' : (notice.category === 'vehicle' ? '차량/동산' : '기타');
-    const title = `${notice.title} | [${categoryName}] ${notice.department || ''}`;
+    const safeTitle = maskPersonNames(notice.title);
+    const title = `${safeTitle} | [${categoryName}] ${notice.department || ''}`;
 
-    // Use AI summary for better SEO description if available
-    const aiDesc = notice.ai_summary ? notice.ai_summary.replace(/[*#\n]/g, ' ').substring(0, 200) + '...' : '';
-    const description = aiDesc || `${notice.title} - ${notice.department || ''} 관할 회생·파산 자산매각 공고 상세 정보입니다.`;
+    // 설명문: 실제 요약 → 원문 앞부분 → 기본 문구 순
+    let description = `${safeTitle} - ${notice.department || ''} 관할 회생·파산 자산매각 공고 상세 정보입니다.`;
+    if (hasUsefulSummary(notice.ai_summary)) {
+        description = textExcerpt(notice.ai_summary.replace(/[*#]/g, ''), 155);
+    } else if (hasSubstantialText(notice.content_text, notice.title)) {
+        description = textExcerpt(`${notice.department || ''} ${notice.content_text}`, 155);
+    }
 
-    const siteUrl = 'https://www.courtauction.site';
-
-    // Automated records stay available as a utility but are not editorial pages.
     const shouldIndex = INDEX_AUTOMATED_NOTICE_PAGES && isQualityNotice(notice);
 
     return {
@@ -90,31 +103,36 @@ export default async function NoticeDetail({ params }: PageProps) {
         return '기타';
     };
 
+    const safeTitle = maskPersonNames(notice.title);
+    const originalText: string | null = hasSubstantialText(notice.content_text, notice.title) ? notice.content_text : null;
+    const rounds = originalText ? parseRoundTable(originalText) : null;
+    const showSummary = hasUsefulSummary(notice.ai_summary);
+
     const categorySlug = getCategoryByDbCategory(notice.category)?.slug;
     return (
         <div className="max-w-7xl mx-auto px-4 py-6 md:py-10">
-            <Breadcrumbs 
+            <Breadcrumbs
                 items={[
                     { label: '공고 검색', href: '/' },
                     { label: getCategoryName(notice.category), href: categorySlug ? `/category/${categorySlug}` : '/' },
-                    { label: notice.title, href: `/notice/${notice.id}` }
-                ]} 
+                    { label: safeTitle, href: `/notice/${notice.id}` }
+                ]}
             />
-            
+
             <NoticeHero notice={{
-                title: notice.title,
+                title: safeTitle,
                 category: notice.category,
                 court_name: notice.court_name || notice.department || '대한민국 법원',
                 date_posted: notice.date_posted,
                 department: notice.department
             }} />
-            
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                 {/* Main Content Area */}
-                <div className="lg:col-span-2 space-y-8">
+                <div className="lg:col-span-2 space-y-8 min-w-0">
                     <div className="bg-white shadow-soft rounded-2xl overflow-hidden border border-gray-200">
                         <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                            <h3 className="text-lg font-bold text-gray-900">공고 정보</h3>
+                            <h2 className="text-lg font-bold text-gray-900">공고 정보</h2>
                             <Link href="/" className="text-sm font-bold text-indigo-600 hover:underline">목록보기</Link>
                         </div>
                         <div className="p-6">
@@ -133,7 +151,7 @@ export default async function NoticeDetail({ params }: PageProps) {
                                 </div>
                                 <div className="border-b border-gray-100 pb-2">
                                     <dt className="text-gray-500 font-medium mb-1">매각기관</dt>
-                                    <dd className="text-gray-900">{notice.sale_org || '-'}</dd>
+                                    <dd className="text-gray-900">{maskPersonNames(notice.sale_org) || '-'}</dd>
                                 </div>
                                 <div className="border-b border-gray-100 pb-2">
                                     <dt className="text-gray-500 font-medium mb-1">연락처</dt>
@@ -151,8 +169,10 @@ export default async function NoticeDetail({ params }: PageProps) {
                         </div>
                     </div>
 
-                    {/* AI Analysis Report Section */}
-                    {notice.ai_summary && (
+                    {rounds && <RoundTableSection rows={rounds} />}
+
+                    {/* AI Analysis Report Section — '첨부파일을 확인하라'는 대체 요약은 보여주지 않는다 */}
+                    {showSummary && (
                         <article className="relative overflow-hidden rounded-2xl border border-gray-200 shadow-sm bg-white">
                             <div className="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between gap-3 flex-wrap">
                                 <h2 className="text-base font-bold text-gray-900">공고 첨부문서 요약</h2>
@@ -188,7 +208,7 @@ export default async function NoticeDetail({ params }: PageProps) {
                                             });
                                         };
 
-                                        return notice.ai_summary.split('\n').map((line: string, idx: number) => {
+                                        return maskPersonNames(notice.ai_summary).split('\n').map((line: string, idx: number) => {
                                             const trimmed = line.trim();
                                             if (!trimmed) return <br key={idx} />;
                                             const parts = trimmed.split(/(\*\*[^*]+\*\*)/g);
@@ -232,12 +252,16 @@ export default async function NoticeDetail({ params }: PageProps) {
                         </article>
                     )}
 
+                    {/* 첨부문서 원문 — PDF·HWP 를 열지 않고 읽을 수 있게 텍스트로 옮긴 것 */}
+                    {originalText && <OriginalTextSection text={originalText} />}
+
+                    <SameEstateNotices currentId={notice.id} saleOrg={notice.sale_org} />
 
                     <div id="calculator"><CourtCostCalculator category={notice.category} /></div>
 
                     {/* FAQ & Social Proof */}
                     <NoticeFAQ notice={{
-                        title: notice.title,
+                        title: safeTitle,
                         category: notice.category || '기타',
                         court_name: notice.court_name || notice.department || '대한민국 법원',
                         date_posted: notice.date_posted || ''
@@ -264,12 +288,12 @@ export default async function NoticeDetail({ params }: PageProps) {
 
                 {/* Sidebar area */}
                 <div className="space-y-8 sticky top-6">
-                    <RelatedNoticesRSS 
-                        currentId={notice.id} 
-                        category={notice.category} 
-                        courtName={notice.court_name || notice.department} 
+                    <RelatedNoticesRSS
+                        currentId={notice.id}
+                        category={notice.category}
+                        courtName={notice.court_name || notice.department}
                     />
-                    
+
                     <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-soft">
                         <h4 className="text-sm font-bold text-gray-900 mb-4">공고 원본 확인</h4>
                         <p className="text-xs text-gray-500 leading-relaxed mb-4">
