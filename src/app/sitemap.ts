@@ -81,15 +81,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     let noticePages: MetadataRoute.Sitemap = [];
     try {
         const since = new Date(Date.now() - NOTICE_SITEMAP_DAYS * 86400000).toISOString().slice(0, 10);
-        const { data } = await supabase
-            .from('court_notices')
-            .select('id, date_posted')
-            .eq('source_type', 'notice')
-            .not('content_text', 'is', null)
-            .gte('date_posted', since)
-            .order('date_posted', { ascending: false })
-            .limit(5000);
-        noticePages = (data || []).map((n: { id: string; date_posted: string | null }) => ({
+        // Supabase 는 요청 1번에 최대 1,000행만 돌려주므로(.limit 이 커도 동일) 1,000건씩 나눠 받는다.
+        const PAGE = 1000;
+        const MAX_NOTICE_URLS = 5000;
+        const data: { id: string; date_posted: string | null }[] = [];
+        for (let from = 0; from < MAX_NOTICE_URLS; from += PAGE) {
+            const { data: batch, error } = await supabase
+                .from('court_notices')
+                .select('id, date_posted')
+                .eq('source_type', 'notice')
+                .not('content_text', 'is', null)
+                .gte('date_posted', since)
+                .order('date_posted', { ascending: false })
+                .order('id', { ascending: true })
+                .range(from, from + PAGE - 1);
+            if (error) throw error;
+            data.push(...(batch || []));
+            if (!batch || batch.length < PAGE) break;
+        }
+        noticePages = data.map((n: { id: string; date_posted: string | null }) => ({
             url: `${baseUrl}/notice/${n.id}`,
             ...(n.date_posted ? { lastModified: new Date(n.date_posted) } : {}),
             changeFrequency: 'monthly' as const,
