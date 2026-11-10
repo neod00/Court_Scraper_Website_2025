@@ -235,7 +235,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
                     함께 보기
                 </h2>
                 <p className="text-sm text-gray-600 mb-6">
-                    글에서 다룬 용어와 수치는 용어사전, 주간 칼럼, 데이터랩에서 다시 확인할 수 있습니다.
+                    글에서 다룬 용어와 수치는 용어사전, 계산기, 데이터랩에서 다시 확인할 수 있습니다.
                     모든 글은 로옥션 편집팀이 작성하고 법령 원문과 수집 공고에 대조해 확인합니다.{' '}
                     <Link href="/editorial-policy" className="font-semibold text-indigo-700 hover:underline">편집 원칙 보기</Link>
                 </p>
@@ -246,8 +246,8 @@ export default async function BlogPage({ searchParams }: PageProps) {
                     <Link href="/glossary" className="bg-white text-gray-700 font-bold px-6 py-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
                         용어사전
                     </Link>
-                    <Link href="/trend" className="bg-white text-gray-700 font-bold px-6 py-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
-                        주간 칼럼
+                    <Link href="/tools" className="bg-white text-gray-700 font-bold px-6 py-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+                        계산기
                     </Link>
                     <Link href="/datalab" className="bg-white text-gray-700 font-bold px-6 py-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
                         데이터랩

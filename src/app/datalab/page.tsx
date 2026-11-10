@@ -302,8 +302,8 @@ export default async function DataLabPage() {
                     <Link href="/" className="inline-block bg-gray-900 text-white font-bold px-6 py-3 rounded-xl hover:bg-gray-800 transition-colors text-sm">
                         공고 검색하기
                     </Link>
-                    <Link href="/trend" className="inline-block bg-white text-gray-700 font-bold px-6 py-3 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors text-sm">
-                        주간 칼럼 보기
+                    <Link href="/court" className="inline-block bg-white text-gray-700 font-bold px-6 py-3 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors text-sm">
+                        법원별 공고 보기
                     </Link>
                 </div>
             </div>

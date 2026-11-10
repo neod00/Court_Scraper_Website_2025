@@ -215,7 +215,7 @@ export default function sitemap() {
 
 ## 학습 기록 — 도구형 색인 구조 (2026-11-10)
 
-- **색인 대상**: 홈, 법원별(/court, /court/[slug]), 자산 유형별(/category/[slug]), 계산기 4종(/tools/*), 원문이 있는 공고 상세, 사람이 검수한 블로그 5편. 주간 칼럼(/trend)과 월간 리포트(/reports)는 `contentPolicy.INDEX_AUTO_EDITORIAL=false` 로 noindex·사이트맵 제외(자동 작성 글이라 thin content 위험).
+- **색인 대상**: 홈, 법원별(/court, /court/[slug]), 자산 유형별(/category/[slug]), 계산기 4종(/tools/*), 원문이 있는 공고 상세, 사람이 검수한 블로그 5편. 주간 칼럼(/trend)과 월간 리포트(/reports)는 2026-11-10 종료·삭제했고 옛 주소는 /datalab 으로 301 리다이렉트한다(자동 작성 글이라 thin content 위험, 색인 0건이었음). 관련 워크플로·스크립트도 삭제했으며 Supabase weekly_reports 테이블은 보존. 되살리려면 git 이력에서 복원하되 사람 해석 단락이 먼저다.
 - **법원 페이지 기준**: 최근 180일 원문 공고가 `COURT_INDEX_MIN_NOTICES`(10건) 미만인 법원은 noindex, 사이트맵도 같은 기준.
 - **랜딩 데이터 출처**: `src/lib/noticeIndex.ts` 가 content_text 를 한 번 읽어 회차표만 남긴 작은 레코드를 6시간 캐시한다(unstable_cache, 2MB 한도 주의). 홈·법원·자산 유형 페이지와 사이트맵이 이 캐시를 함께 쓴다. 본문을 요청마다 읽지 말 것(Supabase egress).
 - **'마감일' 대신 '입찰일'**: 원문 회차표 줄의 첫 날짜는 입찰 시작일일 수도 있어 '마감'이라고 단정하지 않는다.

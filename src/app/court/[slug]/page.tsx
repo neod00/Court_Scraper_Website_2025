@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import { COURT_INDEX_MIN_NOTICES, courts, getCourtBySlug } from '@/data/courts';
 import { getCategoryByDbCategory } from '@/data/categories';
 import { INDEX_DAYS, getNoticeIndex, groupStats, upcomingRounds } from '@/lib/noticeIndex';
-import { categoryLabel } from '@/lib/weeklyColumn';
+import { categoryLabel } from '@/lib/categoryLabels';
 import { CountChips, RecentNoticeList, StatsCards, UpcomingTable, shortWon } from '@/components/NoticeIndexViews';
 
 export const revalidate = 3600;

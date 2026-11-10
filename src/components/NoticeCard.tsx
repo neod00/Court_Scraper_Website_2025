@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Badge from './Badge';
-import { CATEGORY_LABELS } from '@/lib/weeklyColumn';
+import { CATEGORY_LABELS } from '@/lib/categoryLabels';
 
 interface NoticeProps {
     id: string; // our db uuid

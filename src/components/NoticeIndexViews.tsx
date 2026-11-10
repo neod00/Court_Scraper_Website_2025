@@ -1,6 +1,6 @@
 // 공고 색인(noticeIndex) 기반 목록 표 — 홈·법원별·자산 유형별 페이지 공용.
 import Link from 'next/link';
-import { categoryLabel } from '@/lib/weeklyColumn';
+import { categoryLabel } from '@/lib/categoryLabels';
 import { getCourtByName } from '@/data/courts';
 import type { GroupStats, IndexedNotice, UpcomingRound } from '@/lib/noticeIndex';
 

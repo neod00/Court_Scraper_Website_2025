@@ -1,14 +1,4 @@
 import { getPublicBlogPosts } from '@/data/blog-posts';
-import { supabase } from '@/lib/supabase';
-import {
-    columnAuthor,
-    columnDate,
-    columnExcerpt,
-    columnTitle,
-    filterPublishedColumns,
-    weekSlug,
-    type WeeklyReport,
-} from '@/lib/weeklyColumn';
 
 const BASE_URL = 'https://www.courtauction.site';
 
@@ -31,36 +21,10 @@ interface RssItem {
     author: string;
 }
 
-async function fetchPublishedColumns(): Promise<WeeklyReport[]> {
-    try {
-        const { data, error } = await supabase
-            .from('weekly_reports')
-            .select('week_start, week_end, editor_note, editor_note_title, editor_note_by, editor_note_at')
-            .not('editor_note', 'is', null)
-            .order('week_end', { ascending: false })
-            .limit(52);
-        if (error || !data) return [];
-        return filterPublishedColumns(data as WeeklyReport[]);
-    } catch {
-        return [];
-    }
-}
-
 export async function GET() {
     const siteName = '로옥션(LawAuction)';
     const siteDescription =
-        '법원 회생·파산 자산매각 공고 데이터를 바탕으로 로옥션 운영자가 검수해 발행하는 주간 데이터 칼럼과 편집 글입니다.';
-
-    const columns = await fetchPublishedColumns();
-
-    const columnItems: RssItem[] = columns.map((report) => ({
-        title: columnTitle(report),
-        link: `${BASE_URL}/trend/${weekSlug(report)}`,
-        description: columnExcerpt(report, 200),
-        pubDate: new Date(report.editor_note_at || columnDate(report)),
-        category: '주간 데이터 칼럼',
-        author: columnAuthor(report),
-    }));
+        '법원 회생·파산 자산매각 공고를 읽는 방법과 절차를 설명하는 로옥션 편집 글입니다.';
 
     const blogItems: RssItem[] = getPublicBlogPosts().map((post) => ({
         title: post.title,
@@ -71,7 +35,7 @@ export async function GET() {
         author: post.author,
     }));
 
-    const items = [...columnItems, ...blogItems]
+    const items = [...blogItems]
         .sort((a, b) => b.pubDate.getTime() - a.pubDate.getTime())
         .map((item) => `
         <item>

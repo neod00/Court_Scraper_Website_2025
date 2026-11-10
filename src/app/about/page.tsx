@@ -4,7 +4,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
     title: '로옥션 소개',
     description:
-        '로옥션(LawAuction)은 법원 회생·파산 자산매각 공고를 수집·보관하고, 그 데이터를 바탕으로 주간 칼럼과 월간 리포트, 검수 편집 글을 발행하는 1인 운영 정보 서비스입니다.',
+        '로옥션(LawAuction)은 법원 회생·파산 자산매각 공고를 수집·보관하고, 첨부 공고문 원문·회차별 최저입찰가, 법원별 공고 모음, 취득세·입찰가 계산기와 검수 편집 글을 제공하는 1인 운영 정보 서비스입니다.',
     alternates: { canonical: '/about' },
 };
 
@@ -42,15 +42,14 @@ export default function AboutPage() {
                             <Link href="/datalab" className="text-indigo-600 hover:underline">데이터랩 보기</Link>
                         </li>
                         <li>
-                            <strong className="text-gray-800">주간 데이터 칼럼</strong> — 한 주 동안 수집한
-                            공고 집계에 데이터 노트를 붙여 발행합니다. 노트는 집계를 바탕으로 자동 작성·검증하며 그 사실을
-                            표시합니다. 노트가 붙지 않은 주차는 발행하지 않습니다.{' '}
-                            <Link href="/trend" className="text-indigo-600 hover:underline">주간 칼럼 보기</Link>
+                            <strong className="text-gray-800">법원별·자산 유형별 공고</strong> — 법원과 자산 유형마다 최근 공고,
+                            2주 안의 입찰 일정, 회차마다 최저가가 내려가는 폭을 모아 보여 줍니다.{' '}
+                            <Link href="/court" className="text-indigo-600 hover:underline">법원별 공고 보기</Link>
                         </li>
                         <li>
-                            <strong className="text-gray-800">월간 리포트</strong> — 한 달치 공고를 법원·자산
-                            유형·최저매각가 분포·입찰 일정으로 나누어 정리한 보고서입니다. 검증을 통과한 달부터
-                            순차적으로 공개하고, 자동 작성한 노트에는 그 사실을 표시합니다.
+                            <strong className="text-gray-800">계산기</strong> — 낙찰가로 취득세를 계산하고, 목표 이익률로
+                            입찰가 상한을 역산하며, 차량 이전 비용과 매도·임대 손익을 계산합니다.{' '}
+                            <Link href="/tools" className="text-indigo-600 hover:underline">계산기 보기</Link>
                         </li>
                         <li>
                             <strong className="text-gray-800">검수 편집 글</strong> — 공고를 읽는 방법과 관련
@@ -68,8 +67,8 @@ export default function AboutPage() {
                 <section>
                     <h2 className="text-xl font-semibold text-gray-800 mb-3">누가 운영하나요</h2>
                     <p className="text-gray-600 leading-relaxed mb-4">
-                        로옥션은 1인이 운영합니다. 운영자는 수집 프로그램의 유지, 데이터 검수, 자동 발행된 주간 칼럼과
-                        월간 리포트의 사후 검토, 편집 글의 작성과 사실 확인, 오류 신고 처리를 맡습니다. 변호사·세무사
+                        로옥션은 1인이 운영합니다. 운영자는 수집 프로그램의 유지, 데이터 검수, 계산기 세율 확인,
+                        편집 글의 작성과 사실 확인, 오류 신고 처리를 맡습니다. 변호사·세무사
                         등 자격 있는 전문가를 표방하지 않으며, 개별 사건에 대한 법률·세무 판단을 제공하지
                         않습니다. 작성·검수 절차는{' '}
                         <Link href="/authors/lawauction-editorial-team" className="text-indigo-600 hover:underline">
@@ -111,17 +110,8 @@ export default function AboutPage() {
                             </dd>
                         </div>
                         <div>
-                            <dt className="font-semibold text-gray-800">칼럼·리포트의 자동 작성</dt>
-                            <dd>
-                                주간 칼럼(매주 토요일)과 월간 리포트(매월 2일)의 노트는 수집 공고의 집계만을 입력으로 자동 작성한 뒤,
-                                본문 수치가 집계와 일치하는지와 금지 표현·개인명·원인 단정이 없는지 프로그램이 검증해 통과한 경우에만
-                                발행하며, 해당 글에 자동 작성 고지를 붙입니다.
-                            </dd>
-                        </div>
-                        <div>
                             <dt className="font-semibold text-gray-800">사람 검수 주기</dt>
                             <dd>
-                                자동 발행된 칼럼과 리포트는 운영자가 사후에 읽고 오류가 있으면 정정하거나 내립니다.
                                 편집 글은 발행 시 원문·법령과 대조하고, 이후 분기마다 다시 확인해 최종 확인일을 갱신합니다.
                             </dd>
                         </div>

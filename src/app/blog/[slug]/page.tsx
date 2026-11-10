@@ -489,8 +489,8 @@ export default async function BlogPostPage({ params }: PageProps) {
                     <Link href="/" className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-700 transition-colors">
                         공고 검색하기
                     </Link>
-                    <Link href="/trend" className="bg-emerald-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-emerald-700 transition-colors">
-                        주간 칼럼 보기
+                    <Link href="/tools" className="bg-emerald-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-emerald-700 transition-colors">
+                        계산기 보기
                     </Link>
                 </div>
             </div>

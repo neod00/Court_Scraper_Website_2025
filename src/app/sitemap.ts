@@ -1,9 +1,6 @@
 import { MetadataRoute } from 'next';
 import { getPublicBlogPosts } from '@/data/blog-posts';
 import { supabase } from '@/lib/supabase';
-import { type WeeklyReport, filterPublishedColumns, columnDate } from '@/lib/weeklyColumn';
-import { getPublishedReports } from '@/lib/monthlyReport';
-import { INDEX_AUTO_EDITORIAL } from '@/lib/contentPolicy';
 import { getNoticeIndex } from '@/lib/noticeIndex';
 import { COURT_INDEX_MIN_NOTICES, courts } from '@/data/courts';
 import { categories } from '@/data/categories';
@@ -37,52 +34,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         { url: `${baseUrl}/glossary`, changeFrequency: 'monthly', priority: 0.7 },
     ];
 
-    // 월간 리포트 — 편집자 노트가 붙고 발행 처리된 달만 (monthlyReport 게이트와 동일 기준).
-    // 발행된 리포트가 없으면 허브(/reports)도 notFound 이므로 함께 뺀다.
-    const publishedReports = getPublishedReports();
-    const monthlyReportPages: MetadataRoute.Sitemap = publishedReports.length === 0
-        ? []
-        : [
-            {
-                url: `${baseUrl}/reports`,
-                lastModified: new Date(publishedReports[0].published_at),
-                changeFrequency: 'monthly' as const,
-                priority: 0.9,
-            },
-            ...publishedReports.map((report) => ({
-                url: `${baseUrl}/reports/${report.month}`,
-                lastModified: new Date(report.published_at),
-                changeFrequency: 'monthly' as const,
-                priority: 0.8,
-            })),
-        ];
-
     const reviewedBlogPages: MetadataRoute.Sitemap = getPublicBlogPosts().map((post) => ({
         url: `${baseUrl}/blog/${post.slug}`,
         lastModified: new Date(post.reviewedAt ?? post.updatedAt),
         changeFrequency: 'monthly' as const,
         priority: 0.8,
     }));
-
-    // 주간 칼럼 — 편집자 해석이 달린 주차만 색인 대상 (weeklyColumn 게이트와 동일 기준)
-    let weeklyColumnPages: MetadataRoute.Sitemap = [];
-    try {
-        const { data } = await supabase
-            .from('weekly_reports')
-            .select('week_start, week_end, editor_note, editor_note_at')
-            .not('editor_note', 'is', null)
-            .order('week_start', { ascending: false })
-            .limit(100);
-
-        weeklyColumnPages = filterPublishedColumns((data as WeeklyReport[]) || []).map((report) => ({
-            url: `${baseUrl}/trend/${report.week_start}`,
-            lastModified: new Date(columnDate(report)),
-            changeFrequency: 'monthly' as const,
-            priority: 0.8,
-        }));
-    } catch (error) {
-        console.error('Error fetching weekly columns for sitemap:', error);
-    }
 
     // 공고 상세 — 첨부 원문(content_text)이 저장된 공고만. content_text 는 attachment_text_extractor 가
     // '읽을 만한 원문'일 때만 채우므로 NULL 여부만으로 거르고, 본문은 내려받지 않는다(egress 절약).
@@ -129,8 +86,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.8,
     }));
 
-    // 자동 작성 칼럼·리포트는 INDEX_AUTO_EDITORIAL 이 꺼져 있으면 싣지 않는다(페이지도 noindex).
-    const editorialPages = INDEX_AUTO_EDITORIAL ? [...weeklyColumnPages, ...monthlyReportPages] : [];
-
-    return [...reviewedPages, ...courtPages, ...categoryPages, ...reviewedBlogPages, ...editorialPages, ...noticePages];
+    return [...reviewedPages, ...courtPages, ...categoryPages, ...reviewedBlogPages, ...noticePages];
 }

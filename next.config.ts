@@ -46,6 +46,11 @@ const nextConfig: NextConfig = {
       { source: '/guide/bankruptcy-vs-auction', destination: '/blog/court-auction-vs-rehabilitation-sale', permanent: true },
       { source: '/guide/law-changes-2025', destination: '/blog', permanent: true },
       { source: '/guide', destination: '/blog', permanent: true },
+      // 주간 칼럼·월간 리포트 종료(2026-11-10) — 집계 통계는 데이터랩에서 본다
+      { source: '/trend', destination: '/datalab', permanent: true },
+      { source: '/trend/:week', destination: '/datalab', permanent: true },
+      { source: '/reports', destination: '/datalab', permanent: true },
+      { source: '/reports/:month', destination: '/datalab', permanent: true },
     ];
   },
 };

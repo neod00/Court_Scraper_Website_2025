@@ -10,9 +10,9 @@ const inter = Inter({ subsets: ['latin'] });
 
 const siteUrl = 'https://www.courtauction.site';
 const siteName = '로옥션(LawAuction)';
-const defaultTitle = '로옥션(LawAuction) | 법원 회생·파산 자산매각 공고 검색과 데이터 칼럼';
+const defaultTitle = '로옥션(LawAuction) | 법원 회생·파산 자산매각 공고 검색과 계산기';
 const siteDescription =
-  '대한민국 법원에 공개된 회생·파산 자산매각 공고를 기간, 자산 유형과 키워드로 검색하고, 수집한 공고를 집계한 주간 칼럼과 데이터랩을 함께 제공하는 민간 정보 서비스입니다.';
+  '대한민국 법원에 공개된 회생·파산 자산매각 공고를 기간, 자산 유형과 키워드로 검색하고, 첨부 공고문의 회차별 최저입찰가와 취득세·입찰가 계산기를 함께 제공하는 민간 정보 서비스입니다.';
 const contactEmail = 'openbrain.main@gmail.com';
 
 export const metadata: Metadata = {
