@@ -53,40 +53,34 @@ export default async function GlossaryDetailPage({ params }: PageProps) {
     return (
         <article className="max-w-4xl mx-auto px-4 py-8">
             {/* 브레드크럼 */}
-            <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8">
-                <Link href="/" className="hover:text-indigo-600">홈</Link>
+            <nav className="flex items-center gap-2 text-sm text-[#57534E] mb-8">
+                <Link href="/" className="hover:text-[#1F3D7A]">홈</Link>
                 <span>/</span>
-                <Link href="/glossary" className="hover:text-indigo-600">용어사전</Link>
+                <Link href="/glossary" className="hover:text-[#1F3D7A]">용어사전</Link>
                 <span>/</span>
-                <span className="text-gray-900 font-medium">{displayName}</span>
+                <span className="text-[#161616] font-medium">{displayName}</span>
             </nav>
 
             {/* 헤더 */}
             <header className="mb-10">
                 <div className="flex items-center gap-3 mb-4">
-                    <span className="bg-indigo-100 text-indigo-700 text-sm font-bold px-3 py-1 rounded-full">
+                    <span className="bg-[#D7E7DF] text-[#1F3D7A] text-sm font-bold px-3 py-1 rounded-none border border-[#161616]">
                         {term.category}
                     </span>
-                    <span className="text-sm text-gray-500">검수 {GLOSSARY_REVIEWED_AT}</span>
+                    <span className="text-sm text-[#57534E]">검수 {GLOSSARY_REVIEWED_AT}</span>
                 </div>
-                <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">
+                <h1 className="text-3xl sm:text-4xl font-extrabold text-[#161616] mb-4">
                     {displayName}
                 </h1>
-                <p className="text-xl text-gray-600 leading-relaxed">
+                <p className="text-xl text-[#3A3A3A] leading-relaxed">
                     {term.shortDescription}
                 </p>
             </header>
 
             {/* 본문 */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-10">
+            <div className="bg-[#FAF7EC] rounded-none border border-[#C9C2B4] p-8 mb-10">
                 <div
-                    className="prose prose-lg max-w-none text-gray-700 leading-relaxed
-                    prose-headings:text-gray-900 prose-headings:font-bold prose-headings:mt-8 prose-headings:mb-4
-                    prose-strong:text-indigo-900
-                    prose-ul:list-disc prose-li:mb-2
-                    prose-table:border-collapse prose-table:w-full
-                    prose-th:bg-gray-100 prose-th:p-3 prose-th:border prose-th:border-gray-200
-                    prose-td:p-3 prose-td:border prose-td:border-gray-200"
+                    className="prose prose-lg max-w-none text-[#2E2B27] leading-relaxed prose-headings:text-[#161616] prose-headings:font-bold prose-headings:mt-8 prose-headings:mb-4 prose-strong:text-[#1F3D7A] prose-ul:list-disc prose-li:mb-2 prose-table:border-collapse prose-table:w-full prose-th:bg-[#E9E4D8] prose-th:p-3 prose-th:border prose-th:border-[#161616] prose-td:p-3 prose-td:border prose-td:border-[#161616]"
                     style={{ whiteSpace: 'pre-line' }}
                 >
                     {term.fullDescription.split('\n\n').map((paragraph, idx) => {
@@ -104,7 +98,7 @@ export default async function GlossaryDetailPage({ params }: PageProps) {
                                         <thead>
                                             <tr>
                                                 {headers?.map((h, i) => (
-                                                    <th key={i} className="bg-gray-100 p-3 border border-gray-200 text-left font-bold">
+                                                    <th key={i} className="bg-[#E9E4D8] p-3 border border-[#161616] text-left font-bold">
                                                         {h}
                                                     </th>
                                                 ))}
@@ -114,7 +108,7 @@ export default async function GlossaryDetailPage({ params }: PageProps) {
                                             {rows.map((row, ri) => (
                                                 <tr key={ri}>
                                                     {row.map((cell, ci) => (
-                                                        <td key={ci} className="p-3 border border-gray-200">
+                                                        <td key={ci} className="p-3 border border-[#161616]">
                                                             {cell}
                                                         </td>
                                                     ))}
@@ -137,11 +131,11 @@ export default async function GlossaryDetailPage({ params }: PageProps) {
                                         {items.map((item, i) => (
                                             <li
                                                 key={i}
-                                                className="text-gray-700"
+                                                className="text-[#2E2B27]"
                                                 dangerouslySetInnerHTML={{
                                                     __html: item
                                                         .replace(/^\s*\d+\.\s*/, '')
-                                                        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900">$1</strong>'),
+                                                        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#1F3D7A]">$1</strong>'),
                                                 }}
                                             />
                                         ))}
@@ -154,11 +148,11 @@ export default async function GlossaryDetailPage({ params }: PageProps) {
                                     {items.map((item, i) => (
                                         <li
                                             key={i}
-                                            className="text-gray-700"
+                                            className="text-[#2E2B27]"
                                             dangerouslySetInnerHTML={{
                                                 __html: item
                                                     .replace(/^\s*-\s*/, '')
-                                                    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900">$1</strong>'),
+                                                    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#1F3D7A]">$1</strong>'),
                                             }}
                                         />
                                     ))}
@@ -169,7 +163,7 @@ export default async function GlossaryDetailPage({ params }: PageProps) {
                         // 헤더 처리
                         if (paragraph.startsWith('**') && paragraph.endsWith('**')) {
                             return (
-                                <h3 key={idx} className="text-xl font-bold text-gray-900 mt-8 mb-4">
+                                <h3 key={idx} className="text-xl font-bold text-[#161616] mt-8 mb-4">
                                     {paragraph.replace(/\*\*/g, '')}
                                 </h3>
                             );
@@ -179,7 +173,7 @@ export default async function GlossaryDetailPage({ params }: PageProps) {
                         return (
                             <p key={idx} className="my-4" dangerouslySetInnerHTML={{
                                 __html: paragraph
-                                    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-indigo-900">$1</strong>')
+                                    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#1F3D7A]">$1</strong>')
                             }} />
                         );
                     })}
@@ -189,7 +183,7 @@ export default async function GlossaryDetailPage({ params }: PageProps) {
             {/* 관련 용어 */}
             {relatedTermData.length > 0 && (
                 <section className="mb-10">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                    <h2 className="text-2xl font-bold text-[#161616] mb-6">
                         관련 용어
                     </h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -197,12 +191,12 @@ export default async function GlossaryDetailPage({ params }: PageProps) {
                             <Link
                                 key={related.slug}
                                 href={`/glossary/${related.slug}`}
-                                className="group bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-indigo-200 transition-all"
+                                className="group bg-[#FAF7EC] rounded-none border border-[#C9C2B4] p-5 hover:border-[#161616] transition-all"
                             >
-                                <h3 className="font-bold text-gray-900 group-hover:text-indigo-600 transition-colors mb-2">
+                                <h3 className="font-bold text-[#161616] group-hover:text-[#1F3D7A] transition-colors mb-2">
                                     {getTermDisplayName(related)}
                                 </h3>
-                                <p className="text-sm text-gray-600 line-clamp-2">
+                                <p className="text-sm text-[#3A3A3A] line-clamp-2">
                                     {related.shortDescription}
                                 </p>
                             </Link>
@@ -212,29 +206,29 @@ export default async function GlossaryDetailPage({ params }: PageProps) {
             )}
 
             {/* 통계 기준 */}
-            <p className="text-sm text-gray-500 leading-relaxed mb-8">
+            <p className="text-sm text-[#57534E] leading-relaxed mb-8">
                 {GLOSSARY_CORPUS_NOTE}{' '}
-                집계 방법은 <Link href="/editorial-policy" className="underline hover:text-indigo-600">데이터·편집 원칙</Link>에서 확인할 수 있습니다.
+                집계 방법은 <Link href="/editorial-policy" className="underline hover:text-[#1F3D7A]">데이터·편집 원칙</Link>에서 확인할 수 있습니다.
             </p>
 
             {/* 하단 네비게이션 */}
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 border-t border-gray-200">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-8 border-t border-[#161616]">
                 <Link
                     href="/glossary"
-                    className="flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-medium"
+                    className="flex items-center gap-2 text-[#1F3D7A] hover:text-[#1F3D7A] font-medium"
                 >
                     용어사전 목록으로
                 </Link>
                 <div className="flex gap-4">
                     <Link
                         href="/"
-                        className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-700 transition-colors"
+                        className="bg-[#161616] text-white px-6 py-3 rounded-none font-bold hover:bg-[#161616] transition-colors"
                     >
                         공고 검색
                     </Link>
                     <Link
                         href="/blog"
-                        className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-bold hover:bg-gray-200 transition-colors"
+                        className="bg-[#E9E4D8] text-[#2E2B27] px-6 py-3 rounded-none font-bold hover:bg-[#DCD6C8] transition-colors"
                     >
                         편집 콘텐츠
                     </Link>

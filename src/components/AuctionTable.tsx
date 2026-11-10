@@ -19,11 +19,11 @@ interface AuctionItem {
 
 const getCategoryStyles = (cat: string | null) => {
     switch (cat) {
-        case 'apartment': return { text: '아파트', color: 'text-indigo-600 bg-indigo-50 border-indigo-100' };
-        case 'villa': return { text: '빌라/다세대', color: 'text-emerald-700 bg-emerald-50 border-emerald-100' };
-        case 'officetel': return { text: '오피스텔', color: 'text-violet-700 bg-violet-50 border-violet-100' };
-        case 'commercial': return { text: '상가', color: 'text-amber-700 bg-amber-50 border-amber-100' };
-        default: return { text: '기타', color: 'text-slate-600 bg-slate-50 border-slate-100' };
+        case 'apartment': return { text: '아파트', color: 'text-[#1F3D7A] bg-[#D7E7DF] border-[#161616]' };
+        case 'villa': return { text: '빌라/다세대', color: 'text-[#1F4D3F] bg-[#D7E7DF] border-[#161616]' };
+        case 'officetel': return { text: '오피스텔', color: 'text-[#1F3D7A] bg-[#D7E7DF] border-[#161616]' };
+        case 'commercial': return { text: '상가', color: 'text-[#161616] bg-[#F6F1C4] border-[#161616]' };
+        default: return { text: '기타', color: 'text-[#3A3A3A] bg-[#F4F0E6] border-[#C9C2B4]' };
     }
 };
 
@@ -43,16 +43,16 @@ const getDDay = (dateStr: string | null) => {
     const diff = Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
     if (diff === 0) return { text: 'D-Day', color: 'bg-red-500' };
     if (diff < 0) return { text: '종료', color: 'bg-slate-400' };
-    return { text: `D-${diff}`, color: 'bg-indigo-600' };
+    return { text: `D-${diff}`, color: 'bg-[#161616]' };
 };
 
 export default function AuctionTable({ auctions }: { auctions: AuctionItem[] }) {
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="bg-[#FAF7EC] rounded-none border border-[#161616] overflow-hidden">
             <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                     <thead>
-                        <tr className="bg-slate-50 text-slate-500 text-[11px] uppercase font-bold border-b border-slate-200">
+                        <tr className="bg-[#F4F0E6] text-[#57534E] text-[11px] uppercase font-bold border-b border-[#161616]">
                             <th className="px-6 py-4 w-32">상태 / 일자</th>
                             <th className="px-6 py-4 w-28">구분</th>
                             <th className="px-6 py-4 w-32">사건번호</th>
@@ -60,7 +60,7 @@ export default function AuctionTable({ auctions }: { auctions: AuctionItem[] }) 
                             <th className="px-6 py-4 text-right w-48">가격 정보 (원)</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-[#C9C2B4]">
                         {auctions.map((item) => {
                             const cat = getCategoryStyles(item.category);
                             const dDay = getDDay(item.auction_date);
@@ -69,48 +69,48 @@ export default function AuctionTable({ auctions }: { auctions: AuctionItem[] }) 
                             const discount = appraised > 0 ? Math.round((1 - minimum / appraised) * 100) : 0;
 
                             return (
-                                <tr key={item.id} className="hover:bg-slate-50 transition-colors group">
+                                <tr key={item.id} className="hover:bg-[#F4F0E6] transition-colors group">
                                     <td className="px-6 py-4">
                                         <div className="flex flex-col gap-1">
                                             {dDay && (
-                                                <span className={`${dDay.color} text-white text-[10px] font-bold px-2 py-0.5 rounded-sm w-fit`}>
+                                                <span className={`${dDay.color} text-white text-[10px] font-bold px-2 py-0.5 rounded-none w-fit`}>
                                                     {dDay.text}
                                                 </span>
                                             )}
-                                            <span className="text-xs text-slate-500 font-medium">
+                                            <span className="text-xs text-[#57534E] font-medium">
                                                 {item.auction_date?.split('T')[0].replace(/-/g, '.')}
                                             </span>
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className={`text-[11px] font-bold px-2 py-1 rounded border whitespace-nowrap ${cat.color}`}>
+                                        <span className={`text-[11px] font-bold px-2 py-1 rounded-none border whitespace-nowrap ${cat.color}`}>
                                             {cat.text}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className="text-xs font-mono font-bold text-slate-700 bg-slate-50 px-2 py-1 rounded border border-slate-100 group-hover:bg-white group-hover:border-indigo-200 transition-all">
+                                        <span className="text-xs font-mono font-bold text-[#2E2B27] bg-[#F4F0E6] px-2 py-1 rounded-none border border-[#C9C2B4] group-hover:bg-[#FAF7EC] group-hover:border-[#161616] transition-all">
                                             {item.manager}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
                                         <Link href={`/auction/${item.id}`} className="block">
-                                            <div className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors mb-1 line-clamp-1">
+                                            <div className="text-sm font-bold text-[#161616] group-hover:text-[#1F3D7A] transition-colors mb-1 line-clamp-1">
                                                 {item.address}
                                             </div>
-                                            <p className="text-[11px] text-slate-400 line-clamp-1">{item.title.split(']')[1]?.trim() || '정보 없음'}</p>
+                                            <p className="text-[11px] text-[#6B655C] line-clamp-1">{item.title.split(']')[1]?.trim() || '정보 없음'}</p>
                                         </Link>
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex flex-col items-end">
                                             <div className="flex items-center gap-2 mb-0.5">
-                                                <span className="text-[10px] text-slate-400">감정</span>
-                                                <span className="text-xs text-slate-400 line-through">{formatPrice(item.appraised_price)}</span>
+                                                <span className="text-[10px] text-[#6B655C]">감정</span>
+                                                <span className="text-xs text-[#6B655C] line-through">{formatPrice(item.appraised_price)}</span>
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 {discount > 0 && (
                                                     <span className="text-[10px] font-bold text-red-500">↓{discount}%</span>
                                                 )}
-                                                <span className="text-base font-extrabold text-slate-900">{formatPrice(item.minimum_price)}</span>
+                                                <span className="text-base font-extrabold text-[#161616]">{formatPrice(item.minimum_price)}</span>
                                             </div>
                                         </div>
                                     </td>

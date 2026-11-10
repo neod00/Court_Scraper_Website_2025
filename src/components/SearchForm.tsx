@@ -77,20 +77,20 @@ export default function SearchForm() {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100 mb-8 relative z-0 group/form transition-shadow hover:shadow-md">
+        <form onSubmit={handleSubmit} className="bg-[#FAF7EC] rounded-none p-6 md:p-8 border border-[#C9C2B4] mb-8 relative z-0 group/form transition-shadow">
             {/* 배경 은은한 효과 */}
-            <div className="absolute top-0 right-0 w-40 h-40 bg-blue-50 rounded-full blur-3xl -z-10 opacity-40 transition-opacity duration-500 group-hover/form:opacity-100" />
-            <div className="absolute bottom-0 left-0 w-40 h-40 bg-indigo-50 rounded-full blur-3xl -z-10 opacity-40 transition-opacity duration-500 group-hover/form:opacity-100" />
+            <div className="absolute top-0 right-0 w-40 h-40 bg-[#D7E7DF] rounded-full blur-3xl -z-10 opacity-40 transition-opacity duration-500 group-hover/form:opacity-100" />
+            <div className="absolute bottom-0 left-0 w-40 h-40 bg-[#D7E7DF] rounded-full blur-3xl -z-10 opacity-40 transition-opacity duration-500 group-hover/form:opacity-100" />
 
             {/* Date Inputs */}
             <div className="mb-8">
                 <div className="flex items-center gap-2 mb-4">
-                    <span className="text-blue-400 text-xs">■</span>
-                    <label className="text-sm font-semibold text-gray-700">시작일 / 종료일</label>
+                    <span className="text-[#1F3D7A] text-xs">■</span>
+                    <label className="text-sm font-semibold text-[#2E2B27]">시작일 / 종료일</label>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div>
-                        <label htmlFor="startDate" className="block text-sm text-gray-600 mb-2">
+                        <label htmlFor="startDate" className="block text-sm text-[#3A3A3A] mb-2">
                             시작일
                         </label>
                         <input
@@ -98,11 +98,11 @@ export default function SearchForm() {
                             id="startDate"
                             value={startDate}
                             onChange={(e) => setStartDate(e.target.value)}
-                            className={`w-full px-4 py-3 bg-white border rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm hover:border-gray-300 ${dateError ? 'border-red-400' : 'border-gray-200'}`}
+                            className={`w-full px-4 py-3 bg-[#FAF7EC] border rounded-none text-[#161616] focus:ring-2 focus:ring-blue-500/20 focus:border-[#161616] transition-all  hover:border-[#161616] ${dateError ? 'border-red-400' : 'border-[#161616]'}`}
                         />
                     </div>
                     <div>
-                        <label htmlFor="endDate" className="block text-sm text-gray-600 mb-2">
+                        <label htmlFor="endDate" className="block text-sm text-[#3A3A3A] mb-2">
                             종료일
                         </label>
                         <input
@@ -110,32 +110,32 @@ export default function SearchForm() {
                             id="endDate"
                             value={endDate}
                             onChange={(e) => setEndDate(e.target.value)}
-                            className={`w-full px-4 py-3 bg-white border rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm hover:border-gray-300 ${dateError ? 'border-red-400' : 'border-gray-200'}`}
+                            className={`w-full px-4 py-3 bg-[#FAF7EC] border rounded-none text-[#161616] focus:ring-2 focus:ring-blue-500/20 focus:border-[#161616] transition-all  hover:border-[#161616] ${dateError ? 'border-red-400' : 'border-[#161616]'}`}
                         />
                     </div>
                 </div>
-                <p className="mt-3 text-xs text-gray-500">기간을 비우면 최근 30일을 조회합니다.</p>
+                <p className="mt-3 text-xs text-[#57534E]">기간을 비우면 최근 30일을 조회합니다.</p>
                 {/* Date Error Message */}
                 {dateError && (
-                    <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
+                    <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-none">
                         <p className="text-sm text-red-600 font-medium">{dateError}</p>
                     </div>
                 )}
             </div>
 
             {/* Internal Separator */}
-            <div className="border-t border-gray-100 my-8"></div>
+            <div className="border-t border-[#C9C2B4] my-8"></div>
 
             {/* Search Settings */}
             <div className="mb-6">
-                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2 mb-6">
+                <h2 className="text-xl font-bold text-[#161616] flex items-center gap-2 mb-6">
                     검색어 설정
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {/* Preset Select */}
                     <div>
-                        <label htmlFor="category" className="block text-sm text-gray-600 mb-2">
+                        <label htmlFor="category" className="block text-sm text-[#3A3A3A] mb-2">
                             프리셋 검색어
                         </label>
                         <div className="relative">
@@ -143,7 +143,7 @@ export default function SearchForm() {
                                 id="category"
                                 value={category}
                                 onChange={(e) => setCategory(e.target.value)}
-                                className="w-full appearance-none px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm hover:border-gray-300"
+                                className="w-full appearance-none px-4 py-3 bg-[#FAF7EC] border border-[#161616] rounded-none text-[#161616] focus:ring-2 focus:ring-blue-500/20 focus:border-[#161616] transition-all hover:border-[#161616]"
                             >
                                 {presets.map((p) => (
                                     <option key={p.value} value={p.value}>
@@ -151,7 +151,7 @@ export default function SearchForm() {
                                     </option>
                                 ))}
                             </select>
-                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#57534E]">
                                 <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
                                     <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
                                 </svg>
@@ -161,7 +161,7 @@ export default function SearchForm() {
 
                     {/* Keyword Input */}
                     <div>
-                        <label htmlFor="keyword" className="block text-sm text-gray-600 mb-2">
+                        <label htmlFor="keyword" className="block text-sm text-[#3A3A3A] mb-2">
                             직접 검색어 입력 (추가로 필요한 경우)
                         </label>
                         <input
@@ -170,7 +170,7 @@ export default function SearchForm() {
                             placeholder="직접입력"
                             value={keyword}
                             onChange={(e) => setKeyword(e.target.value)}
-                            className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm placeholder-gray-400 hover:border-gray-300"
+                            className="w-full px-4 py-3 bg-[#FAF7EC] border border-[#161616] rounded-none text-[#161616] focus:ring-2 focus:ring-blue-500/20 focus:border-[#161616] transition-all placeholder-gray-400 hover:border-[#161616]"
                         />
                     </div>
                 </div>
@@ -180,11 +180,11 @@ export default function SearchForm() {
                 <button
                     type="submit"
                     disabled={isLoading || !!dateError}
-                    className={`w-full flex flex-col items-center py-4 px-6 border border-transparent rounded-xl shadow-sm text-base font-bold text-white transition-all duration-300 ${dateError
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    className={`w-full flex flex-col items-center py-4 px-6 border border-transparent rounded-none  text-base font-bold text-white transition-all duration-300 ${dateError
+                        ? 'bg-[#C9C2B4] text-[#57534E] cursor-not-allowed'
                         : isLoading
-                            ? 'bg-indigo-400 cursor-wait'
-                            : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 hover:shadow-[0_8px_20px_rgb(59,130,246,0.3)] hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+                            ? 'bg-[#161616] cursor-wait'
+                            : ' bg-[#161616]  hover:bg-[#161616]  hover:shadow-[0_8px_20px_rgb(59,130,246,0.3)] hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#161616]'
                         }`}
                 >
                     {isLoading ? (
@@ -198,7 +198,7 @@ export default function SearchForm() {
                             </span>
                             {/* Animated Progress Bar */}
                             <div className="w-full mt-2 h-1 bg-white/30 rounded-full overflow-hidden">
-                                <div className="h-full bg-white rounded-full animate-pulse" style={{
+                                <div className="h-full bg-[#FAF7EC] rounded-full animate-pulse" style={{
                                     animation: 'progressBar 0.8s ease-in-out',
                                     width: '100%'
                                 }}></div>

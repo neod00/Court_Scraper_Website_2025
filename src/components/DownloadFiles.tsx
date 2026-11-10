@@ -15,7 +15,7 @@ export default function DownloadFiles({ fileInfo }: { fileInfo: any }) {
     const files: FileInfo[] = Array.isArray(fileInfo) ? fileInfo : [];
 
     if (files.length === 0) {
-        return <span className="text-gray-400 text-sm">첨부파일 없음</span>;
+        return <span className="text-[#6B655C] text-sm">첨부파일 없음</span>;
     }
 
     // Use proxy API to properly encode Korean filename to EUC-KR
@@ -37,7 +37,7 @@ export default function DownloadFiles({ fileInfo }: { fileInfo: any }) {
                     href={getDownloadUrl(file)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 max-w-xs truncate"
+                    className="inline-flex items-center px-4 py-2 border border-[#161616] text-sm font-medium rounded-none text-[#2E2B27] bg-[#FAF7EC] hover:bg-[#F4F0E6] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#161616] max-w-xs truncate"
                 >
                     📎 {maskPersonNames(file.original_filename)}
                 </a>

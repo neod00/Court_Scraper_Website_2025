@@ -132,9 +132,9 @@ export default function DonationButton() {
                 {/* 툴팁 */}
                 {showTooltip && !isOpen && (
                     <div className="absolute bottom-full right-0 mb-3 animate-fade-in">
-                        <div className="bg-gray-900 text-white text-sm px-4 py-2.5 rounded-xl shadow-xl whitespace-nowrap relative">
+                        <div className="bg-[#161616] text-white text-sm px-4 py-2.5 rounded-none whitespace-nowrap relative">
                             서비스가 도움이 되셨나요? ☕
-                            <div className="absolute -bottom-1.5 right-6 w-3 h-3 bg-gray-900 transform rotate-45"></div>
+                            <div className="absolute -bottom-1.5 right-6 w-3 h-3 bg-[#161616] transform rotate-45"></div>
                         </div>
                     </div>
                 )}
@@ -146,7 +146,7 @@ export default function DonationButton() {
                         setIsOpen(true);
                         setShowTooltip(false);
                     }}
-                    className="group relative flex items-center gap-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white pl-4 pr-5 py-3.5 rounded-full shadow-lg hover:shadow-xl hover:shadow-orange-500/25 transition-all duration-300 hover:scale-105 active:scale-95"
+                    className="group relative flex items-center gap-2.5 bg-[#161616] hover:bg-[#161616] text-white pl-4 pr-5 py-3.5 rounded-full hover:shadow-orange-500/25 transition-all duration-300 hover:scale-105 active:scale-95"
                     aria-label="개발자에게 커피 한 잔 사주기"
                 >
                     <span className="relative text-xl">
@@ -172,15 +172,15 @@ export default function DonationButton() {
                     />
 
                     {/* 모달 컨텐츠 */}
-                    <div className="relative bg-white rounded-3xl shadow-2xl max-w-md w-full animate-modal-in overflow-hidden">
+                    <div className="relative bg-[#FAF7EC] rounded-none max-w-md w-full animate-modal-in overflow-hidden">
                         {/* 상단 그라데이션 장식 */}
-                        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500"></div>
+                        <div className="absolute top-0 left-0 right-0 h-1.5 bg-[#161616]"></div>
 
                         {/* 닫기 버튼 */}
                         <button
                             id="donation-modal-close"
                             onClick={() => setIsOpen(false)}
-                            className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors z-10"
+                            className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full text-[#6B655C] hover:text-[#3A3A3A] hover:bg-[#E9E4D8] transition-colors z-10"
                             aria-label="닫기"
                         >
                             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -190,13 +190,13 @@ export default function DonationButton() {
 
                         {/* 모달 헤더 */}
                         <div className="pt-8 pb-4 px-6 text-center">
-                            <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-amber-50 to-orange-100 rounded-2xl flex items-center justify-center shadow-inner">
+                            <div className="w-20 h-20 mx-auto mb-4 bg-[#D7E7DF] rounded-none flex items-center justify-center">
                                 <span className="text-4xl">☕</span>
                             </div>
-                            <h2 className="text-xl font-bold text-gray-900">
+                            <h2 className="text-xl font-bold text-[#161616]">
                                 개발자에게 커피 한 잔 사주기
                             </h2>
-                            <p className="mt-2 text-sm text-gray-500 leading-relaxed">
+                            <p className="mt-2 text-sm text-[#57534E] leading-relaxed">
                                 로옥션(LawAuction) 서비스가 도움이 되셨다면,<br />
                                 따뜻한 커피 한 잔으로 응원해주세요! 💛
                             </p>
@@ -210,7 +210,7 @@ export default function DonationButton() {
                                     href={KAKAOPAY_LINK}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="group flex items-center justify-center gap-3 w-full p-4 rounded-2xl bg-yellow-400 hover:bg-yellow-500 text-yellow-900 transition-all duration-200 hover:shadow-lg hover:shadow-yellow-400/30 active:scale-[0.98]"
+                                    className="group flex items-center justify-center gap-3 w-full p-4 rounded-none bg-[#161616] hover:bg-[#161616] text-[#161616] transition-all duration-200 hover:shadow-yellow-400/30 active:scale-[0.98]"
                                 >
                                     <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M12 3C6.48 3 2 6.58 2 10.95c0 2.82 1.86 5.3 4.66 6.7l-1.19 4.35 5.07-3.35c.48.05.96.08 1.46.08 5.52 0 10-3.58 10-7.98S17.52 3 12 3z" />
@@ -219,24 +219,24 @@ export default function DonationButton() {
                                 </a>
                             ) : (
                                 <div className="text-center">
-                                    <div className="inline-block bg-white border-2 border-gray-100 rounded-2xl p-4 shadow-sm">
+                                    <div className="inline-block bg-[#FAF7EC] border-2 border-[#C9C2B4] rounded-none p-4">
                                         {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img
                                             src={QR_CODE_URL}
                                             alt="카카오페이 송금 QR코드"
                                             width={200}
                                             height={200}
-                                            className="rounded-lg"
+                                            className="rounded-none"
                                         />
                                     </div>
                                     <div className="mt-4 space-y-1.5">
-                                        <p className="text-sm font-semibold text-gray-700 flex items-center justify-center gap-2">
+                                        <p className="text-sm font-semibold text-[#2E2B27] flex items-center justify-center gap-2">
                                             <svg className="w-5 h-5 text-yellow-500" viewBox="0 0 24 24" fill="currentColor">
                                                 <path d="M12 3C6.48 3 2 6.58 2 10.95c0 2.82 1.86 5.3 4.66 6.7l-1.19 4.35 5.07-3.35c.48.05.96.08 1.46.08 5.52 0 10-3.58 10-7.98S17.52 3 12 3z" />
                                             </svg>
                                             스마트폰으로 QR코드를 스캔해주세요
                                         </p>
-                                        <p className="text-xs text-gray-400">
+                                        <p className="text-xs text-[#6B655C]">
                                             카메라 앱 또는 카카오페이 앱에서 스캔 가능합니다
                                         </p>
                                     </div>
@@ -246,8 +246,8 @@ export default function DonationButton() {
 
                         {/* 하단 안내 메시지 */}
                         <div className="px-6 pb-6">
-                            <div className="bg-gray-50 rounded-xl p-4 text-center">
-                                <p className="text-xs text-gray-400 leading-relaxed">
+                            <div className="bg-[#F4F0E6] rounded-none p-4 text-center">
+                                <p className="text-xs text-[#6B655C] leading-relaxed">
                                     💡 후원금은 서버 유지비, 데이터 수집·분석, 서비스 개선에 사용됩니다.<br />
                                     금액에 상관없이 모든 후원에 감사드립니다!
                                 </p>

@@ -40,13 +40,13 @@ function Choice<T extends string | number | boolean>({
                     type="button"
                     onClick={() => onChange(option.value)}
                     aria-pressed={value === option.value}
-                    className={`py-2 px-2 rounded-lg text-sm font-medium border transition-colors ${value === option.value
-                        ? 'bg-indigo-600 text-white border-indigo-600'
-                        : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'
+                    className={`py-2 px-2 rounded-none text-sm font-medium border transition-colors ${value === option.value
+                        ? 'bg-[#161616] text-white border-[#161616]'
+                        : 'bg-[#FAF7EC] text-[#2E2B27] border-[#161616] hover:border-[#161616]'
                         }`}
                 >
                     {option.label}
-                    {option.hint && <span className={`block text-[11px] mt-0.5 ${value === option.value ? 'text-indigo-100' : 'text-gray-400'}`}>{option.hint}</span>}
+                    {option.hint && <span className={`block text-[11px] mt-0.5 ${value === option.value ? 'text-[#CFC8B8]' : 'text-[#6B655C]'}`}>{option.hint}</span>}
                 </button>
             ))}
         </div>
@@ -63,9 +63,9 @@ function PriceInput({ value, onChange }: { value: string; onChange: (v: string) 
                 onChange={(e) => onChange(formatNumber(e.target.value))}
                 placeholder="0"
                 aria-label="취득가액"
-                className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-right text-lg"
+                className="w-full px-4 py-3 pr-12 border border-[#161616] rounded-none focus:ring-2 focus:ring-[#161616] focus:border-[#161616] text-right text-lg"
             />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">원</span>
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#57534E]">원</span>
         </div>
     );
 }
@@ -73,22 +73,22 @@ function PriceInput({ value, onChange }: { value: string; onChange: (v: string) 
 function PropertyResult({ r }: { r: TaxBreakdown }) {
     return (
         <div className="space-y-4">
-            <div className="bg-white/10 rounded-xl p-4">
-                <div className="text-indigo-200 text-sm">적용 세율</div>
+            <div className="bg-white/10 rounded-none p-4">
+                <div className="text-[#CFC8B8] text-sm">적용 세율</div>
                 <div className="text-3xl font-bold">{r.rate}%</div>
-                <div className="text-indigo-100 text-xs mt-1">{r.basis}</div>
+                <div className="text-[#CFC8B8] text-xs mt-1">{r.basis}</div>
             </div>
             <dl className="space-y-3">
-                <div className="flex justify-between"><dt className="text-indigo-200">취득세</dt><dd className="font-medium">{won(r.acquisitionTax)}</dd></div>
-                <div className="flex justify-between"><dt className="text-indigo-200">지방교육세</dt><dd className="font-medium">{won(r.educationTax)}</dd></div>
-                <div className="flex justify-between"><dt className="text-indigo-200">농어촌특별세</dt><dd className="font-medium">{r.ruralTax > 0 ? won(r.ruralTax) : '비과세'}</dd></div>
+                <div className="flex justify-between"><dt className="text-[#CFC8B8]">취득세</dt><dd className="font-medium">{won(r.acquisitionTax)}</dd></div>
+                <div className="flex justify-between"><dt className="text-[#CFC8B8]">지방교육세</dt><dd className="font-medium">{won(r.educationTax)}</dd></div>
+                <div className="flex justify-between"><dt className="text-[#CFC8B8]">농어촌특별세</dt><dd className="font-medium">{r.ruralTax > 0 ? won(r.ruralTax) : '비과세'}</dd></div>
             </dl>
             <div className="border-t border-white/20 pt-4">
                 <div className="flex justify-between items-center">
                     <span className="text-lg">합계</span>
                     <span className="text-2xl font-bold">{won(r.total)}</span>
                 </div>
-                <div className="text-indigo-200 text-sm text-right mt-1">취득가액 대비 {r.totalRate}%</div>
+                <div className="text-[#CFC8B8] text-sm text-right mt-1">취득가액 대비 {r.totalRate}%</div>
             </div>
         </div>
     );
@@ -148,23 +148,23 @@ export default function AcquisitionTaxPage() {
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
-            <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8" aria-label="breadcrumb">
-                <Link href="/" className="hover:text-indigo-600">홈</Link>
+            <nav className="flex items-center gap-2 text-sm text-[#57534E] mb-8" aria-label="breadcrumb">
+                <Link href="/" className="hover:text-[#1F3D7A]">홈</Link>
                 <span>/</span>
-                <Link href="/tools" className="hover:text-indigo-600">계산기</Link>
+                <Link href="/tools" className="hover:text-[#1F3D7A]">계산기</Link>
                 <span>/</span>
-                <span className="text-gray-900 font-medium">취득세 계산기</span>
+                <span className="text-[#161616] font-medium">취득세 계산기</span>
             </nav>
 
             <header className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900">취득세 계산기</h1>
-                <p className="text-gray-600 mt-2 leading-relaxed">
+                <h1 className="text-3xl font-bold text-[#161616]">취득세 계산기</h1>
+                <p className="text-[#3A3A3A] mt-2 leading-relaxed">
                     회생·파산 매각이나 경매로 부동산·차량을 살 때 내는 취득세와 지방교육세, 농어촌특별세를 계산합니다.
                     다주택 중과와 조정대상지역 여부, 경차 감면을 반영합니다. 세율 확인일 {RULES_CHECKED_AT}.
                 </p>
             </header>
 
-            <div className="flex border-b border-gray-200 mb-8" role="tablist">
+            <div className="flex border-b border-[#161616] mb-8" role="tablist">
                 {(['property', 'vehicle'] as const).map((tab) => (
                     <button
                         key={tab}
@@ -173,8 +173,8 @@ export default function AcquisitionTaxPage() {
                         aria-selected={activeTab === tab}
                         onClick={() => setActiveTab(tab)}
                         className={`px-6 py-3 font-medium text-sm border-b-2 transition-colors ${activeTab === tab
-                            ? 'border-indigo-600 text-indigo-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700'
+                            ? 'border-[#161616] text-[#1F3D7A]'
+                            : 'border-transparent text-[#57534E] hover:text-[#2E2B27]'
                             }`}
                     >
                         {tab === 'property' ? '부동산' : '차량'}
@@ -183,15 +183,15 @@ export default function AcquisitionTaxPage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                    <h2 className="text-lg font-bold text-gray-900 mb-6">
+                <div className="bg-[#FAF7EC] rounded-none border border-[#C9C2B4] p-6">
+                    <h2 className="text-lg font-bold text-[#161616] mb-6">
                         {activeTab === 'property' ? '부동산 정보 입력' : '차량 정보 입력'}
                     </h2>
 
                     {activeTab === 'property' ? (
                         <div className="space-y-5">
                             <div>
-                                <p className="block text-sm font-medium text-gray-700 mb-2">물건 종류</p>
+                                <p className="block text-sm font-medium text-[#2E2B27] mb-2">물건 종류</p>
                                 <Choice
                                     value={propertyType}
                                     onChange={setPropertyType}
@@ -203,14 +203,14 @@ export default function AcquisitionTaxPage() {
                                 />
                             </div>
                             <div>
-                                <p className="block text-sm font-medium text-gray-700 mb-2">취득가액 (낙찰가)</p>
+                                <p className="block text-sm font-medium text-[#2E2B27] mb-2">취득가액 (낙찰가)</p>
                                 <PriceInput value={propertyPrice} onChange={setPropertyPrice} />
                             </div>
                             {propertyType === 'house' && (
                                 <>
                                     <div>
-                                        <p className="block text-sm font-medium text-gray-700 mb-1">취득 후 세대 주택 수</p>
-                                        <p className="text-xs text-gray-500 mb-2">이번에 사는 주택을 포함해 셉니다.</p>
+                                        <p className="block text-sm font-medium text-[#2E2B27] mb-1">취득 후 세대 주택 수</p>
+                                        <p className="text-xs text-[#57534E] mb-2">이번에 사는 주택을 포함해 셉니다.</p>
                                         <Choice
                                             cols={4}
                                             value={housesAfter}
@@ -224,7 +224,7 @@ export default function AcquisitionTaxPage() {
                                         />
                                     </div>
                                     <div>
-                                        <p className="block text-sm font-medium text-gray-700 mb-2">주택 소재지</p>
+                                        <p className="block text-sm font-medium text-[#2E2B27] mb-2">주택 소재지</p>
                                         <Choice
                                             cols={2}
                                             value={regulated}
@@ -236,7 +236,7 @@ export default function AcquisitionTaxPage() {
                                         />
                                     </div>
                                     <div>
-                                        <p className="block text-sm font-medium text-gray-700 mb-2">전용면적</p>
+                                        <p className="block text-sm font-medium text-[#2E2B27] mb-2">전용면적</p>
                                         <Choice
                                             cols={2}
                                             value={over85}
@@ -253,7 +253,7 @@ export default function AcquisitionTaxPage() {
                     ) : (
                         <div className="space-y-5">
                             <div>
-                                <p className="block text-sm font-medium text-gray-700 mb-2">차종</p>
+                                <p className="block text-sm font-medium text-[#2E2B27] mb-2">차종</p>
                                 <Choice
                                     value={vehicleKind}
                                     onChange={setVehicleKind}
@@ -265,7 +265,7 @@ export default function AcquisitionTaxPage() {
                                 />
                             </div>
                             <div>
-                                <p className="block text-sm font-medium text-gray-700 mb-2">용도</p>
+                                <p className="block text-sm font-medium text-[#2E2B27] mb-2">용도</p>
                                 <Choice
                                     cols={2}
                                     value={vehicleUse}
@@ -277,51 +277,51 @@ export default function AcquisitionTaxPage() {
                                 />
                             </div>
                             <div>
-                                <p className="block text-sm font-medium text-gray-700 mb-2">취득가액 (낙찰가)</p>
+                                <p className="block text-sm font-medium text-[#2E2B27] mb-2">취득가액 (낙찰가)</p>
                                 <PriceInput value={vehiclePrice} onChange={setVehiclePrice} />
                             </div>
-                            <p className="text-xs text-gray-500 leading-relaxed">
+                            <p className="text-xs text-[#57534E] leading-relaxed">
                                 공채, 번호판, 등록 수수료까지 합친 이전 비용은{' '}
-                                <Link href="/tools/vehicle-transfer" className="text-indigo-600 underline">차량 이전비 계산기</Link>에서 볼 수 있습니다.
+                                <Link href="/tools/vehicle-transfer" className="text-[#1F3D7A] underline">차량 이전비 계산기</Link>에서 볼 수 있습니다.
                             </p>
                         </div>
                     )}
                 </div>
 
-                <div className="bg-gradient-to-br from-indigo-600 to-blue-700 rounded-2xl shadow-lg p-6 text-white" aria-live="polite">
+                <div className="bg-[#161616] rounded-none p-6 text-white" aria-live="polite">
                     <h2 className="text-lg font-bold mb-6">계산 결과</h2>
                     {activeTab === 'property' ? (
                         propertyResult ? <PropertyResult r={propertyResult} /> : (
-                            <p className="text-center text-indigo-200 py-12">취득가액을 입력하면 바로 계산합니다.</p>
+                            <p className="text-center text-[#CFC8B8] py-12">취득가액을 입력하면 바로 계산합니다.</p>
                         )
                     ) : vehicleResult ? (
                         <div className="space-y-4">
-                            <div className="bg-white/10 rounded-xl p-4">
-                                <div className="text-indigo-200 text-sm">적용 세율</div>
+                            <div className="bg-white/10 rounded-none p-4">
+                                <div className="text-[#CFC8B8] text-sm">적용 세율</div>
                                 <div className="text-3xl font-bold">{vehicleResult.rate}%</div>
-                                <div className="text-indigo-100 text-xs mt-1">{vehicleResult.basis}</div>
+                                <div className="text-[#CFC8B8] text-xs mt-1">{vehicleResult.basis}</div>
                             </div>
                             <dl className="space-y-3">
-                                <div className="flex justify-between"><dt className="text-indigo-200">산출 취득세</dt><dd className="font-medium">{won(vehicleResult.grossTax)}</dd></div>
+                                <div className="flex justify-between"><dt className="text-[#CFC8B8]">산출 취득세</dt><dd className="font-medium">{won(vehicleResult.grossTax)}</dd></div>
                                 {vehicleResult.relief > 0 && (
-                                    <div className="flex justify-between"><dt className="text-indigo-200">경차 감면</dt><dd className="font-medium">−{won(vehicleResult.relief)}</dd></div>
+                                    <div className="flex justify-between"><dt className="text-[#CFC8B8]">경차 감면</dt><dd className="font-medium">−{won(vehicleResult.relief)}</dd></div>
                                 )}
                             </dl>
                             <div className="border-t border-white/20 pt-4 flex justify-between items-center">
                                 <span className="text-lg">납부 취득세</span>
                                 <span className="text-2xl font-bold">{won(vehicleResult.tax)}</span>
                             </div>
-                            <p className="text-xs text-indigo-100">차량 취득에는 지방교육세와 농어촌특별세가 붙지 않습니다.</p>
+                            <p className="text-xs text-[#CFC8B8]">차량 취득에는 지방교육세와 농어촌특별세가 붙지 않습니다.</p>
                         </div>
                     ) : (
-                        <p className="text-center text-indigo-200 py-12">취득가액을 입력하면 바로 계산합니다.</p>
+                        <p className="text-center text-[#CFC8B8] py-12">취득가액을 입력하면 바로 계산합니다.</p>
                     )}
                 </div>
             </div>
 
             <section className="mt-12" aria-labelledby="how-heading">
-                <h2 id="how-heading" className="text-xl font-bold text-gray-900 mb-4">계산 방법</h2>
-                <ol className="list-decimal list-inside space-y-2 text-gray-700 leading-relaxed">
+                <h2 id="how-heading" className="text-xl font-bold text-[#161616] mb-4">계산 방법</h2>
+                <ol className="list-decimal list-inside space-y-2 text-[#2E2B27] leading-relaxed">
                     <li><strong>과세표준</strong>은 실제 매수대금(낙찰가)입니다. 관재인 매각과 경매 모두 실제 지급액을 씁니다.</li>
                     <li><strong>취득세</strong>는 과세표준에 세율을 곱합니다. 1주택 6억~9억 원 구간은 (취득가액 × 2/3억 − 3)% 산식으로 세율이 1%에서 3%까지 올라갑니다.</li>
                     <li><strong>지방교육세</strong>는 일반세율 주택이면 취득세의 10%, 중과 주택이면 취득가액의 0.4%, 상가·토지는 0.4%, 농지는 0.2%입니다.</li>
@@ -330,10 +330,10 @@ export default function AcquisitionTaxPage() {
             </section>
 
             <section className="mt-10" aria-labelledby="table-heading">
-                <h2 id="table-heading" className="text-xl font-bold text-gray-900 mb-4">주택 취득세 총 부담률표 (개인·유상취득)</h2>
-                <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
+                <h2 id="table-heading" className="text-xl font-bold text-[#161616] mb-4">주택 취득세 총 부담률표 (개인·유상취득)</h2>
+                <div className="overflow-x-auto rounded-none border border-[#161616] bg-[#FAF7EC]">
                     <table className="w-full text-sm">
-                        <thead className="bg-gray-50 text-gray-600">
+                        <thead className="bg-[#F4F0E6] text-[#3A3A3A]">
                             <tr>
                                 <th scope="col" className="text-left px-4 py-3 font-medium">구분</th>
                                 <th scope="col" className="text-right px-4 py-3 font-medium">85㎡ 이하</th>
@@ -342,54 +342,54 @@ export default function AcquisitionTaxPage() {
                         </thead>
                         <tbody>
                             {RATE_TABLE.map((row) => (
-                                <tr key={row.label} className="border-t border-gray-100">
-                                    <th scope="row" className="text-left px-4 py-3 font-normal text-gray-800">{row.label}</th>
-                                    <td className="text-right px-4 py-3 text-gray-900">{row.small}</td>
-                                    <td className="text-right px-4 py-3 text-gray-900">{row.large}</td>
+                                <tr key={row.label} className="border-t border-[#C9C2B4]">
+                                    <th scope="row" className="text-left px-4 py-3 font-normal text-[#161616]">{row.label}</th>
+                                    <td className="text-right px-4 py-3 text-[#161616]">{row.small}</td>
+                                    <td className="text-right px-4 py-3 text-[#161616]">{row.large}</td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
-                <p className="text-xs text-gray-500 mt-2">
+                <p className="text-xs text-[#57534E] mt-2">
                     취득세·지방교육세·농어촌특별세를 합친 값입니다. 비조정대상지역 2주택은 1주택과 같은 일반세율을 씁니다.
                     상가·오피스텔·토지는 4.6%, 농지는 3.4%입니다.
                 </p>
             </section>
 
             <section className="mt-10" aria-labelledby="example-heading">
-                <h2 id="example-heading" className="text-xl font-bold text-gray-900 mb-4">계산 예시</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700 leading-relaxed">
-                    <div className="rounded-xl border border-gray-200 bg-white p-5">
-                        <p className="font-semibold text-gray-900 mb-2">무주택자가 7억 5천만 원 아파트(84㎡)를 낙찰</p>
+                <h2 id="example-heading" className="text-xl font-bold text-[#161616] mb-4">계산 예시</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-[#2E2B27] leading-relaxed">
+                    <div className="rounded-none border border-[#161616] bg-[#FAF7EC] p-5">
+                        <p className="font-semibold text-[#161616] mb-2">무주택자가 7억 5천만 원 아파트(84㎡)를 낙찰</p>
                         <p>세율은 (7.5 × 2/3 − 3) = 2%입니다. 취득세 1,500만 원, 지방교육세 150만 원, 농어촌특별세 비과세로 합계 1,650만 원입니다.</p>
                     </div>
-                    <div className="rounded-xl border border-gray-200 bg-white p-5">
-                        <p className="font-semibold text-gray-900 mb-2">관재인 매각으로 3억 원 상가를 매수</p>
+                    <div className="rounded-none border border-[#161616] bg-[#FAF7EC] p-5">
+                        <p className="font-semibold text-[#161616] mb-2">관재인 매각으로 3억 원 상가를 매수</p>
                         <p>취득세 4% 1,200만 원, 지방교육세 120만 원, 농어촌특별세 60만 원으로 합계 1,380만 원입니다.</p>
                     </div>
                 </div>
             </section>
 
             <section className="mt-10" aria-labelledby="faq-heading">
-                <h2 id="faq-heading" className="text-xl font-bold text-gray-900 mb-4">자주 묻는 질문</h2>
+                <h2 id="faq-heading" className="text-xl font-bold text-[#161616] mb-4">자주 묻는 질문</h2>
                 <div className="space-y-3">
                     {FAQ.map((item) => (
-                        <details key={item.q} className="rounded-xl border border-gray-200 bg-white p-5">
-                            <summary className="font-semibold text-gray-900 cursor-pointer">{item.q}</summary>
-                            <p className="mt-3 text-sm text-gray-700 leading-relaxed">{item.a}</p>
+                        <details key={item.q} className="rounded-none border border-[#161616] bg-[#FAF7EC] p-5">
+                            <summary className="font-semibold text-[#161616] cursor-pointer">{item.q}</summary>
+                            <p className="mt-3 text-sm text-[#2E2B27] leading-relaxed">{item.a}</p>
                         </details>
                     ))}
                 </div>
             </section>
 
-            <section className="mt-10 bg-amber-50 rounded-xl p-6 border border-amber-100" aria-labelledby="limit-heading">
-                <h2 id="limit-heading" className="text-base font-bold text-amber-900 mb-3">근거 법령과 계산하지 않는 것</h2>
-                <p className="text-sm text-amber-800 leading-relaxed mb-3">
+            <section className="mt-10 bg-[#F6F1C4] rounded-none p-6 border border-[#161616]" aria-labelledby="limit-heading">
+                <h2 id="limit-heading" className="text-base font-bold text-[#161616] mb-3">근거 법령과 계산하지 않는 것</h2>
+                <p className="text-sm text-[#161616] leading-relaxed mb-3">
                     지방세법 제11조·제12조·제13조의2·제151조, 농어촌특별세법 제5조, 지방세특례제한법 제67조를 기준으로 {RULES_CHECKED_AT}에 확인했습니다.
                     실제 신고세액은 관할 시·군·구 세무부서가 정합니다.
                 </p>
-                <ul className="text-sm text-amber-800 space-y-1">
+                <ul className="text-sm text-[#161616] space-y-1">
                     <li>• 법인 취득, 상속·증여, 생애최초 주택 감면, 일시적 2주택 등 예외는 계산하지 않습니다.</li>
                     <li>• 조정대상지역은 국토교통부 고시로 바뀌므로 취득일 기준 지정 여부를 확인해야 합니다.</li>
                     <li>• 법령이 바뀌면 결과가 달라집니다. 위택스(wetax.go.kr)와 국가법령정보센터(law.go.kr)에서 확인하세요.</li>
@@ -397,10 +397,10 @@ export default function AcquisitionTaxPage() {
             </section>
 
             <div className="mt-8 flex flex-wrap gap-3">
-                <Link href="/tools/bid-calculator" className="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-5 py-3 rounded-lg font-medium hover:bg-gray-200">
+                <Link href="/tools/bid-calculator" className="inline-flex items-center gap-2 bg-[#E9E4D8] text-[#2E2B27] px-5 py-3 rounded-none font-medium hover:bg-[#DCD6C8]">
                     입찰가 계산기 →
                 </Link>
-                <Link href="/category/real-estate" className="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-5 py-3 rounded-lg font-medium hover:bg-gray-200">
+                <Link href="/category/real-estate" className="inline-flex items-center gap-2 bg-[#E9E4D8] text-[#2E2B27] px-5 py-3 rounded-none font-medium hover:bg-[#DCD6C8]">
                     부동산 매각 공고 보기 →
                 </Link>
             </div>

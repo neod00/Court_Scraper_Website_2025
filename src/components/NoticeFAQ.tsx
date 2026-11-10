@@ -28,15 +28,15 @@ export default function NoticeFAQ({ notice }: NoticeFAQProps) {
     ];
 
     return (
-        <section className="mt-12 bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-            <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-bold text-gray-900">공고 확인 체크포인트</h3>
+        <section className="mt-12 bg-[#FAF7EC] border border-[#161616] rounded-none overflow-hidden">
+            <div className="bg-[#F4F0E6] px-6 py-4 border-b border-[#161616]">
+                <h3 className="text-lg font-bold text-[#161616]">공고 확인 체크포인트</h3>
             </div>
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-[#C9C2B4]">
                 {checks.map((check) => (
                     <div key={check.q} className="p-6">
-                        <h4 className="font-bold text-gray-900 mb-2">Q. {check.q}</h4>
-                        <p className="text-gray-600 leading-relaxed text-sm">A. {check.a}</p>
+                        <h4 className="font-bold text-[#161616] mb-2">Q. {check.q}</h4>
+                        <p className="text-[#3A3A3A] leading-relaxed text-sm">A. {check.a}</p>
                     </div>
                 ))}
             </div>

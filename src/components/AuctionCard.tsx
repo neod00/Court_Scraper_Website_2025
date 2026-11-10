@@ -83,10 +83,10 @@ export default function AuctionCard({ auction }: { auction: AuctionItem }) {
         switch (cat) {
             case 'apartment':
                 return {
-                    bg: 'bg-blue-50',
-                    border: 'border-blue-100',
-                    text: 'text-blue-600',
-                    badge: 'bg-blue-100 text-blue-700',
+                    bg: 'bg-[#D7E7DF]',
+                    border: 'border-[#161616]',
+                    text: 'text-[#1F3D7A]',
+                    badge: 'bg-[#D7E7DF] text-[#1F3D7A]',
                     icon: (
                         <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -95,10 +95,10 @@ export default function AuctionCard({ auction }: { auction: AuctionItem }) {
                 };
             case 'villa':
                 return {
-                    bg: 'bg-emerald-50',
-                    border: 'border-emerald-100',
-                    text: 'text-emerald-600',
-                    badge: 'bg-emerald-100 text-emerald-700',
+                    bg: 'bg-[#D7E7DF]',
+                    border: 'border-[#161616]',
+                    text: 'text-[#1F4D3F]',
+                    badge: 'bg-[#D7E7DF] text-[#1F4D3F]',
                     icon: (
                         <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -107,10 +107,10 @@ export default function AuctionCard({ auction }: { auction: AuctionItem }) {
                 };
             case 'officetel':
                 return {
-                    bg: 'bg-indigo-50',
-                    border: 'border-indigo-100',
-                    text: 'text-indigo-600',
-                    badge: 'bg-indigo-100 text-indigo-700',
+                    bg: 'bg-[#D7E7DF]',
+                    border: 'border-[#161616]',
+                    text: 'text-[#1F3D7A]',
+                    badge: 'bg-[#D7E7DF] text-[#1F3D7A]',
                     icon: (
                         <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
@@ -119,10 +119,10 @@ export default function AuctionCard({ auction }: { auction: AuctionItem }) {
                 };
             case 'commercial':
                 return {
-                    bg: 'bg-purple-50',
-                    border: 'border-purple-100',
-                    text: 'text-purple-600',
-                    badge: 'bg-purple-100 text-purple-700',
+                    bg: 'bg-[#D7E7DF]',
+                    border: 'border-[#161616]',
+                    text: 'text-[#1F3D7A]',
+                    badge: 'bg-[#D7E7DF] text-[#1F3D7A]',
                     icon: (
                         <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -131,10 +131,10 @@ export default function AuctionCard({ auction }: { auction: AuctionItem }) {
                 };
             default:
                 return {
-                    bg: 'bg-slate-50',
-                    border: 'border-slate-100',
-                    text: 'text-slate-600',
-                    badge: 'bg-slate-100 text-slate-700',
+                    bg: 'bg-[#F4F0E6]',
+                    border: 'border-[#C9C2B4]',
+                    text: 'text-[#3A3A3A]',
+                    badge: 'bg-[#E9E4D8] text-[#2E2B27]',
                     icon: (
                         <svg className="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
@@ -150,7 +150,7 @@ export default function AuctionCard({ auction }: { auction: AuctionItem }) {
 
     return (
         <Link href={`/auction/${auction.id}`} className="block group">
-            <div className={`bg-white overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border ${styles.border} rounded-2xl`}>
+            <div className={`bg-[#FAF7EC] overflow-hidden   transition-all duration-300 border ${styles.border} rounded-none`}>
                 <div className="flex h-full">
                     {/* Left Side: Visual Identity (Approx 30%) */}
                     <div className={`w-32 flex-shrink-0 flex flex-col items-center justify-center p-4 ${styles.bg} border-r ${styles.border} group-hover:bg-opacity-80 transition-colors`}>
@@ -169,16 +169,16 @@ export default function AuctionCard({ auction }: { auction: AuctionItem }) {
                             <div className="flex items-center justify-between mb-2">
                                 <div className="flex gap-2">
                                     {auction.status && (
-                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${auction.status.includes('유찰') ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-600'
+                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-none border border-[#161616] ${auction.status.includes('유찰') ? 'bg-[#F6F1C4] text-[#161616]' : 'bg-[#E9E4D8] text-[#3A3A3A]'
                                             }`}>
                                             {auction.status}
                                         </span>
                                     )}
                                 </div>
                                 {dday && (
-                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded shadow-sm whitespace-nowrap flex-shrink-0
+                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-none  whitespace-nowrap flex-shrink-0
                                         ${dday === 'D-Day' ? 'bg-red-500 text-white animate-pulse' :
-                                            dday.startsWith('D-') ? 'bg-indigo-600 text-white' : 'bg-gray-400 text-white'
+                                            dday.startsWith('D-') ? 'bg-[#161616] text-white' : 'bg-gray-400 text-white'
                                         }`}>
                                         {dday}
                                     </span>
@@ -186,37 +186,37 @@ export default function AuctionCard({ auction }: { auction: AuctionItem }) {
                             </div>
 
                             {/* Title / Address */}
-                            <h3 className="text-base font-bold text-slate-800 line-clamp-2 mb-1 group-hover:text-indigo-600 transition-colors h-[3rem]">
+                            <h3 className="text-base font-bold text-[#161616] line-clamp-2 mb-1 group-hover:text-[#1F3D7A] transition-colors h-[3rem]">
                                 {auction.address || "주소 미상"}
                             </h3>
-                            <div className="text-xs text-slate-500 font-mono mb-4">
+                            <div className="text-xs text-[#57534E] font-mono mb-4">
                                 {auction.manager}
                             </div>
                         </div>
 
                         {/* Price Section - Key Focus */}
-                        <div className="bg-slate-50 rounded-lg p-3 border border-slate-100">
+                        <div className="bg-[#F4F0E6] rounded-none p-3 border border-[#C9C2B4]">
                             <div className="flex flex-col">
                                 {auction.appraised_price && (
                                     <div className="flex justify-between items-center mb-1">
-                                        <span className="text-xs text-slate-400">감정가</span>
-                                        <span className="text-xs text-slate-400 line-through decoration-slate-400">
+                                        <span className="text-xs text-[#6B655C]">감정가</span>
+                                        <span className="text-xs text-[#6B655C] line-through decoration-slate-400">
                                             {parseInt(auction.appraised_price).toLocaleString()}
                                         </span>
                                     </div>
                                 )}
                                 <div className="flex justify-between items-end">
-                                    <span className="text-xs font-semibold text-slate-600">최저가</span>
+                                    <span className="text-xs font-semibold text-[#3A3A3A]">최저가</span>
                                     <div className="text-right">
-                                        <span className="text-lg font-bold text-slate-900">
+                                        <span className="text-lg font-bold text-[#161616]">
                                             {formatPrice(auction.minimum_price).replace('원', '')}
                                         </span>
-                                        <span className="text-sm text-slate-600 ml-0.5">원</span>
+                                        <span className="text-sm text-[#3A3A3A] ml-0.5">원</span>
                                     </div>
                                 </div>
                                 {discountRate && discountRate > 0 && (
                                     <div className="mt-1 flex justify-end">
-                                        <span className="text-xs font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded">
+                                        <span className="text-xs font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded-none">
                                             ↓ {discountRate}%
                                         </span>
                                     </div>

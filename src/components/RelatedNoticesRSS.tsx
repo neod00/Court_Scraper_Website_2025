@@ -28,14 +28,14 @@ export default async function RelatedNoticesRSS({ currentId, category }: Related
     const categoryLabel = category === 'real_estate' ? '부동산' : (category === 'vehicle' ? '차량/동산' : '기타자산');
 
     return (
-        <aside className="mt-12 bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-            <div className="bg-gray-50 border-b border-gray-200 px-6 py-4">
-                <h3 className="font-bold text-base text-gray-900">같은 분야의 최근 공고</h3>
+        <aside className="mt-12 bg-[#FAF7EC] border border-[#161616] rounded-none overflow-hidden">
+            <div className="bg-[#F4F0E6] border-b border-[#161616] px-6 py-4">
+                <h3 className="font-bold text-base text-[#161616]">같은 분야의 최근 공고</h3>
             </div>
 
             <div className="p-6">
-                <p className="text-gray-500 text-xs mb-5">
-                    <span className="text-gray-900 font-bold">{categoryLabel}</span> 분야에서 최근 수집된 공고 중 요약이 확인된 {notices.length}건입니다.
+                <p className="text-[#57534E] text-xs mb-5">
+                    <span className="text-[#161616] font-bold">{categoryLabel}</span> 분야에서 최근 수집된 공고 중 요약이 확인된 {notices.length}건입니다.
                 </p>
 
                 <div className="space-y-5">
@@ -43,26 +43,26 @@ export default async function RelatedNoticesRSS({ currentId, category }: Related
                         <Link
                             key={notice.id}
                             href={`/notice/${notice.id}`}
-                            className="block group border-l-2 border-gray-200 pl-4 hover:border-indigo-500 transition-colors"
+                            className="block group border-l-2 border-[#161616] pl-4 hover:border-[#161616] transition-colors"
                         >
-                            <div className="text-[11px] text-gray-400 mb-1">
+                            <div className="text-[11px] text-[#6B655C] mb-1">
                                 {notice.date_posted}
                             </div>
-                            <h4 className="text-sm font-bold text-gray-800 group-hover:text-indigo-700 line-clamp-2 leading-snug">
+                            <h4 className="text-sm font-bold text-[#161616] group-hover:text-[#1F3D7A] line-clamp-2 leading-snug">
                                 {notice.title}
                             </h4>
-                            <div className="mt-2 text-[11px] text-gray-500 bg-gray-50 inline-block px-2 py-0.5 rounded border border-gray-200">
+                            <div className="mt-2 text-[11px] text-[#57534E] bg-[#F4F0E6] inline-block px-2 py-0.5 rounded-none border border-[#161616]">
                                 {notice.department || '법원'}
                             </div>
                         </Link>
                     ))}
                 </div>
 
-                <div className="mt-8 pt-4 border-t border-gray-100 flex justify-center">
+                <div className="mt-8 pt-4 border-t border-[#C9C2B4] flex justify-center">
                     <Link
                         href="/rss.xml"
                         target="_blank"
-                        className="text-[11px] font-bold text-indigo-600 hover:text-indigo-700 transition-colors flex items-center gap-1.5"
+                        className="text-[11px] font-bold text-[#1F3D7A] hover:text-[#1F3D7A] transition-colors flex items-center gap-1.5"
                     >
                         <span>편집 글 RSS</span>
                         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">

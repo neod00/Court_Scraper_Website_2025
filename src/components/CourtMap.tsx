@@ -312,17 +312,17 @@ export default function CourtMap({ notices }: CourtMapProps) {
     // 카테고리 색상
     const getCategoryColor = (category: string) => {
         const colors: Record<string, string> = {
-            real_estate: 'bg-blue-100 text-blue-700',
-            vehicle: 'bg-green-100 text-green-700',
-            electronics: 'bg-purple-100 text-purple-700',
-            bond: 'bg-yellow-100 text-yellow-700',
+            real_estate: 'bg-[#D7E7DF] text-[#1F3D7A]',
+            vehicle: 'bg-[#D7E7DF] text-[#1F4D3F]',
+            electronics: 'bg-[#D7E7DF] text-[#1F3D7A]',
+            bond: 'bg-[#F6F1C4] text-[#161616]',
             stock: 'bg-pink-100 text-pink-700',
-            patent: 'bg-orange-100 text-orange-700',
-            intangible: 'bg-teal-100 text-teal-700',
-            asset: 'bg-indigo-100 text-indigo-700',
-            etc: 'bg-gray-100 text-gray-700',
+            patent: 'bg-[#F6F1C4] text-[#161616]',
+            intangible: 'bg-[#D7E7DF] text-[#1F4D3F]',
+            asset: 'bg-[#D7E7DF] text-[#1F3D7A]',
+            etc: 'bg-[#E9E4D8] text-[#2E2B27]',
         };
-        return colors[category] || 'bg-gray-100 text-gray-700';
+        return colors[category] || 'bg-[#E9E4D8] text-[#2E2B27]';
     };
 
     // 총 공고 수 계산
@@ -336,14 +336,14 @@ export default function CourtMap({ notices }: CourtMapProps) {
     // 에러 상태
     if (loadError) {
         return (
-            <div className="flex items-center justify-center h-[600px] bg-gray-100 rounded-lg">
+            <div className="flex items-center justify-center h-[600px] bg-[#E9E4D8] rounded-none">
                 <div className="text-center p-8">
                     <div className="text-red-500 text-5xl mb-4">⚠️</div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2">지도 로딩 실패</h3>
-                    <p className="text-gray-600 mb-4">{loadError}</p>
+                    <h3 className="text-lg font-semibold text-[#161616] mb-2">지도 로딩 실패</h3>
+                    <p className="text-[#3A3A3A] mb-4">{loadError}</p>
                     <button
                         onClick={handleRetry}
-                        className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                        className="px-6 py-2 bg-[#161616] text-white rounded-none hover:bg-[#161616] transition-colors"
                     >
                         다시 시도
                     </button>
@@ -355,11 +355,11 @@ export default function CourtMap({ notices }: CourtMapProps) {
     // 로딩 상태
     if (!isLoaded) {
         return (
-            <div className="flex items-center justify-center h-[600px] bg-gray-100 rounded-lg">
+            <div className="flex items-center justify-center h-[600px] bg-[#E9E4D8] rounded-none">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">지도를 불러오는 중...</p>
-                    <p className="text-gray-400 text-sm mt-2">잠시만 기다려주세요...</p>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#161616] mx-auto mb-4"></div>
+                    <p className="text-[#3A3A3A]">지도를 불러오는 중...</p>
+                    <p className="text-[#6B655C] text-sm mt-2">잠시만 기다려주세요...</p>
                 </div>
             </div>
         );
@@ -368,14 +368,14 @@ export default function CourtMap({ notices }: CourtMapProps) {
     return (
         <div className="space-y-4">
             {/* 지역 필터 */}
-            <div className="bg-white rounded-lg shadow p-4">
+            <div className="bg-[#FAF7EC] rounded-none p-4">
                 <div className="flex flex-wrap gap-2">
                     <button
                         onClick={() => handleRegionChange('전체')}
-                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                        className={`px-4 py-2 rounded-none border border-[#161616] text-sm font-medium transition-colors ${
                             selectedRegion === '전체'
-                                ? 'bg-indigo-600 text-white'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                ? 'bg-[#161616] text-white'
+                                : 'bg-[#E9E4D8] text-[#2E2B27] hover:bg-[#DCD6C8]'
                         }`}
                     >
                         전체 ({markerData.reduce((sum, m) => sum + m.count, 0)}건)
@@ -389,10 +389,10 @@ export default function CourtMap({ notices }: CourtMapProps) {
                             <button
                                 key={region}
                                 onClick={() => handleRegionChange(region)}
-                                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                                className={`px-4 py-2 rounded-none border border-[#161616] text-sm font-medium transition-colors ${
                                     selectedRegion === region
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                        ? 'bg-[#161616] text-white'
+                                        : 'bg-[#E9E4D8] text-[#2E2B27] hover:bg-[#DCD6C8]'
                                 }`}
                             >
                                 {region} ({regionCount}건)
@@ -405,43 +405,43 @@ export default function CourtMap({ notices }: CourtMapProps) {
             {/* 지도 및 사이드바 */}
             <div className="flex flex-col lg:flex-row gap-4">
                 {/* 지도 */}
-                <div className="flex-1 bg-white rounded-lg shadow overflow-hidden relative">
+                <div className="flex-1 bg-[#FAF7EC] rounded-none overflow-hidden relative">
                     <div ref={mapRef} style={{ width: '100%', height: '600px' }} />
                     {/* 선택된 법원 정보 오버레이 */}
                     {selectedCourt && (
-                        <div className="absolute top-2 left-2 bg-white rounded-lg shadow-lg p-3 min-w-[200px] max-w-[280px] z-10">
+                        <div className="absolute top-2 left-2 bg-[#FAF7EC] rounded-none p-3 min-w-[200px] max-w-[280px] z-10">
                             <div className="flex justify-between items-start mb-2">
-                                <h3 className="font-bold text-indigo-700">{selectedCourt.courtName}</h3>
+                                <h3 className="font-bold text-[#1F3D7A]">{selectedCourt.courtName}</h3>
                                 <button
                                     onClick={() => setSelectedCourt(null)}
-                                    className="text-gray-400 hover:text-gray-600"
+                                    className="text-[#6B655C] hover:text-[#3A3A3A]"
                                 >
                                     ✕
                                 </button>
                             </div>
-                            <p className="text-xs text-gray-500 mb-2">{selectedCourt.address}</p>
-                            <p className="text-sm font-medium text-gray-700">
-                                총 <span className="text-indigo-600 font-bold">{selectedCourt.count}건</span>의 공고
+                            <p className="text-xs text-[#57534E] mb-2">{selectedCourt.address}</p>
+                            <p className="text-sm font-medium text-[#2E2B27]">
+                                총 <span className="text-[#1F3D7A] font-bold">{selectedCourt.count}건</span>의 공고
                             </p>
                         </div>
                     )}
                 </div>
 
                 {/* 사이드바 - 선택된 법원의 공고 목록 */}
-                <div className="lg:w-96 bg-white rounded-lg shadow">
-                    <div className="p-4 border-b border-gray-200">
-                        <h2 className="font-bold text-gray-800">
+                <div className="lg:w-96 bg-[#FAF7EC] rounded-none">
+                    <div className="p-4 border-b border-[#161616]">
+                        <h2 className="font-bold text-[#161616]">
                             {selectedCourt ? (
                                 <>
                                     📍 {selectedCourt.courtName}
-                                    <span className="text-sm font-normal text-gray-500 ml-2">
+                                    <span className="text-sm font-normal text-[#57534E] ml-2">
                                         ({selectedCourt.count}건)
                                     </span>
                                 </>
                             ) : (
                                 <>
                                     🗺️ 지역별 공고 현황
-                                    <span className="text-sm font-normal text-gray-500 ml-2">({totalNotices}건)</span>
+                                    <span className="text-sm font-normal text-[#57534E] ml-2">({totalNotices}건)</span>
                                 </>
                             )}
                         </h2>
@@ -450,61 +450,61 @@ export default function CourtMap({ notices }: CourtMapProps) {
                     <div className="max-h-[520px] overflow-y-auto">
                         {selectedCourt ? (
                             // 선택된 법원의 공고 목록
-                            <div className="divide-y divide-gray-100">
+                            <div className="divide-y divide-[#C9C2B4]">
                                 {selectedCourt.notices.slice(0, 20).map((notice) => (
                                     <Link
                                         key={notice.site_id}
                                         href={`/notice/${notice.site_id}`}
-                                        className="block p-4 hover:bg-gray-50 transition-colors"
+                                        className="block p-4 hover:bg-[#F4F0E6] transition-colors"
                                     >
                                         <div className="flex items-start gap-2">
                                             <span
-                                                className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getCategoryColor(
+                                                className={`inline-flex items-center px-2 py-0.5 rounded-none text-xs font-medium ${getCategoryColor(
                                                     notice.category
                                                 )}`}
                                             >
                                                 {getCategoryLabel(notice.category)}
                                             </span>
                                         </div>
-                                        <h3 className="text-sm font-medium text-gray-900 mt-1 line-clamp-2">
+                                        <h3 className="text-sm font-medium text-[#161616] mt-1 line-clamp-2">
                                             {notice.title}
                                         </h3>
-                                        <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
+                                        <div className="flex items-center gap-2 mt-2 text-xs text-[#57534E]">
                                             <span>📅 {notice.date_posted}</span>
                                             {notice.expiry_date && <span>⏰ ~{notice.expiry_date}</span>}
                                         </div>
                                     </Link>
                                 ))}
                                 {selectedCourt.notices.length > 20 && (
-                                    <div className="p-4 text-center text-sm text-gray-500">
+                                    <div className="p-4 text-center text-sm text-[#57534E]">
                                         외 {selectedCourt.notices.length - 20}건 더 있음
                                     </div>
                                 )}
                             </div>
                         ) : (
                             // 지역/법원별 요약
-                            <div className="divide-y divide-gray-100">
+                            <div className="divide-y divide-[#C9C2B4]">
                                 {filteredMarkers
                                     .sort((a, b) => b.count - a.count)
                                     .map((marker) => (
                                         <button
                                             key={marker.courtName}
                                             onClick={() => handleMarkerClick(marker)}
-                                            className="w-full text-left p-4 hover:bg-gray-50 transition-colors"
+                                            className="w-full text-left p-4 hover:bg-[#F4F0E6] transition-colors"
                                         >
                                             <div className="flex justify-between items-center">
                                                 <div>
-                                                    <h3 className="font-medium text-gray-900">{marker.courtName}</h3>
-                                                    <p className="text-xs text-gray-500 mt-1">{marker.address}</p>
+                                                    <h3 className="font-medium text-[#161616]">{marker.courtName}</h3>
+                                                    <p className="text-xs text-[#57534E] mt-1">{marker.address}</p>
                                                 </div>
-                                                <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 font-bold text-sm">
+                                                <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#D7E7DF] text-[#1F3D7A] font-bold text-sm">
                                                     {marker.count}
                                                 </span>
                                             </div>
                                         </button>
                                     ))}
                                 {filteredMarkers.length === 0 && (
-                                    <div className="p-8 text-center text-gray-500">
+                                    <div className="p-8 text-center text-[#57534E]">
                                         <p>해당 지역에 공고가 없습니다.</p>
                                     </div>
                                 )}

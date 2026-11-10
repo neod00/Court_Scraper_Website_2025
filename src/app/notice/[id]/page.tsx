@@ -136,44 +136,44 @@ export default async function NoticeDetail({ params }: PageProps) {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                 {/* Main Content Area */}
                 <div className="lg:col-span-2 space-y-8 min-w-0">
-                    <div className="bg-white shadow-soft rounded-2xl overflow-hidden border border-gray-200">
-                        <div className="px-6 py-5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-                            <h2 className="text-lg font-bold text-gray-900">공고 정보</h2>
-                            <Link href="/" className="text-sm font-bold text-indigo-600 hover:underline">목록보기</Link>
+                    <div className="bg-[#FAF7EC] rounded-none overflow-hidden border border-[#161616]">
+                        <div className="px-6 py-5 border-b border-[#C9C2B4] flex justify-between items-center bg-[#F4F0E6]">
+                            <h2 className="text-lg font-bold text-[#161616]">공고 정보</h2>
+                            <Link href="/" className="text-sm font-bold text-[#1F3D7A] hover:underline">목록보기</Link>
                         </div>
                         <div className="p-6">
                             <dl className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 text-sm">
-                                <div className="border-b border-gray-100 pb-2">
-                                    <dt className="text-gray-500 font-medium mb-1">관리번호</dt>
-                                    <dd className="text-gray-900 font-mono">{notice.site_id}</dd>
+                                <div className="border-b border-[#C9C2B4] pb-2">
+                                    <dt className="text-[#57534E] font-medium mb-1">관리번호</dt>
+                                    <dd className="text-[#161616] font-mono">{notice.site_id}</dd>
                                 </div>
-                                <div className="border-b border-gray-100 pb-2">
-                                    <dt className="text-gray-500 font-medium mb-1">공고일자</dt>
-                                    <dd className="text-gray-900">{notice.date_posted}</dd>
+                                <div className="border-b border-[#C9C2B4] pb-2">
+                                    <dt className="text-[#57534E] font-medium mb-1">공고일자</dt>
+                                    <dd className="text-[#161616]">{notice.date_posted}</dd>
                                 </div>
-                                <div className="border-b border-gray-100 pb-2">
-                                    <dt className="text-gray-500 font-medium mb-1">관할부서</dt>
-                                    <dd className="text-gray-900">
+                                <div className="border-b border-[#C9C2B4] pb-2">
+                                    <dt className="text-[#57534E] font-medium mb-1">관할부서</dt>
+                                    <dd className="text-[#161616]">
                                         {courtInfo ? (
-                                            <Link href={`/court/${courtInfo.slug}`} className="text-indigo-700 hover:underline">{notice.department}</Link>
+                                            <Link href={`/court/${courtInfo.slug}`} className="text-[#1F3D7A] hover:underline">{notice.department}</Link>
                                         ) : (notice.department || '-')}
                                     </dd>
                                 </div>
-                                <div className="border-b border-gray-100 pb-2">
-                                    <dt className="text-gray-500 font-medium mb-1">매각기관</dt>
-                                    <dd className="text-gray-900">{maskPersonNames(notice.sale_org) || '-'}</dd>
+                                <div className="border-b border-[#C9C2B4] pb-2">
+                                    <dt className="text-[#57534E] font-medium mb-1">매각기관</dt>
+                                    <dd className="text-[#161616]">{maskPersonNames(notice.sale_org) || '-'}</dd>
                                 </div>
-                                <div className="border-b border-gray-100 pb-2">
-                                    <dt className="text-gray-500 font-medium mb-1">연락처</dt>
-                                    <dd className="text-gray-900">{notice.phone || '-'}</dd>
+                                <div className="border-b border-[#C9C2B4] pb-2">
+                                    <dt className="text-[#57534E] font-medium mb-1">연락처</dt>
+                                    <dd className="text-[#161616]">{notice.phone || '-'}</dd>
                                 </div>
-                                <div className="border-b border-gray-100 pb-2">
-                                    <dt className="text-gray-500 font-medium mb-1">원본 출처</dt>
-                                    <dd><a href={notice.detail_link} target="_blank" rel="noreferrer" className="text-indigo-600 hover:text-indigo-900 underline font-bold">법원 바로가기 ↗</a></dd>
+                                <div className="border-b border-[#C9C2B4] pb-2">
+                                    <dt className="text-[#57534E] font-medium mb-1">원본 출처</dt>
+                                    <dd><a href={notice.detail_link} target="_blank" rel="noreferrer" className="text-[#1F3D7A] hover:text-[#1F3D7A] underline font-bold">법원 바로가기 ↗</a></dd>
                                 </div>
                             </dl>
-                            <dl className="mt-6 pt-6 border-t border-gray-100 text-sm">
-                                <dt className="text-gray-500 font-medium mb-2">첨부파일</dt>
+                            <dl className="mt-6 pt-6 border-t border-[#C9C2B4] text-sm">
+                                <dt className="text-[#57534E] font-medium mb-2">첨부파일</dt>
                                 <dd><DownloadFiles fileInfo={notice.file_info} /></dd>
                             </dl>
                         </div>
@@ -183,16 +183,14 @@ export default async function NoticeDetail({ params }: PageProps) {
 
                     {/* AI Analysis Report Section — '첨부파일을 확인하라'는 대체 요약은 보여주지 않는다 */}
                     {showSummary && (
-                        <article className="relative overflow-hidden rounded-2xl border border-gray-200 shadow-sm bg-white">
-                            <div className="px-6 py-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between gap-3 flex-wrap">
-                                <h2 className="text-base font-bold text-gray-900">공고 첨부문서 요약</h2>
-                                <span className="text-[11px] font-medium text-gray-500">AI 추출 · 원문 확인 필수</span>
+                        <article className="relative overflow-hidden rounded-none border border-[#161616] bg-[#FAF7EC]">
+                            <div className="px-6 py-4 bg-[#F4F0E6] border-b border-[#161616] flex items-center justify-between gap-3 flex-wrap">
+                                <h2 className="text-base font-bold text-[#161616]">공고 첨부문서 요약</h2>
+                                <span className="text-[11px] font-medium text-[#57534E]">AI 추출 · 원문 확인 필수</span>
                             </div>
 
                             <div className="p-6 md:p-8">
-                                <div className="prose prose-indigo max-w-none text-gray-700 leading-[1.8]
-                                    prose-strong:text-indigo-900 prose-strong:font-bold
-                                    prose-p:my-4 prose-li:my-1">
+                                <div className="prose prose-indigo max-w-none text-[#2E2B27] leading-[1.8] prose-strong:text-[#1F3D7A] prose-strong:font-bold prose-p:my-4 prose-li:my-1">
                                     {(() => {
                                         const linkify = (content: any[]) => {
                                             return content.map((part, pIdx) => {
@@ -207,7 +205,7 @@ export default async function NoticeDetail({ params }: PageProps) {
                                                         parts.forEach((p, i) => {
                                                             if (p === item.term) {
                                                                 newSegments.push(
-                                                                    <Link key={`${pIdx}-${item.slug}-${i}`} href={`/glossary/${item.slug}`} className="text-indigo-600 font-medium border-b border-dotted border-indigo-300 hover:bg-indigo-50 transition-colors" title={item.shortDescription}>{p}</Link>
+                                                                    <Link key={`${pIdx}-${item.slug}-${i}`} href={`/glossary/${item.slug}`} className="text-[#1F3D7A] font-medium border-b border-dotted border-[#161616] hover:bg-[#D7E7DF] transition-colors" title={item.shortDescription}>{p}</Link>
                                                                 );
                                                             } else if (p) { newSegments.push(p); }
                                                         });
@@ -230,7 +228,7 @@ export default async function NoticeDetail({ params }: PageProps) {
                                             if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
                                                 return (
                                                     <div key={idx} className="flex gap-2 my-1 pl-2">
-                                                        <span className="text-indigo-400 mt-0.5 flex-shrink-0">•</span>
+                                                        <span className="text-[#1F3D7A] mt-0.5 flex-shrink-0">•</span>
                                                         <span>{linkedRendered.map((r: any) => typeof r === 'string' ? r.replace(/^[-•]\s*/, '') : r)}</span>
                                                     </div>
                                                 );
@@ -238,7 +236,7 @@ export default async function NoticeDetail({ params }: PageProps) {
                                             if (/^\d+\./.test(trimmed)) {
                                                 return (
                                                     <div key={idx} className="flex gap-2 my-1.5 font-medium">
-                                                        <span className="text-indigo-600 flex-shrink-0">{trimmed.match(/^\d+/)?.[0]}.</span>
+                                                        <span className="text-[#1F3D7A] flex-shrink-0">{trimmed.match(/^\d+/)?.[0]}.</span>
                                                         <span>{linkedRendered.map((r: any) => typeof r === 'string' ? r.replace(/^\d+\.\s*/, '') : r)}</span>
                                                     </div>
                                                 );
@@ -247,10 +245,10 @@ export default async function NoticeDetail({ params }: PageProps) {
                                         });
                                     })()}
                                 </div>
-                                <div className="mt-8 pt-4 border-t border-gray-100">
+                                <div className="mt-8 pt-4 border-t border-[#C9C2B4]">
                                     <details className="cursor-pointer group">
-                                        <summary className="text-xs font-bold text-gray-500 tracking-widest flex items-center gap-2 hover:text-indigo-600 transition-colors">분석 범위와 확인 방법</summary>
-                                        <ul className="list-disc pl-5 mt-3 space-y-1 text-xs text-gray-500 font-medium">
+                                        <summary className="text-xs font-bold text-[#57534E] tracking-widest flex items-center gap-2 hover:text-[#1F3D7A] transition-colors">분석 범위와 확인 방법</summary>
+                                        <ul className="list-disc pl-5 mt-3 space-y-1 text-xs text-[#57534E] font-medium">
                                             <li>요약 입력 자료: 이 페이지에 연결된 대한민국 법원 공고와 첨부 문서</li>
                                             <li>분석 방식: 문서에서 일정·가격·대상 자산을 찾기 위한 AI 보조 추출</li>
                                             <li>별도 실거래가 조회, 감정평가 또는 권리관계 검증은 포함하지 않습니다.</li>
@@ -278,15 +276,15 @@ export default async function NoticeDetail({ params }: PageProps) {
                     }} />
 
                     {/* Related reading */}
-                    <div className="mt-12 bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-soft">
-                        <div className="px-6 py-4 bg-gray-50 border-b border-gray-100">
-                            <h3 className="text-lg font-bold text-gray-900">관련 확인 가이드</h3>
+                    <div className="mt-12 bg-[#FAF7EC] rounded-none border border-[#161616] overflow-hidden">
+                        <div className="px-6 py-4 bg-[#F4F0E6] border-b border-[#C9C2B4]">
+                            <h3 className="text-lg font-bold text-[#161616]">관련 확인 가이드</h3>
                         </div>
                         <div className="p-6">
                             <ul className="space-y-2">
                                 {getRecentPosts(3).map((post) => (
                                     <li key={post.slug}>
-                                        <Link href={`/blog/${post.slug}`} className="text-sm text-gray-700 hover:text-indigo-600 font-medium transition-colors underline-offset-2 hover:underline">
+                                        <Link href={`/blog/${post.slug}`} className="text-sm text-[#2E2B27] hover:text-[#1F3D7A] font-medium transition-colors underline-offset-2 hover:underline">
                                             {post.title}
                                         </Link>
                                     </li>
@@ -304,12 +302,12 @@ export default async function NoticeDetail({ params }: PageProps) {
                         courtName={notice.court_name || notice.department}
                     />
 
-                    <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-soft">
-                        <h4 className="text-sm font-bold text-gray-900 mb-4">공고 원본 확인</h4>
-                        <p className="text-xs text-gray-500 leading-relaxed mb-4">
-                            입찰 전 법원 사이트의 원본 공고를 확인해야 합니다. <Link href="/editorial-policy" className="text-indigo-600 underline underline-offset-2">데이터·편집 원칙</Link>
+                    <div className="bg-[#FAF7EC] rounded-none p-6 border border-[#161616]">
+                        <h4 className="text-sm font-bold text-[#161616] mb-4">공고 원본 확인</h4>
+                        <p className="text-xs text-[#57534E] leading-relaxed mb-4">
+                            입찰 전 법원 사이트의 원본 공고를 확인해야 합니다. <Link href="/editorial-policy" className="text-[#1F3D7A] underline underline-offset-2">데이터·편집 원칙</Link>
                         </p>
-                        <a href={notice.detail_link} target="_blank" rel="noreferrer" className="block w-full text-center py-2.5 bg-gray-100 rounded-xl text-[11px] font-bold text-gray-700 hover:bg-gray-200 transition-colors border border-gray-200">
+                        <a href={notice.detail_link} target="_blank" rel="noreferrer" className="block w-full text-center py-2.5 bg-[#E9E4D8] rounded-none text-[11px] font-bold text-[#2E2B27] hover:bg-[#DCD6C8] transition-colors border border-[#161616]">
                              원본 법원 공고 열기 &rarr;
                         </a>
                     </div>

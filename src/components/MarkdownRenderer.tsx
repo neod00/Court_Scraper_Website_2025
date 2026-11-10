@@ -15,43 +15,43 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
             components={{
                 // Headings
                 h2: ({ children }) => (
-                    <h2 className="text-2xl font-extrabold text-gray-900 mt-10 mb-4 pb-3 border-b-2 border-indigo-100 flex items-center gap-2">
+                    <h2 className="text-2xl font-extrabold text-[#161616] mt-10 mb-4 pb-3 border-b-2 border-[#161616] flex items-center gap-2">
                         {children}
                     </h2>
                 ),
                 h3: ({ children }) => (
-                    <h3 className="text-xl font-bold text-gray-800 mt-8 mb-3 flex items-center gap-2">
+                    <h3 className="text-xl font-bold text-[#161616] mt-8 mb-3 flex items-center gap-2">
                         {children}
                     </h3>
                 ),
                 // Paragraphs
                 p: ({ children }) => (
-                    <p className="text-gray-700 leading-[1.85] mb-4 text-[15px]">
+                    <p className="text-[#2E2B27] leading-[1.85] mb-4 text-[15px]">
                         {children}
                     </p>
                 ),
                 // Strong
                 strong: ({ children }) => (
-                    <strong className="font-bold text-gray-900">{children}</strong>
+                    <strong className="font-bold text-[#161616]">{children}</strong>
                 ),
                 // Blockquotes - styled as callout boxes
                 blockquote: ({ children }) => (
-                    <div className="my-6 bg-gradient-to-r from-indigo-50 to-blue-50 border-l-4 border-indigo-400 rounded-r-xl px-5 py-4 shadow-sm">
-                        <div className="text-gray-700 text-[15px] leading-relaxed [&>p]:mb-0">
+                    <div className="my-6 bg-[#D7E7DF] border-l-4 border-[#161616] rounded-none px-5 py-4">
+                        <div className="text-[#2E2B27] text-[15px] leading-relaxed [&>p]:mb-0">
                             {children}
                         </div>
                     </div>
                 ),
                 // Tables
                 table: ({ children }) => (
-                    <div className="overflow-x-auto my-6 rounded-xl border border-gray-200 shadow-sm">
+                    <div className="overflow-x-auto my-6 rounded-none border border-[#161616]">
                         <table className="w-full text-sm">
                             {children}
                         </table>
                     </div>
                 ),
                 thead: ({ children }) => (
-                    <thead className="bg-gradient-to-r from-slate-800 to-slate-700 text-white text-xs uppercase tracking-wider">
+                    <thead className="bg-[#161616] text-white text-xs uppercase tracking-wider">
                         {children}
                     </thead>
                 ),
@@ -59,20 +59,20 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
                     <th className="px-4 py-3 text-left font-semibold">{children}</th>
                 ),
                 tbody: ({ children }) => (
-                    <tbody className="divide-y divide-gray-100">{children}</tbody>
+                    <tbody className="divide-y divide-[#C9C2B4]">{children}</tbody>
                 ),
                 tr: ({ children }) => (
-                    <tr className="hover:bg-gray-50 transition-colors">{children}</tr>
+                    <tr className="hover:bg-[#F4F0E6] transition-colors">{children}</tr>
                 ),
                 td: ({ children }) => (
-                    <td className="px-4 py-3 text-gray-700 font-medium">{children}</td>
+                    <td className="px-4 py-3 text-[#2E2B27] font-medium">{children}</td>
                 ),
                 // Horizontal rules
                 hr: () => (
                     <div className="my-8 flex items-center gap-4">
-                        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
-                        <span className="text-gray-300 text-xs">◆</span>
-                        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
+                        <div className="flex-1 h-px" />
+                        <span className="text-[#8A8478] text-xs">◆</span>
+                        <div className="flex-1 h-px" />
                     </div>
                 ),
                 // Unordered lists
@@ -97,20 +97,20 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
                     // Task list items
                     if (checked !== undefined && checked !== null) {
                         return (
-                            <li className="flex items-start gap-3 bg-gray-50 rounded-lg px-4 py-3 border border-gray-100">
-                                <span className={`mt-0.5 flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center ${checked ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 bg-white'}`}>
+                            <li className="flex items-start gap-3 bg-[#F4F0E6] rounded-none px-4 py-3 border border-[#C9C2B4]">
+                                <span className={`mt-0.5 flex-shrink-0 w-5 h-5 rounded-none border-2 flex items-center justify-center ${checked ? 'bg-[#161616] border-[#161616] text-white' : 'border-[#161616] bg-[#FAF7EC]'}`}>
                                     {checked && <span className="text-xs">✓</span>}
                                 </span>
-                                <span className="text-gray-700 text-[15px] leading-relaxed">{children}</span>
+                                <span className="text-[#2E2B27] text-[15px] leading-relaxed">{children}</span>
                             </li>
                         );
                     }
 
                     // Regular list items with emoji bullet detection
                     return (
-                        <li className="flex items-start gap-2 text-gray-700 text-[15px] leading-relaxed pl-1">
+                        <li className="flex items-start gap-2 text-[#2E2B27] text-[15px] leading-relaxed pl-1">
                             {!content.match(/^[📍💰✨🥇🥈🥉]/) && (
-                                <span className="text-indigo-400 mt-1.5 flex-shrink-0">•</span>
+                                <span className="text-[#1F3D7A] mt-1.5 flex-shrink-0">•</span>
                             )}
                             <span>{children}</span>
                         </li>
@@ -118,13 +118,13 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
                 },
                 // Links
                 a: ({ href, children }) => (
-                    <a href={href} className="text-indigo-600 hover:text-indigo-800 underline decoration-indigo-200 hover:decoration-indigo-400 transition-colors font-medium" target="_blank" rel="noopener noreferrer">
+                    <a href={href} className="text-[#1F3D7A] hover:text-[#1F3D7A] underline decoration-indigo-200 hover:decoration-indigo-400 transition-colors font-medium" target="_blank" rel="noopener noreferrer">
                         {children}
                     </a>
                 ),
                 // Inline code
                 code: ({ children }) => (
-                    <code className="bg-gray-100 text-indigo-700 px-1.5 py-0.5 rounded text-sm font-mono">
+                    <code className="bg-[#E9E4D8] text-[#1F3D7A] px-1.5 py-0.5 rounded-none text-sm font-mono">
                         {children}
                     </code>
                 ),

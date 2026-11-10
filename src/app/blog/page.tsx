@@ -115,16 +115,16 @@ export default async function BlogPage({ searchParams }: PageProps) {
         : mergedPosts;
 
     const chipBase = 'px-4 py-2 rounded-full text-sm font-medium transition-colors';
-    const chipActive = 'bg-indigo-600 text-white';
-    const chipIdle = 'bg-gray-100 text-gray-700 hover:bg-indigo-600 hover:text-white';
+    const chipActive = 'bg-[#161616] text-white';
+    const chipIdle = 'bg-[#E9E4D8] text-[#2E2B27] hover:bg-[#161616] hover:text-white';
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
             <header className="text-center mb-10">
-                <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                <h1 className="text-3xl sm:text-4xl font-bold text-[#161616] mb-4">
                     법원 경매·회생·파산 매각 공고 확인 가이드
                 </h1>
-                <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                <p className="text-lg text-[#3A3A3A] max-w-3xl mx-auto leading-relaxed">
                     공고를 읽을 때 필요한 절차 구분, 확인 문서, 법령 근거를 정리한 글입니다.
                     글에 나오는 수치는 로옥션이 수집한 공고를 집계한 값이며, 실제 참여 전에는 원문 공고와 최신 법령을 확인해야 합니다.
                 </p>
@@ -150,7 +150,7 @@ export default async function BlogPage({ searchParams }: PageProps) {
             {/* 주요 글 */}
             {!validSelectedCategory && featuredPosts.length > 0 && (
                 <section className="mb-16" aria-labelledby="featured-heading">
-                    <h2 id="featured-heading" className="text-2xl font-bold text-gray-900 mb-6">
+                    <h2 id="featured-heading" className="text-2xl font-bold text-[#161616] mb-6">
                         먼저 읽을 글
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -158,21 +158,21 @@ export default async function BlogPage({ searchParams }: PageProps) {
                             <Link
                                 key={post.slug}
                                 href={`/blog/${post.slug}`}
-                                className="group relative bg-gradient-to-br from-indigo-600 to-blue-700 rounded-2xl p-8 text-white hover:shadow-2xl transition-all duration-300 overflow-hidden"
+                                className="group relative bg-[#161616] rounded-none p-8 text-white transition-all duration-300 overflow-hidden"
                             >
-                                <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm">
+                                <div className="absolute top-4 right-4 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-none border border-[#161616] text-sm">
                                     {post.readingTime}분 읽기
                                 </div>
-                                <span className="text-indigo-200 text-sm font-medium">
+                                <span className="text-[#CFC8B8] text-sm font-medium">
                                     {categoryLabel(post.category)}
                                 </span>
                                 <h3 className="text-2xl font-bold mt-2 mb-4 group-hover:translate-x-1 transition-transform">
                                     {post.title}
                                 </h3>
-                                <p className="text-indigo-100 line-clamp-2 mb-4">
+                                <p className="text-[#CFC8B8] line-clamp-2 mb-4">
                                     {post.description}
                                 </p>
-                                <div className="flex items-center gap-3 text-sm text-indigo-200">
+                                <div className="flex items-center gap-3 text-sm text-[#CFC8B8]">
                                     <span>최종 확인 {post.reviewedAt ?? post.updatedAt}</span>
                                     <span aria-hidden="true">·</span>
                                     <span>{post.author}</span>
@@ -185,39 +185,39 @@ export default async function BlogPage({ searchParams }: PageProps) {
 
             {/* 전체 글 목록 */}
             <section aria-labelledby="all-posts-heading">
-                <h2 id="all-posts-heading" className="text-2xl font-bold text-gray-900 mb-6">
+                <h2 id="all-posts-heading" className="text-2xl font-bold text-[#161616] mb-6">
                     {validSelectedCategory ? `${categoryLabel(validSelectedCategory)} 글` : '전체 글'}
-                    <span className="ml-2 text-base font-medium text-gray-500">{allPosts.length}편</span>
+                    <span className="ml-2 text-base font-medium text-[#57534E]">{allPosts.length}편</span>
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {allPosts.map((post) => (
                         <Link
                             key={post.slug}
                             href={`/blog/${post.slug}`}
-                            className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:border-indigo-200 transition-all duration-300"
+                            className="group bg-[#FAF7EC] rounded-none border border-[#C9C2B4] overflow-hidden hover:border-[#161616] transition-all duration-300"
                         >
-                            <div className="h-2 bg-gradient-to-r from-indigo-500 to-blue-500" />
+                            <div className="h-2 bg-[#161616]" />
 
                             <div className="p-6">
                                 <div className="flex items-center justify-between mb-3">
-                                    <span className="text-xs font-bold px-2 py-1 rounded bg-indigo-100 text-indigo-700">
+                                    <span className="text-xs font-bold px-2 py-1 rounded-none bg-[#D7E7DF] text-[#1F3D7A]">
                                         {categoryLabel(post.category)}
                                     </span>
-                                    <span className="text-xs text-gray-400">
+                                    <span className="text-xs text-[#6B655C]">
                                         {post.readingTime}분 읽기
                                     </span>
                                 </div>
-                                <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors line-clamp-2">
+                                <h3 className="text-lg font-bold text-[#161616] mb-2 group-hover:text-[#1F3D7A] transition-colors line-clamp-2">
                                     {post.title}
                                 </h3>
-                                <p className="text-gray-600 text-sm line-clamp-3 mb-4">
+                                <p className="text-[#3A3A3A] text-sm line-clamp-3 mb-4">
                                     {post.description}
                                 </p>
-                                <div className="flex items-center justify-between gap-3 text-xs text-gray-500">
+                                <div className="flex items-center justify-between gap-3 text-xs text-[#57534E]">
                                     <span>최종 확인 {post.reviewedAt}</span>
                                     <div className="flex gap-1 flex-wrap justify-end">
                                         {post.tags.slice(0, 2).map(tag => (
-                                            <span key={tag} className="bg-gray-100 px-2 py-0.5 rounded">
+                                            <span key={tag} className="bg-[#E9E4D8] px-2 py-0.5 rounded-none">
                                                 #{tag}
                                             </span>
                                         ))}
@@ -230,26 +230,26 @@ export default async function BlogPage({ searchParams }: PageProps) {
             </section>
 
             {/* 함께 보기 */}
-            <section className="mt-16 bg-gray-50 rounded-2xl p-8" aria-labelledby="more-heading">
-                <h2 id="more-heading" className="text-xl font-bold text-gray-900 mb-2">
+            <section className="mt-16 bg-[#F4F0E6] rounded-none p-8" aria-labelledby="more-heading">
+                <h2 id="more-heading" className="text-xl font-bold text-[#161616] mb-2">
                     함께 보기
                 </h2>
-                <p className="text-sm text-gray-600 mb-6">
+                <p className="text-sm text-[#3A3A3A] mb-6">
                     글에서 다룬 용어와 수치는 용어사전, 계산기, 데이터랩에서 다시 확인할 수 있습니다.
                     모든 글은 로옥션 편집팀이 작성하고 법령 원문과 수집 공고에 대조해 확인합니다.{' '}
-                    <Link href="/editorial-policy" className="font-semibold text-indigo-700 hover:underline">편집 원칙 보기</Link>
+                    <Link href="/editorial-policy" className="font-semibold text-[#1F3D7A] hover:underline">편집 원칙 보기</Link>
                 </p>
                 <div className="flex gap-3 flex-wrap">
-                    <Link href="/" className="bg-indigo-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors">
+                    <Link href="/" className="bg-[#161616] text-white font-bold px-6 py-3 rounded-none hover:bg-[#161616] transition-colors">
                         공고 검색
                     </Link>
-                    <Link href="/glossary" className="bg-white text-gray-700 font-bold px-6 py-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+                    <Link href="/glossary" className="bg-[#FAF7EC] text-[#2E2B27] font-bold px-6 py-3 rounded-none border border-[#161616] hover:bg-[#F4F0E6] transition-colors">
                         용어사전
                     </Link>
-                    <Link href="/tools" className="bg-white text-gray-700 font-bold px-6 py-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+                    <Link href="/tools" className="bg-[#FAF7EC] text-[#2E2B27] font-bold px-6 py-3 rounded-none border border-[#161616] hover:bg-[#F4F0E6] transition-colors">
                         계산기
                     </Link>
-                    <Link href="/datalab" className="bg-white text-gray-700 font-bold px-6 py-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
+                    <Link href="/datalab" className="bg-[#FAF7EC] text-[#2E2B27] font-bold px-6 py-3 rounded-none border border-[#161616] hover:bg-[#F4F0E6] transition-colors">
                         데이터랩
                     </Link>
                 </div>

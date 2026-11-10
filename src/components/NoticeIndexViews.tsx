@@ -18,17 +18,17 @@ export function shortWon(n: number): string {
 function CourtLink({ name }: { name: string }) {
     const court = getCourtByName(name);
     if (!court) return <span>{name || '-'}</span>;
-    return <Link href={`/court/${court.slug}`} className="hover:text-indigo-700 hover:underline">{name}</Link>;
+    return <Link href={`/court/${court.slug}`} className="hover:text-[#1F3D7A] hover:underline">{name}</Link>;
 }
 
 export function UpcomingTable({ rows, showCourt = true, showCategory = true }: { rows: UpcomingRound[]; showCourt?: boolean; showCategory?: boolean }) {
     if (rows.length === 0) {
-        return <p className="rounded-xl border border-gray-200 bg-white p-6 text-sm text-gray-600">앞으로 2주 안에 입찰 회차가 원문 표에서 확인된 공고가 없습니다.</p>;
+        return <p className="rounded-none border border-[#161616] bg-[#FAF7EC] p-6 text-sm text-[#3A3A3A]">앞으로 2주 안에 입찰 회차가 원문 표에서 확인된 공고가 없습니다.</p>;
     }
     return (
-        <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
+        <div className="overflow-x-auto rounded-none border border-[#161616] bg-[#FAF7EC]">
             <table className="w-full text-sm">
-                <thead className="bg-gray-50 text-gray-600">
+                <thead className="bg-[#F4F0E6] text-[#3A3A3A]">
                     <tr>
                         <th scope="col" className="text-left px-3 py-3 font-medium whitespace-nowrap">입찰일</th>
                         <th scope="col" className="text-left px-3 py-3 font-medium">공고</th>
@@ -39,23 +39,23 @@ export function UpcomingTable({ rows, showCourt = true, showCategory = true }: {
                 </thead>
                 <tbody>
                     {rows.map((r) => (
-                        <tr key={`${r.notice.id}-${r.round}`} className="border-t border-gray-100 align-top">
+                        <tr key={`${r.notice.id}-${r.round}`} className="border-t border-[#C9C2B4] align-top">
                             <td className="px-3 py-3 whitespace-nowrap">
-                                <span className="font-semibold text-gray-900">{r.date.slice(5).replace('-', '.')}</span>
-                                <span className={`ml-1.5 inline-block rounded px-1.5 py-0.5 text-[11px] font-bold ${r.dDay <= 3 ? 'bg-red-50 text-red-700' : 'bg-gray-100 text-gray-600'}`}>
+                                <span className="font-semibold text-[#161616]">{r.date.slice(5).replace('-', '.')}</span>
+                                <span className={`ml-1.5 inline-block rounded-none px-1.5 py-0.5 text-[11px] font-bold ${r.dDay <= 3 ? 'bg-red-50 text-red-700' : 'bg-[#E9E4D8] text-[#3A3A3A]'}`}>
                                     {r.dDay === 0 ? '오늘' : `D-${r.dDay}`}
                                 </span>
                             </td>
                             <td className="px-3 py-3">
-                                <Link href={`/notice/${r.notice.id}`} className="font-medium text-gray-900 hover:text-indigo-700 hover:underline">{r.notice.title}</Link>
-                                <span className="block text-xs text-gray-500 mt-0.5">
+                                <Link href={`/notice/${r.notice.id}`} className="font-medium text-[#161616] hover:text-[#1F3D7A] hover:underline">{r.notice.title}</Link>
+                                <span className="block text-xs text-[#57534E] mt-0.5">
                                     {showCategory && `${categoryLabel(r.notice.category)} · `}{r.round}/{r.totalRounds}회차
                                     {showCourt && <span className="md:hidden"> · {r.notice.court}</span>}
                                 </span>
                             </td>
-                            {showCourt && <td className="px-3 py-3 text-gray-700 whitespace-nowrap hidden md:table-cell"><CourtLink name={r.notice.court} /></td>}
-                            <td className="px-3 py-3 text-right font-semibold text-gray-900 whitespace-nowrap">{shortWon(r.price)}</td>
-                            <td className="px-3 py-3 text-right text-gray-600 whitespace-nowrap hidden sm:table-cell">
+                            {showCourt && <td className="px-3 py-3 text-[#2E2B27] whitespace-nowrap hidden md:table-cell"><CourtLink name={r.notice.court} /></td>}
+                            <td className="px-3 py-3 text-right font-semibold text-[#161616] whitespace-nowrap">{shortWon(r.price)}</td>
+                            <td className="px-3 py-3 text-right text-[#3A3A3A] whitespace-nowrap hidden sm:table-cell">
                                 {r.firstPrice > 0 ? `${Math.round((r.price / r.firstPrice) * 100)}%` : '-'}
                             </td>
                         </tr>
@@ -68,15 +68,15 @@ export function UpcomingTable({ rows, showCourt = true, showCategory = true }: {
 
 export function RecentNoticeList({ notices, showCourt = true, showCategory = true }: { notices: IndexedNotice[]; showCourt?: boolean; showCategory?: boolean }) {
     if (notices.length === 0) {
-        return <p className="rounded-xl border border-gray-200 bg-white p-6 text-sm text-gray-600">원문이 확인된 공고가 아직 없습니다.</p>;
+        return <p className="rounded-none border border-[#161616] bg-[#FAF7EC] p-6 text-sm text-[#3A3A3A]">원문이 확인된 공고가 아직 없습니다.</p>;
     }
     return (
-        <ul className="divide-y divide-gray-100 rounded-xl border border-gray-200 bg-white">
+        <ul className="divide-y divide-[#C9C2B4] rounded-none border border-[#161616] bg-[#FAF7EC]">
             {notices.map((n) => (
                 <li key={n.id} className="px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
-                    <span className="text-xs text-gray-500 whitespace-nowrap sm:w-20">{n.date}</span>
-                    <Link href={`/notice/${n.id}`} className="flex-1 font-medium text-gray-900 hover:text-indigo-700 hover:underline">{n.title}</Link>
-                    <span className="text-xs text-gray-500 whitespace-nowrap">
+                    <span className="text-xs text-[#57534E] whitespace-nowrap sm:w-20">{n.date}</span>
+                    <Link href={`/notice/${n.id}`} className="flex-1 font-medium text-[#161616] hover:text-[#1F3D7A] hover:underline">{n.title}</Link>
+                    <span className="text-xs text-[#57534E] whitespace-nowrap">
                         {showCategory && categoryLabel(n.category)}
                         {showCategory && showCourt && ' · '}
                         {showCourt && n.court}
@@ -102,9 +102,9 @@ export function StatsCards({ stats, days }: { stats: GroupStats; days: number })
     return (
         <dl className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {items.map((item) => (
-                <div key={item.label} className="rounded-xl border border-gray-200 bg-white p-4">
-                    <dt className="text-xs text-gray-500">{item.label}</dt>
-                    <dd className="mt-1 text-xl font-bold text-gray-900">{item.value}</dd>
+                <div key={item.label} className="rounded-none border border-[#161616] bg-[#FAF7EC] p-4">
+                    <dt className="text-xs text-[#57534E]">{item.label}</dt>
+                    <dd className="mt-1 text-xl font-bold text-[#161616]">{item.value}</dd>
                 </div>
             ))}
         </dl>
@@ -120,9 +120,9 @@ export function CountChips({ items, hrefOf, labelOf }: { items: [string, number]
                 return (
                     <li key={key}>
                         {href ? (
-                            <Link href={href} className="inline-block rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-700 hover:border-indigo-300 hover:text-indigo-700">{label}</Link>
+                            <Link href={href} className="inline-block rounded-none border border-[#161616] bg-[#FAF7EC] px-3 py-1.5 text-sm text-[#2E2B27] hover:border-[#161616] hover:text-[#1F3D7A]">{label}</Link>
                         ) : (
-                            <span className="inline-block rounded-full border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm text-gray-600">{label}</span>
+                            <span className="inline-block rounded-none border border-[#161616] bg-[#F4F0E6] px-3 py-1.5 text-sm text-[#3A3A3A]">{label}</span>
                         )}
                     </li>
                 );

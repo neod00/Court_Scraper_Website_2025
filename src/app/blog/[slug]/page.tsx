@@ -43,8 +43,8 @@ function categoryLabel(name: string): string {
 // 인라인 마크다운(굵게, 링크)을 HTML로 바꿉니다. 본문은 저장소 안의 편집 글이라 신뢰할 수 있는 입력입니다.
 function inlineMarkdown(text: string): string {
     return text
-        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-gray-900">$1</strong>')
-        .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-indigo-600 hover:underline" rel="noopener">$1</a>');
+        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#161616]">$1</strong>')
+        .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-[#1F3D7A] hover:underline" rel="noopener">$1</a>');
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -172,7 +172,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
                     if (trimmed.startsWith('## ')) {
                         return (
-                            <h2 key={idx} className="text-2xl font-bold text-gray-900 mt-10 mb-4 pb-2 border-b border-gray-200">
+                            <h2 key={idx} className="text-2xl font-bold text-[#161616] mt-10 mb-4 pb-2 border-b border-[#161616]">
                                 {trimmed.replace('## ', '')}
                             </h2>
                         );
@@ -180,20 +180,20 @@ export default async function BlogPostPage({ params }: PageProps) {
 
                     if (trimmed.startsWith('### ')) {
                         return (
-                            <h3 key={idx} className="text-xl font-bold text-gray-900 mt-8 mb-3">
+                            <h3 key={idx} className="text-xl font-bold text-[#161616] mt-8 mb-3">
                                 {trimmed.replace('### ', '')}
                             </h3>
                         );
                     }
 
                     if (trimmed === '---') {
-                        return <hr key={idx} className="my-8 border-gray-200" />;
+                        return <hr key={idx} className="my-8 border-[#161616]" />;
                     }
 
                     if (trimmed.startsWith('```')) {
                         const codeContent = trimmed.replace(/```\w*\n?/g, '').trim();
                         return (
-                            <pre key={idx} className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto my-4 text-sm">
+                            <pre key={idx} className="bg-[#161616] text-gray-100 p-4 rounded-none overflow-x-auto my-4 text-sm">
                                 <code>{codeContent}</code>
                             </pre>
                         );
@@ -212,7 +212,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                                     <thead>
                                         <tr>
                                             {headers?.map((h, i) => (
-                                                <th key={i} className="bg-gray-100 p-3 border border-gray-200 text-left font-bold">
+                                                <th key={i} className="bg-[#E9E4D8] p-3 border border-[#161616] text-left font-bold">
                                                     {h}
                                                 </th>
                                             ))}
@@ -222,7 +222,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                                         {rows.map((row, ri) => (
                                             <tr key={ri}>
                                                 {row.map((cell, ci) => (
-                                                    <td key={ci} className="p-3 border border-gray-200">
+                                                    <td key={ci} className="p-3 border border-[#161616]">
                                                         {cell}
                                                     </td>
                                                 ))}
@@ -244,7 +244,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                                     return (
                                         <li key={i} className="flex items-center gap-2">
                                             <input type="checkbox" checked={checked} readOnly className="w-4 h-4" />
-                                            <span className={checked ? 'text-gray-500 line-through' : 'text-gray-700'}>
+                                            <span className={checked ? 'text-[#57534E] line-through' : 'text-[#2E2B27]'}>
                                                 {text}
                                             </span>
                                         </li>
@@ -257,7 +257,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                     if (/^\d+\.\s/.test(trimmed)) {
                         const items = trimmed.split('\n');
                         return (
-                            <ol key={idx} className="list-decimal list-inside my-4 space-y-2 text-gray-700">
+                            <ol key={idx} className="list-decimal list-inside my-4 space-y-2 text-[#2E2B27]">
                                 {items.map((item, i) => (
                                     <li key={i} dangerouslySetInnerHTML={{
                                         __html: inlineMarkdown(item.replace(/^\d+\.\s*/, ''))
@@ -270,7 +270,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                     if (trimmed.startsWith('- ')) {
                         const items = trimmed.split('\n');
                         return (
-                            <ul key={idx} className="list-disc list-inside my-4 space-y-2 text-gray-700">
+                            <ul key={idx} className="list-disc list-inside my-4 space-y-2 text-[#2E2B27]">
                                 {items.map((item, i) => (
                                     <li key={i} dangerouslySetInnerHTML={{
                                         __html: inlineMarkdown(item.replace(/^-\s*/, ''))
@@ -281,7 +281,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                     }
 
                     return (
-                        <p key={idx} className="my-4 text-gray-700 leading-relaxed" dangerouslySetInnerHTML={{
+                        <p key={idx} className="my-4 text-[#2E2B27] leading-relaxed" dangerouslySetInnerHTML={{
                             __html: inlineMarkdown(trimmed)
                         }} />
                     );
@@ -296,38 +296,38 @@ export default async function BlogPostPage({ params }: PageProps) {
                 />
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                     <article className="lg:col-span-2">
-                <nav aria-label="현재 위치" className="flex items-center gap-2 text-sm text-gray-500 mb-8">
-                    <Link href="/" className="hover:text-indigo-600">홈</Link>
+                <nav aria-label="현재 위치" className="flex items-center gap-2 text-sm text-[#57534E] mb-8">
+                    <Link href="/" className="hover:text-[#1F3D7A]">홈</Link>
                     <span>/</span>
-                    <Link href="/blog" className="hover:text-indigo-600">블로그</Link>
+                    <Link href="/blog" className="hover:text-[#1F3D7A]">블로그</Link>
                     <span>/</span>
-                    <span className="text-gray-900 font-medium line-clamp-1">{staticPost.title}</span>
+                    <span className="text-[#161616] font-medium line-clamp-1">{staticPost.title}</span>
                 </nav>
 
                 <header className="mb-10">
                     <div className="flex items-center gap-3 mb-4">
-                        <span className="bg-indigo-100 text-indigo-700 text-sm font-bold px-3 py-1 rounded-full">
+                        <span className="bg-[#D7E7DF] text-[#1F3D7A] text-sm font-bold px-3 py-1 rounded-none border border-[#161616]">
                             {categoryLabel(staticPost.category)}
                         </span>
-                        <span className="text-gray-400 text-sm">
+                        <span className="text-[#6B655C] text-sm">
                             {staticPost.readingTime}분 읽기
                         </span>
                     </div>
-                    <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 leading-tight mb-4">
+                    <h1 className="text-3xl sm:text-4xl font-extrabold text-[#161616] leading-tight mb-4">
                         {staticPost.title}
                     </h1>
-                    <p className="text-xl text-gray-600 leading-relaxed mb-6">
+                    <p className="text-xl text-[#3A3A3A] leading-relaxed mb-6">
                         {staticPost.description}
                     </p>
-                    <div className="flex items-center justify-between flex-wrap gap-4 pb-6 border-b border-gray-200">
-                        <dl className="flex items-center flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500">
-                            <div><dt className="inline">작성 </dt><dd className="inline text-gray-700">{staticPost.author}</dd></div>
+                    <div className="flex items-center justify-between flex-wrap gap-4 pb-6 border-b border-[#161616]">
+                        <dl className="flex items-center flex-wrap gap-x-4 gap-y-1 text-sm text-[#57534E]">
+                            <div><dt className="inline">작성 </dt><dd className="inline text-[#2E2B27]">{staticPost.author}</dd></div>
                             <div><dt className="inline">게시 </dt><dd className="inline"><time dateTime={staticPost.publishedAt}>{staticPost.publishedAt}</time></dd></div>
-                            <div><dt className="inline">최종 확인 </dt><dd className="inline text-gray-700"><time dateTime={lastConfirmed}>{lastConfirmed}</time></dd></div>
+                            <div><dt className="inline">최종 확인 </dt><dd className="inline text-[#2E2B27]"><time dateTime={lastConfirmed}>{lastConfirmed}</time></dd></div>
                         </dl>
                         <div className="flex gap-2 flex-wrap">
                             {staticPost.tags.map(tag => (
-                                <span key={tag} className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">
+                                <span key={tag} className="bg-[#E9E4D8] text-[#3A3A3A] text-xs px-2 py-1 rounded-none">
                                     #{tag}
                                 </span>
                             ))}
@@ -339,7 +339,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                     {renderContent(staticPost.content)}
                 </div>
 
-                <div className="mt-12 rounded-xl border border-emerald-200 bg-emerald-50 p-6 text-sm leading-6 text-emerald-950">
+                <div className="mt-12 rounded-none border border-[#161616] bg-[#D7E7DF] p-6 text-sm leading-6 text-[#1F4D3F]">
                     <h2 className="font-bold mb-2">작성·검수 안내</h2>
                     <dl className="space-y-1">
                         <div><dt className="inline font-semibold">작성:</dt> <dd className="inline"><Link href="/authors/lawauction-editorial-team" className="underline">{staticPost.author}</Link></dd></div>
@@ -352,12 +352,12 @@ export default async function BlogPostPage({ params }: PageProps) {
                 </div>
 
                 {staticPost.sources && staticPost.sources.length > 0 && (
-                    <section className="mt-8 rounded-xl border border-gray-200 bg-white p-6" aria-labelledby="sources-heading">
-                        <h2 id="sources-heading" className="text-lg font-bold text-gray-900 mb-3">공식 참고자료</h2>
+                    <section className="mt-8 rounded-none border border-[#161616] bg-[#FAF7EC] p-6" aria-labelledby="sources-heading">
+                        <h2 id="sources-heading" className="text-lg font-bold text-[#161616] mb-3">공식 참고자료</h2>
                         <ul className="space-y-2 text-sm">
                             {staticPost.sources.map((source) => (
                                 <li key={source.url}>
-                                    <a href={source.url} target="_blank" rel="noopener noreferrer" className="text-indigo-700 underline">
+                                    <a href={source.url} target="_blank" rel="noopener noreferrer" className="text-[#1F3D7A] underline">
                                         {source.title}
                                     </a>
                                 </li>
@@ -367,22 +367,22 @@ export default async function BlogPostPage({ params }: PageProps) {
                 )}
 
                 {relatedPosts.length > 0 && (
-                    <section className="mt-16 pt-8 border-t border-gray-200" aria-labelledby="related-heading">
-                        <h2 id="related-heading" className="text-2xl font-bold text-gray-900 mb-6">관련 글</h2>
+                    <section className="mt-16 pt-8 border-t border-[#161616]" aria-labelledby="related-heading">
+                        <h2 id="related-heading" className="text-2xl font-bold text-[#161616] mb-6">관련 글</h2>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             {relatedPosts.map((related) => (
                                 <Link
                                     key={related.slug}
                                     href={`/blog/${related.slug}`}
-                                    className="group bg-gray-50 rounded-xl p-5 hover:bg-indigo-50 transition-colors"
+                                    className="group bg-[#F4F0E6] rounded-none p-5 hover:bg-[#D7E7DF] transition-colors"
                                 >
-                                    <span className="text-xs text-indigo-600 font-bold">
+                                    <span className="text-xs text-[#1F3D7A] font-bold">
                                         {categoryLabel(related.category)}
                                     </span>
-                                    <h3 className="font-bold text-gray-900 mt-2 group-hover:text-indigo-600 transition-colors line-clamp-2">
+                                    <h3 className="font-bold text-[#161616] mt-2 group-hover:text-[#1F3D7A] transition-colors line-clamp-2">
                                         {related.title}
                                     </h3>
-                                    <p className="text-sm text-gray-500 mt-2 line-clamp-2">
+                                    <p className="text-sm text-[#57534E] mt-2 line-clamp-2">
                                         {related.description}
                                     </p>
                                 </Link>
@@ -391,11 +391,11 @@ export default async function BlogPostPage({ params }: PageProps) {
                     </section>
                 )}
 
-                <div className="mt-12 pt-8 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <Link href="/blog" className="flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-medium">
+                <div className="mt-12 pt-8 border-t border-[#161616] flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <Link href="/blog" className="flex items-center gap-2 text-[#1F3D7A] hover:text-[#1F3D7A] font-medium">
                         &larr; 블로그 목록으로
                     </Link>
-                    <Link href="/" className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-700 transition-colors">
+                    <Link href="/" className="bg-[#161616] text-white px-6 py-3 rounded-none font-bold hover:bg-[#161616] transition-colors">
                         공고 검색하기
                     </Link>
                 </div>
@@ -427,40 +427,40 @@ export default async function BlogPostPage({ params }: PageProps) {
         <div className="max-w-7xl mx-auto px-4 py-8">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                 <article className="lg:col-span-2">
-            <nav aria-label="현재 위치" className="flex items-center gap-2 text-sm text-gray-500 mb-8">
-                <Link href="/" className="hover:text-indigo-600">홈</Link>
+            <nav aria-label="현재 위치" className="flex items-center gap-2 text-sm text-[#57534E] mb-8">
+                <Link href="/" className="hover:text-[#1F3D7A]">홈</Link>
                 <span>/</span>
-                <Link href="/blog" className="hover:text-indigo-600">블로그</Link>
+                <Link href="/blog" className="hover:text-[#1F3D7A]">블로그</Link>
                 <span>/</span>
-                <span className="text-gray-900 font-medium line-clamp-1">{dynamicPost.title}</span>
+                <span className="text-[#161616] font-medium line-clamp-1">{dynamicPost.title}</span>
             </nav>
 
             <header className="mb-10">
                 <div className="flex items-center gap-3 mb-4 flex-wrap">
-                    <span className="bg-emerald-100 text-emerald-700 text-sm font-bold px-3 py-1 rounded-full">
+                    <span className="bg-[#D7E7DF] text-[#1F4D3F] text-sm font-bold px-3 py-1 rounded-none border border-[#161616]">
                         {dynamicPost.category || '시장분석'}
                     </span>
-                    <span className="text-gray-400 text-sm">
+                    <span className="text-[#6B655C] text-sm">
                         {readingTime}분 읽기
                     </span>
-                    <span className="bg-amber-100 text-amber-700 text-xs font-bold px-2 py-1 rounded">
+                    <span className="bg-[#F6F1C4] text-[#161616] text-xs font-bold px-2 py-1 rounded-none">
                         AI 초안
                     </span>
                 </div>
-                <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 leading-tight mb-4">
+                <h1 className="text-3xl sm:text-4xl font-extrabold text-[#161616] leading-tight mb-4">
                     {dynamicPost.title}
                 </h1>
-                <p className="text-xl text-gray-600 leading-relaxed mb-6">
+                <p className="text-xl text-[#3A3A3A] leading-relaxed mb-6">
                     {dynamicPost.description}
                 </p>
-                <div className="flex items-center justify-between flex-wrap gap-4 pb-6 border-b border-gray-200">
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                <div className="flex items-center justify-between flex-wrap gap-4 pb-6 border-b border-[#161616]">
+                    <div className="flex items-center gap-4 text-sm text-[#57534E]">
                         <span>{dynamicPost.author || '로옥션'}</span>
                         <span>{dynamicPost.published_at}</span>
                     </div>
                     <div className="flex gap-2 flex-wrap">
                         {tags.map((tag: string) => (
-                            <span key={tag} className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded">
+                            <span key={tag} className="bg-[#E9E4D8] text-[#3A3A3A] text-xs px-2 py-1 rounded-none">
                                 #{tag}
                             </span>
                         ))}
@@ -473,7 +473,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                 <MarkdownRenderer content={dynamicPost.content} />
             </div>
 
-            <div className="mt-12 rounded-xl border border-amber-200 bg-amber-50 p-6 text-sm leading-6 text-amber-950">
+            <div className="mt-12 rounded-none border border-[#161616] bg-[#F6F1C4] p-6 text-sm leading-6 text-[#161616]">
                 <h2 className="font-bold mb-2">작성 안내</h2>
                 <p>
                     이 글은 로옥션이 수집한 공고 데이터를 바탕으로 만든 초안이며, 편집팀의 사실 확인 절차는{' '}
@@ -481,15 +481,15 @@ export default async function BlogPostPage({ params }: PageProps) {
                 </p>
             </div>
 
-            <div className="mt-12 pt-8 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4">
-                <Link href="/blog" className="flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-medium">
+            <div className="mt-12 pt-8 border-t border-[#161616] flex flex-col sm:flex-row justify-between items-center gap-4">
+                <Link href="/blog" className="flex items-center gap-2 text-[#1F3D7A] hover:text-[#1F3D7A] font-medium">
                     &larr; 블로그 목록으로
                 </Link>
                 <div className="flex gap-4">
-                    <Link href="/" className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-700 transition-colors">
+                    <Link href="/" className="bg-[#161616] text-white px-6 py-3 rounded-none font-bold hover:bg-[#161616] transition-colors">
                         공고 검색하기
                     </Link>
-                    <Link href="/tools" className="bg-emerald-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-emerald-700 transition-colors">
+                    <Link href="/tools" className="bg-[#161616] text-white px-6 py-3 rounded-none font-bold hover:bg-[#161616] transition-colors">
                         계산기 보기
                     </Link>
                 </div>

@@ -128,17 +128,17 @@ export default function DDayChart({ rawItems }: DDayChartProps) {
     <div className="w-full flex flex-col space-y-6">
         {/* Scorecards */}
         <div className="grid grid-cols-3 gap-3 md:gap-4">
-            <div className="bg-blue-50/50 p-3 md:p-4 rounded-xl border border-blue-100 flex flex-col items-center justify-center text-center">
-                <span className="text-xs font-bold text-blue-600 mb-1">입찰 예정 공고</span>
-                <span className="text-lg md:text-2xl font-black text-gray-900">{totalItems}건</span>
+            <div className="bg-[#D7E7DF] p-3 md:p-4 rounded-none border border-[#161616] flex flex-col items-center justify-center text-center">
+                <span className="text-xs font-bold text-[#1F3D7A] mb-1">입찰 예정 공고</span>
+                <span className="text-lg md:text-2xl font-black text-[#161616]">{totalItems}건</span>
             </div>
-            <div className="bg-purple-50/50 p-3 md:p-4 rounded-xl border border-purple-100 flex flex-col items-center justify-center text-center">
-                <span className="text-xs font-bold text-purple-600 mb-1">최저매각가 합계</span>
-                <span className="text-lg md:text-2xl font-black text-gray-900">{totalVolumeUk}억</span>
+            <div className="bg-[#D7E7DF] p-3 md:p-4 rounded-none border border-[#161616] flex flex-col items-center justify-center text-center">
+                <span className="text-xs font-bold text-[#1F3D7A] mb-1">최저매각가 합계</span>
+                <span className="text-lg md:text-2xl font-black text-[#161616]">{totalVolumeUk}억</span>
             </div>
-            <div className="bg-emerald-50/50 p-3 md:p-4 rounded-xl border border-emerald-100 flex flex-col items-center justify-center text-center">
-                <span className="text-xs font-bold text-emerald-600 mb-1">마감이 가장 많은 날</span>
-                <span className="text-lg md:text-2xl font-black text-gray-900">{peakDay} ({peakDayCount}건)</span>
+            <div className="bg-[#D7E7DF] p-3 md:p-4 rounded-none border border-[#161616] flex flex-col items-center justify-center text-center">
+                <span className="text-xs font-bold text-[#1F4D3F] mb-1">마감이 가장 많은 날</span>
+                <span className="text-lg md:text-2xl font-black text-[#161616]">{peakDay} ({peakDayCount}건)</span>
             </div>
         </div>
 
@@ -150,10 +150,10 @@ export default function DDayChart({ rawItems }: DDayChartProps) {
                     type="button"
                     onClick={() => setActiveFilter(f)}
                     aria-pressed={activeFilter === f}
-                    className={`px-4 py-2 rounded-full text-sm font-bold transition-all whitespace-nowrap ${
+                    className={`px-4 py-2 rounded-none border border-[#161616] text-sm font-bold transition-all whitespace-nowrap ${
                         activeFilter === f
-                        ? 'bg-gray-900 text-white shadow-md'
-                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                        ? 'bg-[#161616] text-white '
+                        : 'bg-[#E9E4D8] text-[#57534E] hover:bg-[#DCD6C8]'
                     }`}
                 >
                     {f}
@@ -227,7 +227,7 @@ export default function DDayChart({ rawItems }: DDayChartProps) {
                     </ComposedChart>
                 </ResponsiveContainer>
             ) : (
-                <div className="w-full h-full min-h-72 flex items-center justify-center bg-gray-50 rounded-xl text-gray-400">
+                <div className="w-full h-full min-h-72 flex items-center justify-center bg-[#F4F0E6] rounded-none text-[#6B655C]">
                     해당 조건의 공고가 없습니다.
                 </div>
             )}

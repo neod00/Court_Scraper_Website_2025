@@ -52,28 +52,28 @@ export default function VehicleTransferPage() {
 
     return (
         <div className="max-w-4xl mx-auto px-4 py-8">
-            <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8" aria-label="breadcrumb">
-                <Link href="/" className="hover:text-indigo-600">홈</Link>
+            <nav className="flex items-center gap-2 text-sm text-[#57534E] mb-8" aria-label="breadcrumb">
+                <Link href="/" className="hover:text-[#1F3D7A]">홈</Link>
                 <span>/</span>
-                <Link href="/tools" className="hover:text-indigo-600">계산기</Link>
+                <Link href="/tools" className="hover:text-[#1F3D7A]">계산기</Link>
                 <span>/</span>
-                <span className="text-gray-900 font-medium">차량 이전비 계산기</span>
+                <span className="text-[#161616] font-medium">차량 이전비 계산기</span>
             </nav>
 
             <header className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900">차량 이전비 계산기</h1>
-                <p className="text-gray-600 mt-2 leading-relaxed">
+                <h1 className="text-3xl font-bold text-[#161616]">차량 이전비 계산기</h1>
+                <p className="text-[#3A3A3A] mt-2 leading-relaxed">
                     회생·파산 매각이나 경매로 산 차량을 내 이름으로 이전 등록할 때 드는 취득세, 공채 부담액, 기타 비용을 합산합니다.
                     취득세는 법령 세율로 계산하고, 지역마다 다른 공채 비율은 직접 입력합니다. 세율 확인일 {RULES_CHECKED_AT}.
                 </p>
             </header>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
-                    <h2 className="text-lg font-bold text-gray-900">차량 정보 입력</h2>
+                <div className="bg-[#FAF7EC] rounded-none border border-[#C9C2B4] p-6 space-y-5">
+                    <h2 className="text-lg font-bold text-[#161616]">차량 정보 입력</h2>
 
                     <div>
-                        <p className="block text-sm font-medium text-gray-700 mb-2">차종</p>
+                        <p className="block text-sm font-medium text-[#2E2B27] mb-2">차종</p>
                         <div className="grid grid-cols-3 gap-2">
                             {KINDS.map((k) => (
                                 <button
@@ -81,17 +81,17 @@ export default function VehicleTransferPage() {
                                     type="button"
                                     aria-pressed={kind === k.value}
                                     onClick={() => setKind(k.value)}
-                                    className={`py-2 px-2 rounded-lg text-sm font-medium border transition-colors ${kind === k.value ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'}`}
+                                    className={`py-2 px-2 rounded-none text-sm font-medium border transition-colors ${kind === k.value ? 'bg-[#161616] text-white border-[#161616]' : 'bg-[#FAF7EC] text-[#2E2B27] border-[#161616] hover:border-[#161616]'}`}
                                 >
                                     {k.label}
-                                    <span className={`block text-[11px] mt-0.5 ${kind === k.value ? 'text-indigo-100' : 'text-gray-400'}`}>{k.hint}</span>
+                                    <span className={`block text-[11px] mt-0.5 ${kind === k.value ? 'text-[#CFC8B8]' : 'text-[#6B655C]'}`}>{k.hint}</span>
                                 </button>
                             ))}
                         </div>
                     </div>
 
                     <div>
-                        <p className="block text-sm font-medium text-gray-700 mb-2">용도</p>
+                        <p className="block text-sm font-medium text-[#2E2B27] mb-2">용도</p>
                         <div className="grid grid-cols-2 gap-2">
                             {([['personal', '비영업용'], ['business', '영업용']] as const).map(([v, label]) => (
                                 <button
@@ -99,7 +99,7 @@ export default function VehicleTransferPage() {
                                     type="button"
                                     aria-pressed={use === v}
                                     onClick={() => setUse(v)}
-                                    className={`py-2 px-2 rounded-lg text-sm font-medium border transition-colors ${use === v ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300'}`}
+                                    className={`py-2 px-2 rounded-none text-sm font-medium border transition-colors ${use === v ? 'bg-[#161616] text-white border-[#161616]' : 'bg-[#FAF7EC] text-[#2E2B27] border-[#161616] hover:border-[#161616]'}`}
                                 >
                                     {label}
                                 </button>
@@ -108,7 +108,7 @@ export default function VehicleTransferPage() {
                     </div>
 
                     <div>
-                        <label htmlFor="vt-price" className="block text-sm font-medium text-gray-700 mb-2">취득가액 (낙찰가)</label>
+                        <label htmlFor="vt-price" className="block text-sm font-medium text-[#2E2B27] mb-2">취득가액 (낙찰가)</label>
                         <div className="relative">
                             <input
                                 id="vt-price"
@@ -117,15 +117,15 @@ export default function VehicleTransferPage() {
                                 value={vehiclePrice}
                                 onChange={(e) => setVehiclePrice(formatNumber(e.target.value))}
                                 placeholder="0"
-                                className="w-full px-4 py-3 pr-12 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 text-right text-lg"
+                                className="w-full px-4 py-3 pr-12 border border-[#161616] rounded-none focus:ring-2 focus:ring-[#161616] text-right text-lg"
                             />
-                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">원</span>
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#57534E]">원</span>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
                         <div>
-                            <label htmlFor="vt-bond" className="block text-sm font-medium text-gray-700 mb-2">공채 매입률 (%)</label>
+                            <label htmlFor="vt-bond" className="block text-sm font-medium text-[#2E2B27] mb-2">공채 매입률 (%)</label>
                             <input
                                 id="vt-bond"
                                 type="text"
@@ -133,11 +133,11 @@ export default function VehicleTransferPage() {
                                 value={bondRate}
                                 onChange={(e) => setBondRate(e.target.value.replace(/[^0-9.]/g, ''))}
                                 placeholder="예: 0"
-                                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-right"
+                                className="w-full px-3 py-2.5 border border-[#161616] rounded-none text-right"
                             />
                         </div>
                         <div>
-                            <label htmlFor="vt-disc" className="block text-sm font-medium text-gray-700 mb-2">공채 할인율 (%)</label>
+                            <label htmlFor="vt-disc" className="block text-sm font-medium text-[#2E2B27] mb-2">공채 할인율 (%)</label>
                             <input
                                 id="vt-disc"
                                 type="text"
@@ -145,14 +145,14 @@ export default function VehicleTransferPage() {
                                 value={bondDiscount}
                                 onChange={(e) => setBondDiscount(e.target.value.replace(/[^0-9.]/g, ''))}
                                 placeholder="예: 0"
-                                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-right"
+                                className="w-full px-3 py-2.5 border border-[#161616] rounded-none text-right"
                             />
                         </div>
                     </div>
-                    <p className="text-xs text-gray-500 -mt-2">등록할 시·도 차량등록사업소에서 확인한 값을 넣으세요. 비워 두면 0으로 계산합니다.</p>
+                    <p className="text-xs text-[#57534E] -mt-2">등록할 시·도 차량등록사업소에서 확인한 값을 넣으세요. 비워 두면 0으로 계산합니다.</p>
 
                     <div>
-                        <label htmlFor="vt-other" className="block text-sm font-medium text-gray-700 mb-2">기타 비용 (번호판·인지·대행 수수료 등)</label>
+                        <label htmlFor="vt-other" className="block text-sm font-medium text-[#2E2B27] mb-2">기타 비용 (번호판·인지·대행 수수료 등)</label>
                         <div className="relative">
                             <input
                                 id="vt-other"
@@ -161,52 +161,52 @@ export default function VehicleTransferPage() {
                                 value={otherCost}
                                 onChange={(e) => setOtherCost(formatNumber(e.target.value))}
                                 placeholder="0"
-                                className="w-full px-4 py-2.5 pr-12 border border-gray-200 rounded-lg text-right"
+                                className="w-full px-4 py-2.5 pr-12 border border-[#161616] rounded-none text-right"
                             />
-                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">원</span>
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#57534E]">원</span>
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl shadow-lg p-6 text-white" aria-live="polite">
+                <div className="bg-[#161616] rounded-none p-6 text-white" aria-live="polite">
                     <h2 className="text-lg font-bold mb-6">예상 이전 비용</h2>
                     {tax && bond ? (
                         <div className="space-y-4">
-                            <div className="bg-white/10 rounded-xl p-4">
-                                <div className="text-emerald-100 text-sm">취득세율</div>
+                            <div className="bg-white/10 rounded-none p-4">
+                                <div className="text-[#CFC8B8] text-sm">취득세율</div>
                                 <div className="text-3xl font-bold">{tax.rate}%</div>
-                                <div className="text-emerald-50 text-xs mt-1">{tax.basis}</div>
+                                <div className="text-[#CFC8B8] text-xs mt-1">{tax.basis}</div>
                             </div>
                             <dl className="space-y-3">
-                                <div className="flex justify-between"><dt className="text-emerald-100">취득세</dt><dd className="font-medium">{won(tax.tax)}</dd></div>
+                                <div className="flex justify-between"><dt className="text-[#CFC8B8]">취득세</dt><dd className="font-medium">{won(tax.tax)}</dd></div>
                                 {tax.relief > 0 && (
-                                    <div className="flex justify-between text-sm"><dt className="text-emerald-100">경차 감면 반영</dt><dd>−{won(tax.relief)}</dd></div>
+                                    <div className="flex justify-between text-sm"><dt className="text-[#CFC8B8]">경차 감면 반영</dt><dd>−{won(tax.relief)}</dd></div>
                                 )}
-                                <div className="flex justify-between"><dt className="text-emerald-100">공채 부담액</dt><dd className="font-medium">{won(bond.cost)}</dd></div>
+                                <div className="flex justify-between"><dt className="text-[#CFC8B8]">공채 부담액</dt><dd className="font-medium">{won(bond.cost)}</dd></div>
                                 {bond.face > 0 && (
-                                    <div className="flex justify-between text-sm"><dt className="text-emerald-100">공채 액면</dt><dd>{won(bond.face)}</dd></div>
+                                    <div className="flex justify-between text-sm"><dt className="text-[#CFC8B8]">공채 액면</dt><dd>{won(bond.face)}</dd></div>
                                 )}
-                                <div className="flex justify-between"><dt className="text-emerald-100">기타 비용</dt><dd className="font-medium">{won(other)}</dd></div>
+                                <div className="flex justify-between"><dt className="text-[#CFC8B8]">기타 비용</dt><dd className="font-medium">{won(other)}</dd></div>
                             </dl>
                             <div className="border-t border-white/20 pt-4">
                                 <div className="flex justify-between items-center">
                                     <span className="text-lg">이전 비용 합계</span>
                                     <span className="text-2xl font-bold">{won(totalCost)}</span>
                                 </div>
-                                <div className="text-emerald-100 text-sm text-right mt-1">낙찰가 포함 {won(price + totalCost)}</div>
+                                <div className="text-[#CFC8B8] text-sm text-right mt-1">낙찰가 포함 {won(price + totalCost)}</div>
                             </div>
                         </div>
                     ) : (
-                        <p className="text-center text-emerald-100 py-12">취득가액을 입력하면 바로 계산합니다.</p>
+                        <p className="text-center text-[#CFC8B8] py-12">취득가액을 입력하면 바로 계산합니다.</p>
                     )}
                 </div>
             </div>
 
             <section className="mt-12" aria-labelledby="rate-heading">
-                <h2 id="rate-heading" className="text-xl font-bold text-gray-900 mb-4">차량 취득세율 (지방세법 제12조)</h2>
-                <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
+                <h2 id="rate-heading" className="text-xl font-bold text-[#161616] mb-4">차량 취득세율 (지방세법 제12조)</h2>
+                <div className="overflow-x-auto rounded-none border border-[#161616] bg-[#FAF7EC]">
                     <table className="w-full text-sm">
-                        <thead className="bg-gray-50 text-gray-600">
+                        <thead className="bg-[#F4F0E6] text-[#3A3A3A]">
                             <tr>
                                 <th scope="col" className="text-left px-4 py-3 font-medium">차종</th>
                                 <th scope="col" className="text-right px-4 py-3 font-medium">비영업용</th>
@@ -214,18 +214,18 @@ export default function VehicleTransferPage() {
                             </tr>
                         </thead>
                         <tbody>
-                            <tr className="border-t border-gray-100"><th scope="row" className="text-left px-4 py-3 font-normal">승용차</th><td className="text-right px-4 py-3">7%</td><td className="text-right px-4 py-3">4%</td></tr>
-                            <tr className="border-t border-gray-100"><th scope="row" className="text-left px-4 py-3 font-normal">승합·화물차</th><td className="text-right px-4 py-3">5%</td><td className="text-right px-4 py-3">4%</td></tr>
-                            <tr className="border-t border-gray-100"><th scope="row" className="text-left px-4 py-3 font-normal">경자동차</th><td className="text-right px-4 py-3">4% (75만 원까지 감면)</td><td className="text-right px-4 py-3">4%</td></tr>
+                            <tr className="border-t border-[#C9C2B4]"><th scope="row" className="text-left px-4 py-3 font-normal">승용차</th><td className="text-right px-4 py-3">7%</td><td className="text-right px-4 py-3">4%</td></tr>
+                            <tr className="border-t border-[#C9C2B4]"><th scope="row" className="text-left px-4 py-3 font-normal">승합·화물차</th><td className="text-right px-4 py-3">5%</td><td className="text-right px-4 py-3">4%</td></tr>
+                            <tr className="border-t border-[#C9C2B4]"><th scope="row" className="text-left px-4 py-3 font-normal">경자동차</th><td className="text-right px-4 py-3">4% (75만 원까지 감면)</td><td className="text-right px-4 py-3">4%</td></tr>
                         </tbody>
                     </table>
                 </div>
-                <p className="text-xs text-gray-500 mt-2">경차 감면은 지방세특례제한법 제67조에 따르며 적용기한이 있습니다. 하이브리드·전기차 감면은 이 계산기에 넣지 않았습니다.</p>
+                <p className="text-xs text-[#57534E] mt-2">경차 감면은 지방세특례제한법 제67조에 따르며 적용기한이 있습니다. 하이브리드·전기차 감면은 이 계산기에 넣지 않았습니다.</p>
             </section>
 
-            <section className="mt-10 bg-blue-50 rounded-xl p-6 border border-blue-100" aria-labelledby="doc-heading">
-                <h2 id="doc-heading" className="text-base font-bold text-blue-900 mb-3">법원 매각 차량 이전 등록 준비물</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-800">
+            <section className="mt-10 bg-[#D7E7DF] rounded-none p-6 border border-[#161616]" aria-labelledby="doc-heading">
+                <h2 id="doc-heading" className="text-base font-bold text-[#1F3D7A] mb-3">법원 매각 차량 이전 등록 준비물</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-[#1F3D7A]">
                     <div>
                         <h3 className="font-bold mb-1">서류</h3>
                         <ul className="space-y-0.5">
@@ -246,20 +246,20 @@ export default function VehicleTransferPage() {
             </section>
 
             <section className="mt-10" aria-labelledby="faq-heading">
-                <h2 id="faq-heading" className="text-xl font-bold text-gray-900 mb-4">자주 묻는 질문</h2>
+                <h2 id="faq-heading" className="text-xl font-bold text-[#161616] mb-4">자주 묻는 질문</h2>
                 <div className="space-y-3">
                     {FAQ.map((item) => (
-                        <details key={item.q} className="rounded-xl border border-gray-200 bg-white p-5">
-                            <summary className="font-semibold text-gray-900 cursor-pointer">{item.q}</summary>
-                            <p className="mt-3 text-sm text-gray-700 leading-relaxed">{item.a}</p>
+                        <details key={item.q} className="rounded-none border border-[#161616] bg-[#FAF7EC] p-5">
+                            <summary className="font-semibold text-[#161616] cursor-pointer">{item.q}</summary>
+                            <p className="mt-3 text-sm text-[#2E2B27] leading-relaxed">{item.a}</p>
                         </details>
                     ))}
                 </div>
             </section>
 
-            <section className="mt-10 bg-amber-50 rounded-xl p-6 border border-amber-100">
-                <h2 className="text-base font-bold text-amber-900 mb-3">계산하지 않는 것</h2>
-                <ul className="text-sm text-amber-800 space-y-1">
+            <section className="mt-10 bg-[#F6F1C4] rounded-none p-6 border border-[#161616]">
+                <h2 className="text-base font-bold text-[#161616] mb-3">계산하지 않는 것</h2>
+                <ul className="text-sm text-[#161616] space-y-1">
                     <li>• 공채 매입률·할인율과 기타 비용은 입력값을 그대로 더합니다.</li>
                     <li>• 실제 금액은 등록할 시·도 차량등록사업소에서 확정됩니다.</li>
                     <li>• 법령이 바뀌면 결과가 달라집니다. 위택스(wetax.go.kr)와 국가법령정보센터(law.go.kr)에서 확인하세요.</li>
@@ -267,8 +267,8 @@ export default function VehicleTransferPage() {
             </section>
 
             <div className="mt-8 flex flex-wrap gap-3">
-                <Link href="/tools/acquisition-tax" className="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-5 py-3 rounded-lg font-medium hover:bg-gray-200">취득세 계산기 →</Link>
-                <Link href="/category/vehicle" className="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-5 py-3 rounded-lg font-medium hover:bg-gray-200">차량 매각 공고 보기 →</Link>
+                <Link href="/tools/acquisition-tax" className="inline-flex items-center gap-2 bg-[#E9E4D8] text-[#2E2B27] px-5 py-3 rounded-none font-medium hover:bg-[#DCD6C8]">취득세 계산기 →</Link>
+                <Link href="/category/vehicle" className="inline-flex items-center gap-2 bg-[#E9E4D8] text-[#2E2B27] px-5 py-3 rounded-none font-medium hover:bg-[#DCD6C8]">차량 매각 공고 보기 →</Link>
             </div>
         </div>
     );

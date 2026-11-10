@@ -169,27 +169,27 @@ export default function FAQPage() {
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
             />
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">자주 묻는 질문</h1>
-            <p className="text-gray-600 leading-relaxed mb-6">
+            <h1 className="text-3xl font-bold text-[#161616] mb-2">자주 묻는 질문</h1>
+            <p className="text-[#3A3A3A] leading-relaxed mb-6">
                 로옥션 이용 방법과 회생·파산 자산매각 공고를 읽을 때 자주 나오는 질문을 모았습니다.
                 &lsquo;공고 읽기&rsquo; 항목의 수치는 {CORPUS_BASE}입니다.
             </p>
 
             <div className="space-y-8">
                 {faqs.map((section) => (
-                    <div key={section.category} className="bg-white shadow rounded-lg p-6">
-                        <h2 className="text-xl font-semibold text-indigo-600 mb-4">
+                    <div key={section.category} className="bg-[#FAF7EC] rounded-none p-6">
+                        <h2 className="text-xl font-semibold text-[#1F3D7A] mb-4">
                             {section.category}
                         </h2>
                         <div className="space-y-5">
                             {section.questions.map((faq) => (
-                                <div key={faq.q} className="border-b border-gray-100 pb-5 last:border-b-0 last:pb-0">
-                                    <h3 className="font-medium text-gray-900 mb-2 flex items-start gap-2">
-                                        <span className="text-indigo-500 font-bold">Q.</span>
+                                <div key={faq.q} className="border-b border-[#C9C2B4] pb-5 last:border-b-0 last:pb-0">
+                                    <h3 className="font-medium text-[#161616] mb-2 flex items-start gap-2">
+                                        <span className="text-[#1F3D7A] font-bold">Q.</span>
                                         {faq.q}
                                     </h3>
-                                    <p className="text-gray-600 pl-6 leading-relaxed">
-                                        <span className="text-green-600 font-bold mr-1">A.</span>
+                                    <p className="text-[#3A3A3A] pl-6 leading-relaxed">
+                                        <span className="text-[#1F4D3F] font-bold mr-1">A.</span>
                                         {faq.a}
                                     </p>
                                 </div>
@@ -198,15 +198,15 @@ export default function FAQPage() {
                     </div>
                 ))}
 
-                <div className="bg-gray-50 rounded-lg p-6 text-sm text-gray-600 leading-relaxed">
+                <div className="bg-[#F4F0E6] rounded-none p-6 text-sm text-[#3A3A3A] leading-relaxed">
                     <p>
                         답변은 공고를 읽는 방법을 설명하는 일반 정보이며 개별 사건에 대한 법률 판단이 아닙니다.
                         용어별 설명은{' '}
-                        <Link href="/glossary" className="text-indigo-600 hover:underline">용어사전</Link>,
+                        <Link href="/glossary" className="text-[#1F3D7A] hover:underline">용어사전</Link>,
                         작성·검수 기준은{' '}
-                        <Link href="/editorial-policy" className="text-indigo-600 hover:underline">편집·데이터 운영 원칙</Link>
+                        <Link href="/editorial-policy" className="text-[#1F3D7A] hover:underline">편집·데이터 운영 원칙</Link>
                         을 참고하세요. 찾는 답변이 없다면{' '}
-                        <Link href="/contact" className="text-indigo-600 hover:underline">문의 페이지</Link>
+                        <Link href="/contact" className="text-[#1F3D7A] hover:underline">문의 페이지</Link>
                         로 알려주세요.
                     </p>
                 </div>

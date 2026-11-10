@@ -51,20 +51,20 @@ export default function CourtCostCalculator({ category }: Props) {
     };
 
     return (
-        <div className="bg-gradient-to-br from-gray-50 to-indigo-50/30 rounded-xl p-6 border border-gray-200 shadow-sm mt-8">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">예상 부대비용 계산</h3>
+        <div className="bg-[#D7E7DF] rounded-none p-6 border border-[#161616] mt-8">
+            <h3 className="text-lg font-bold text-[#161616] mb-4">예상 부대비용 계산</h3>
 
-            <p className="text-sm text-gray-600 mb-5 leading-relaxed">
+            <p className="text-sm text-[#3A3A3A] mb-5 leading-relaxed">
                 입찰 금액을 입력하면 취득세와 등기·인도 관련 비용을 예시 세율로 계산합니다.
                 공고별 매각 조건과 실제 세율은 원문과 과세 기관에서 확인해야 합니다.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label htmlFor="bid-price" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="bid-price" className="block text-sm font-medium text-[#2E2B27] mb-2">
                         입찰 금액 입력
                     </label>
-                    <div className="relative rounded-md shadow-sm">
+                    <div className="relative rounded-none">
                         <input
                             id="bid-price"
                             type="text"
@@ -73,11 +73,11 @@ export default function CourtCostCalculator({ category }: Props) {
                                 const val = e.target.value.replace(/[^0-9]/g, '');
                                 setPrice(val ? parseInt(val, 10) : '');
                             }}
-                            className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-4 pr-12 py-3 sm:text-sm border-gray-300 rounded-lg"
+                            className="focus:ring-[#161616] focus:border-[#161616] block w-full pl-4 pr-12 py-3 sm:text-sm border-[#161616] rounded-none"
                             placeholder="예: 300000000"
                         />
                         <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                            <span className="text-gray-500 sm:text-sm">원</span>
+                            <span className="text-[#57534E] sm:text-sm">원</span>
                         </div>
                     </div>
 
@@ -88,43 +88,43 @@ export default function CourtCostCalculator({ category }: Props) {
                                 type="checkbox"
                                 checked={isMultiHouse}
                                 onChange={(e) => setIsMultiHouse(e.target.checked)}
-                                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                className="h-4 w-4 text-[#1F3D7A] focus:ring-[#161616] border-[#161616] rounded-none"
                             />
-                            <label htmlFor="multi-house" className="ml-2 block text-sm text-gray-700">
+                            <label htmlFor="multi-house" className="ml-2 block text-sm text-[#2E2B27]">
                                 다주택자 (취득세 중과 적용)
                             </label>
                         </div>
                     )}
                 </div>
 
-                <div className="bg-white p-5 rounded-lg border border-indigo-100 shadow-inner">
-                    <h4 className="text-sm font-bold text-gray-900 mb-4 border-b pb-2">산출 결과</h4>
+                <div className="bg-[#FAF7EC] p-5 rounded-none border border-[#161616]">
+                    <h4 className="text-sm font-bold text-[#161616] mb-4 border-b pb-2">산출 결과</h4>
                     
                     <div className="space-y-3 text-sm">
                         <div className="flex justify-between">
-                            <span className="text-gray-500">입찰 금액:</span>
-                            <span className="font-semibold text-gray-900">{isValid ? formatWon(numericPrice) : '-'}</span>
+                            <span className="text-[#57534E]">입찰 금액:</span>
+                            <span className="font-semibold text-[#161616]">{isValid ? formatWon(numericPrice) : '-'}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-gray-500">{taxName}:</span>
+                            <span className="text-[#57534E]">{taxName}:</span>
                             <span className="font-semibold text-red-600">+{isValid ? formatWon(estimatedTax) : '-'}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-gray-500">등기·인도 관련 비용(예시 1.5%):</span>
-                            <span className="font-semibold text-amber-600">+{isValid ? formatWon(estimatedExtra) : '-'}</span>
+                            <span className="text-[#57534E]">등기·인도 관련 비용(예시 1.5%):</span>
+                            <span className="font-semibold text-[#161616]">+{isValid ? formatWon(estimatedExtra) : '-'}</span>
                         </div>
-                        <div className="border-t border-gray-100 pt-3 mt-3 flex justify-between font-bold">
-                            <span className="text-indigo-900">예상 합계:</span>
-                            <span className="text-indigo-700 text-lg">{isValid ? formatWon(totalCost) : '-'}</span>
+                        <div className="border-t border-[#C9C2B4] pt-3 mt-3 flex justify-between font-bold">
+                            <span className="text-[#1F3D7A]">예상 합계:</span>
+                            <span className="text-[#1F3D7A] text-lg">{isValid ? formatWon(totalCost) : '-'}</span>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <div className="mt-4 text-[11px] text-gray-500 leading-relaxed">
+            <div className="mt-4 text-[11px] text-[#57534E] leading-relaxed">
                 <p>
                     * 적용 세율은 예시이며 지역·과세표준·주택 수에 따라 실제 세금과 다를 수 있습니다.
-                    세율 근거와 자세한 계산은 <a href="/tools" className="underline text-indigo-600 hover:text-indigo-800">계산 도구 페이지</a>에서 확인할 수 있습니다.
+                    세율 근거와 자세한 계산은 <a href="/tools" className="underline text-[#1F3D7A] hover:text-[#1F3D7A]">계산 도구 페이지</a>에서 확인할 수 있습니다.
                 </p>
             </div>
         </div>

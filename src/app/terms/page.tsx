@@ -9,29 +9,29 @@ export const metadata: Metadata = {
 export default function TermsPage() {
     return (
         <div className="max-w-4xl mx-auto">
-            <h1 className="text-3xl font-bold text-gray-900 mb-6">이용약관</h1>
+            <h1 className="text-3xl font-bold text-[#161616] mb-6">이용약관</h1>
 
-            <div className="bg-white shadow rounded-lg p-6 space-y-8">
-                <p className="text-gray-600 text-sm">
+            <div className="bg-[#FAF7EC] rounded-none p-6 space-y-8">
+                <p className="text-[#3A3A3A] text-sm">
                     최종 수정일: 2026년 9월 8일
                 </p>
 
                 <section>
-                    <h2 className="text-xl font-semibold text-gray-800 mb-3">제1조 (목적)</h2>
-                    <p className="text-gray-600 leading-relaxed">
+                    <h2 className="text-xl font-semibold text-[#161616] mb-3">제1조 (목적)</h2>
+                    <p className="text-[#3A3A3A] leading-relaxed">
                         이 약관은 로옥션(LawAuction)(이하 &quot;서비스&quot;)이 제공하는
                         모든 서비스의 이용조건 및 절차에 관한 사항을 규정함을 목적으로 합니다.
                     </p>
                 </section>
 
                 <section>
-                    <h2 className="text-xl font-semibold text-gray-800 mb-3">제2조 (서비스의 내용)</h2>
-                    <p className="text-gray-600 leading-relaxed">
+                    <h2 className="text-xl font-semibold text-[#161616] mb-3">제2조 (서비스의 내용)</h2>
+                    <p className="text-[#3A3A3A] leading-relaxed">
                         본 서비스는 대한민국 법원이 공개한 회생/파산 자산매각 공고 등 공개 자료를 수집·보관하여 사용자에게
                         검색 및 조회 기능을 제공하며, 공고 원문 확인 방법과 일반적인 절차,
                         관련 기관 확인 경로를 설명하는 편집 콘텐츠를 추가로 제공합니다.
                     </p>
-                    <ul className="list-disc list-inside text-gray-600 mt-3 space-y-1">
+                    <ul className="list-disc list-inside text-[#3A3A3A] mt-3 space-y-1">
                         <li>회생/파산 자산매각 공고 검색</li>
                         <li>날짜별, 카테고리별 필터링</li>
                         <li>공고 상세 정보 조회 및 원문 확인 안내</li>
@@ -43,14 +43,14 @@ export default function TermsPage() {
                 </section>
 
                 <section>
-                    <h2 className="text-xl font-semibold text-gray-800 mb-3">제3조 (면책조항)</h2>
-                    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-md">
-                        <p className="text-yellow-800 leading-relaxed">
+                    <h2 className="text-xl font-semibold text-[#161616] mb-3">제3조 (면책조항)</h2>
+                    <div className="bg-[#F6F1C4] border-l-4 border-[#161616] p-4 rounded-none">
+                        <p className="text-[#161616] leading-relaxed">
                             <strong>중요:</strong> 본 서비스에서 제공하는 정보는 참고용으로만 제공되며,
                             법적 효력이 없습니다. 정확한 정보는 반드시 대한민국 법원 대국민서비스(scourt.go.kr)에서 직접 확인하시기 바랍니다.
                         </p>
                     </div>
-                    <ul className="list-disc list-inside text-gray-600 mt-4 space-y-2">
+                    <ul className="list-disc list-inside text-[#3A3A3A] mt-4 space-y-2">
                         <li>본 서비스는 정보의 정확성, 완전성, 적시성을 보장하지 않습니다.</li>
                         <li>본 서비스 이용으로 인해 발생하는 직/간접적인 손해에 대해 책임지지 않습니다.</li>
                         <li>데이터는 주기적으로 업데이트되나, 실시간 반영이 아닐 수 있습니다.</li>
@@ -59,23 +59,23 @@ export default function TermsPage() {
                 </section>
 
                 <section>
-                    <h2 className="text-xl font-semibold text-gray-800 mb-3">제4조 (데이터 출처 및 저작권)</h2>
-                    <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-md">
-                        <p className="text-blue-800 leading-relaxed mb-3">
+                    <h2 className="text-xl font-semibold text-[#161616] mb-3">제4조 (데이터 출처 및 저작권)</h2>
+                    <div className="bg-[#D7E7DF] border-l-4 border-[#161616] p-4 rounded-none">
+                        <p className="text-[#1F3D7A] leading-relaxed mb-3">
                             본 서비스는 대한민국 법원 대국민서비스(scourt.go.kr)에 공개된 회생/파산 자산매각 공고 정보를
                             기초 데이터로 활용하여, 사용자의 편의를 위해 정리/시각화한 민간 정보 서비스입니다.
                         </p>
-                        <p className="text-blue-800 leading-relaxed mb-3">
+                        <p className="text-[#1F3D7A] leading-relaxed mb-3">
                             본 서비스는 법원 또는 법원행정처와 직접적인 제휴/보증 관계에 있지 않으며,
                             법원이 제공하는 원문 정보가 최종적/공식적인 효력을 가집니다.
                         </p>
-                        <p className="text-blue-700 text-sm">
+                        <p className="text-[#1F3D7A] text-sm">
                             <strong>출처:</strong> 대한민국 법원 대국민서비스 (
                             <a
                                 href="https://www.scourt.go.kr"
                                 target="_blank"
                                 rel="noreferrer"
-                                className="underline hover:text-blue-900"
+                                className="underline hover:text-[#1F3D7A]"
                             >
                                 https://www.scourt.go.kr
                             </a>
@@ -86,8 +86,8 @@ export default function TermsPage() {
                 </section>
 
                 <section>
-                    <h2 className="text-xl font-semibold text-gray-800 mb-3">제5조 (서비스 이용 및 광고 게재)</h2>
-                    <p className="text-gray-600 leading-relaxed">
+                    <h2 className="text-xl font-semibold text-[#161616] mb-3">제5조 (서비스 이용 및 광고 게재)</h2>
+                    <p className="text-[#3A3A3A] leading-relaxed">
                         본 서비스는 별도의 회원가입 없이 무료로 이용할 수 있습니다.
                         서비스 운영을 위해 검수된 편집 콘텐츠에 광고가 게재될 수 있으며,
                         광고 수익은 오로지 서비스 운영 및 개선을 위해 사용됩니다.
@@ -96,22 +96,22 @@ export default function TermsPage() {
                 </section>
 
                 <section>
-                    <h2 className="text-xl font-semibold text-gray-800 mb-3">제6조 (서비스의 변경 및 중단)</h2>
-                    <p className="text-gray-600 leading-relaxed">
+                    <h2 className="text-xl font-semibold text-[#161616] mb-3">제6조 (서비스의 변경 및 중단)</h2>
+                    <p className="text-[#3A3A3A] leading-relaxed">
                         서비스 제공자는 운영상, 기술상의 필요에 따라 제공하고 있는 서비스를 변경하거나
                         중단할 수 있습니다. 서비스의 변경 또는 중단 시 가능한 한 사전에 공지하도록 합니다.
                     </p>
                 </section>
 
                 <section>
-                    <h2 className="text-xl font-semibold text-gray-800 mb-3">제7조 (준거법)</h2>
-                    <p className="text-gray-600 leading-relaxed">
+                    <h2 className="text-xl font-semibold text-[#161616] mb-3">제7조 (준거법)</h2>
+                    <p className="text-[#3A3A3A] leading-relaxed">
                         본 약관의 해석 및 서비스 이용에 관하여는 대한민국 법률을 적용합니다.
                     </p>
                 </section>
 
-                <section className="border-t border-gray-200 pt-6">
-                    <p className="text-sm text-gray-500">
+                <section className="border-t border-[#161616] pt-6">
+                    <p className="text-sm text-[#57534E]">
                         본 이용약관은 2026년 7월 11일부터 시행되며, 2026년 9월 8일에 서비스 내용 조항(제2조·제4조)의 문구를 정비했습니다.
                     </p>
                 </section>

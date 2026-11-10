@@ -57,31 +57,31 @@ export default function GlossaryPage() {
 
             {/* 헤더 */}
             <header className="mb-12">
-                <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+                <h1 className="text-3xl sm:text-4xl font-bold text-[#161616] mb-4">
                     회생·파산 자산매각 용어사전
                 </h1>
-                <p className="text-lg text-gray-600 max-w-3xl leading-relaxed">
+                <p className="text-lg text-[#3A3A3A] max-w-3xl leading-relaxed">
                     법원 회생·파산 자산매각 공고를 읽을 때 마주치는 {glossaryTerms.length}개 용어를 설명합니다.
                     각 용어 끝에는 로옥션(LawAuction)이 수집한 공고에서 그 개념이 실제로 얼마나 언급되는지를 덧붙여,
                     법원 경매 용어와 관재인·관리인 매각 공고의 차이를 확인할 수 있게 했습니다.
                 </p>
-                <p className="mt-4 text-sm text-gray-500">
-                    기준: {GLOSSARY_REVIEWED_AT} 검수 · 용어 {glossaryTerms.length}개 · 작성 <Link href="/authors/lawauction-editorial-team" className="underline hover:text-indigo-600">로옥션 편집팀</Link>
+                <p className="mt-4 text-sm text-[#57534E]">
+                    기준: {GLOSSARY_REVIEWED_AT} 검수 · 용어 {glossaryTerms.length}개 · 작성 <Link href="/authors/lawauction-editorial-team" className="underline hover:text-[#1F3D7A]">로옥션 편집팀</Link>
                 </p>
             </header>
 
             {/* 카테고리 바로가기 */}
-            <nav className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-12" aria-label="카테고리 바로가기">
-                <h2 className="text-lg font-bold text-gray-800 mb-4">카테고리별 바로가기</h2>
+            <nav className="bg-[#FAF7EC] rounded-none border border-[#C9C2B4] p-6 mb-12" aria-label="카테고리 바로가기">
+                <h2 className="text-lg font-bold text-[#161616] mb-4">카테고리별 바로가기</h2>
                 <div className="flex flex-wrap gap-3">
                     {categorizedTerms.map(({ category, terms }) => (
                         <a
                             key={category}
                             href={`#category-${category}`}
-                            className="inline-flex items-center gap-2 bg-gray-100 hover:bg-indigo-100 text-gray-700 hover:text-indigo-700 px-4 py-2 rounded-lg transition-colors"
+                            className="inline-flex items-center gap-2 bg-[#E9E4D8] hover:bg-[#D7E7DF] text-[#2E2B27] hover:text-[#1F3D7A] px-4 py-2 rounded-none transition-colors"
                         >
                             <span className="font-medium">{category}</span>
-                            <span className="text-sm text-gray-500">({terms.length})</span>
+                            <span className="text-sm text-[#57534E]">({terms.length})</span>
                         </a>
                     ))}
                 </div>
@@ -91,9 +91,9 @@ export default function GlossaryPage() {
             <div className="space-y-16">
                 {categorizedTerms.map(({ category, terms }) => (
                     <section key={category} id={`category-${category}`} className="scroll-mt-24">
-                        <div className="mb-6 pb-4 border-b-2 border-indigo-100">
-                            <h2 className="text-2xl font-bold text-gray-900">{category}</h2>
-                            <p className="text-sm text-gray-500">{categoryDescriptions[category]}</p>
+                        <div className="mb-6 pb-4 border-b-2 border-[#161616]">
+                            <h2 className="text-2xl font-bold text-[#161616]">{category}</h2>
+                            <p className="text-sm text-[#57534E]">{categoryDescriptions[category]}</p>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -101,17 +101,17 @@ export default function GlossaryPage() {
                                 <Link
                                     key={item.slug}
                                     href={`/glossary/${item.slug}`}
-                                    className="group bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg hover:border-indigo-200 transition-all duration-300"
+                                    className="group bg-[#FAF7EC] rounded-none border border-[#C9C2B4] p-6 hover:border-[#161616] transition-all duration-300"
                                 >
                                     <div className="flex items-start justify-between mb-3">
-                                        <h3 className="text-xl font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">
+                                        <h3 className="text-xl font-bold text-[#161616] group-hover:text-[#1F3D7A] transition-colors">
                                             {getTermDisplayName(item)}
                                         </h3>
-                                        <span className="text-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true">
+                                        <span className="text-[#1F3D7A] opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true">
                                             →
                                         </span>
                                     </div>
-                                    <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                                    <p className="text-[#3A3A3A] text-sm leading-relaxed mb-4">
                                         {item.shortDescription}
                                     </p>
                                     <div className="flex flex-wrap gap-2">
@@ -122,7 +122,7 @@ export default function GlossaryPage() {
                                             .map((related) => (
                                                 <span
                                                     key={related.slug}
-                                                    className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded"
+                                                    className="text-xs bg-[#E9E4D8] text-[#3A3A3A] px-2 py-1 rounded-none"
                                                 >
                                                     {getTermDisplayName(related)}
                                                 </span>
@@ -136,33 +136,33 @@ export default function GlossaryPage() {
             </div>
 
             {/* 통계 기준 */}
-            <p className="mt-12 text-sm text-gray-500 leading-relaxed border-t border-gray-200 pt-6">
+            <p className="mt-12 text-sm text-[#57534E] leading-relaxed border-t border-[#161616] pt-6">
                 {GLOSSARY_CORPUS_NOTE}{' '}
-                집계 방법은 <Link href="/editorial-policy" className="underline hover:text-indigo-600">데이터·편집 원칙</Link>에서 확인할 수 있습니다.
+                집계 방법은 <Link href="/editorial-policy" className="underline hover:text-[#1F3D7A]">데이터·편집 원칙</Link>에서 확인할 수 있습니다.
             </p>
 
             {/* 다음 단계 */}
-            <div className="mt-8 bg-gray-50 rounded-2xl p-8 border border-gray-100">
-                <h2 className="text-xl font-bold text-gray-900 mb-3">함께 보기</h2>
-                <p className="text-gray-600 mb-6">
+            <div className="mt-8 bg-[#F4F0E6] rounded-none p-8 border border-[#C9C2B4]">
+                <h2 className="text-xl font-bold text-[#161616] mb-3">함께 보기</h2>
+                <p className="text-[#3A3A3A] mb-6">
                     용어를 확인한 뒤에는 실제 공고를 검색하거나, 공고 읽는 순서를 정리한 편집 글을 볼 수 있습니다.
                 </p>
                 <div className="flex gap-4 flex-wrap">
                     <Link
                         href="/"
-                        className="bg-indigo-600 text-white font-bold px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors"
+                        className="bg-[#161616] text-white font-bold px-6 py-3 rounded-none hover:bg-[#161616] transition-colors"
                     >
                         공고 검색
                     </Link>
                     <Link
                         href="/blog"
-                        className="bg-white border border-gray-200 text-gray-700 font-bold px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors"
+                        className="bg-[#FAF7EC] border border-[#161616] text-[#2E2B27] font-bold px-6 py-3 rounded-none hover:bg-[#E9E4D8] transition-colors"
                     >
                         편집 콘텐츠
                     </Link>
                     <Link
                         href="/faq"
-                        className="bg-white border border-gray-200 text-gray-700 font-bold px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors"
+                        className="bg-[#FAF7EC] border border-[#161616] text-[#2E2B27] font-bold px-6 py-3 rounded-none hover:bg-[#E9E4D8] transition-colors"
                     >
                         자주 묻는 질문
                     </Link>

@@ -68,26 +68,26 @@ export default async function Home({ searchParams }: PageProps) {
     return (
       <div className="max-w-6xl mx-auto">
         <header className="mb-8">
-          <p className="text-sm font-semibold text-indigo-600 mb-2">공개 공고 검색</p>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900">법원 자산매각 공고 검색 결과</h1>
-          <p className="mt-4 text-gray-600 leading-relaxed">
+          <p className="text-sm font-semibold text-[#1F3D7A] mb-2">공개 공고 검색</p>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-[#161616]">법원 자산매각 공고 검색 결과</h1>
+          <p className="mt-4 text-[#3A3A3A] leading-relaxed">
             검색 결과는 대한민국 법원 공개자료를 수집해 정리한 참고 정보이며, 일정과 조건은 공고 상세의 원문 링크에서 다시 확인해야 합니다.
           </p>
         </header>
 
-        <Suspense fallback={<div className="h-96 rounded-2xl bg-gray-100 animate-pulse" />}>
+        <Suspense fallback={<div className="h-96 rounded-none bg-[#E9E4D8] animate-pulse" />}>
           <SearchForm />
         </Suspense>
 
         {error ? (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-red-800">
+          <div className="rounded-none border border-red-200 bg-red-50 p-6 text-red-800">
             공고를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.
           </div>
         ) : (
           <section>
             <div className="flex items-center justify-between gap-4 mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">조회 결과</h2>
-              <span className="text-sm text-gray-500">최대 50건 표시 · 전체 {count ?? 0}건</span>
+              <h2 className="text-2xl font-bold text-[#161616]">조회 결과</h2>
+              <span className="text-sm text-[#57534E]">최대 50건 표시 · 전체 {count ?? 0}건</span>
             </div>
 
             {notices && notices.length > 0 ? (
@@ -95,9 +95,9 @@ export default async function Home({ searchParams }: PageProps) {
                 {notices.map((notice) => <NoticeCard key={notice.id} notice={notice} />)}
               </div>
             ) : (
-              <div className="rounded-2xl border border-gray-200 bg-white p-10 text-center">
-                <h3 className="font-bold text-gray-900 mb-2">조건에 맞는 공고가 없습니다</h3>
-                <p className="text-gray-600">기간을 넓히거나 키워드·자산 유형을 변경해 다시 조회해 보세요.</p>
+              <div className="rounded-none border border-[#161616] bg-[#FAF7EC] p-10 text-center">
+                <h3 className="font-bold text-[#161616] mb-2">조건에 맞는 공고가 없습니다</h3>
+                <p className="text-[#3A3A3A]">기간을 넓히거나 키워드·자산 유형을 변경해 다시 조회해 보세요.</p>
               </div>
             )}
           </section>

@@ -63,23 +63,23 @@ export default async function SameEstateNotices({ currentId, saleOrg }: Props) {
     const firstDate = rows[rows.length - 1]?.date_posted;
 
     return (
-        <section className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-soft">
-            <div className="px-6 py-4 bg-gray-50 border-b border-gray-100">
-                <h2 className="text-lg font-bold text-gray-900">같은 매각기관의 다른 공고</h2>
-                <p className="text-xs text-gray-500 mt-1">
+        <section className="bg-[#FAF7EC] rounded-none border border-[#161616] overflow-hidden">
+            <div className="px-6 py-4 bg-[#F4F0E6] border-b border-[#C9C2B4]">
+                <h2 className="text-lg font-bold text-[#161616]">같은 매각기관의 다른 공고</h2>
+                <p className="text-xs text-[#57534E] mt-1">
                     {maskPersonNames(saleOrg)} 명의로 로옥션이 수집한 공고 {rows.length}건
                     {firstDate ? ` · ${firstDate}부터` : ''}
                 </p>
             </div>
-            <ol className="divide-y divide-gray-100">
+            <ol className="divide-y divide-[#C9C2B4]">
                 {rows.map((r) => {
                     const price = r.minimum_price ? Number(r.minimum_price) : null;
                     const body = (
                         <>
-                            <span className="text-xs text-gray-500 font-mono w-24 flex-shrink-0">{r.date_posted}</span>
+                            <span className="text-xs text-[#57534E] font-mono w-24 flex-shrink-0">{r.date_posted}</span>
                             <span className="flex-1 min-w-0">
-                                <span className="block text-sm font-medium text-gray-900 truncate">{maskPersonNames(r.title)}</span>
-                                <span className="block text-xs text-gray-500 mt-0.5">
+                                <span className="block text-sm font-medium text-[#161616] truncate">{maskPersonNames(r.title)}</span>
+                                <span className="block text-xs text-[#57534E] mt-0.5">
                                     {CATEGORY_LABEL[r.category ?? 'etc'] ?? '기타'}
                                     {price && price > 0 ? ` · 공고상 최저가 ${formatWon(price)}` : ''}
                                 </span>
@@ -89,7 +89,7 @@ export default async function SameEstateNotices({ currentId, saleOrg }: Props) {
                     return (
                         <li key={r.id}>
                             {linkable(r) ? (
-                                <Link href={`/notice/${r.id}`} className="flex gap-3 items-start px-6 py-3 hover:bg-indigo-50/40 transition-colors">
+                                <Link href={`/notice/${r.id}`} className="flex gap-3 items-start px-6 py-3 hover:bg-[#D7E7DF] transition-colors">
                                     {body}
                                 </Link>
                             ) : (
@@ -99,7 +99,7 @@ export default async function SameEstateNotices({ currentId, saleOrg }: Props) {
                     );
                 })}
             </ol>
-            <p className="px-6 py-3 text-[11px] text-gray-500 border-t border-gray-100 bg-gray-50/50">
+            <p className="px-6 py-3 text-[11px] text-[#57534E] border-t border-[#C9C2B4] bg-[#F4F0E6]">
                 매각기관 표기가 원문과 똑같은 공고만 묶었습니다. 표기가 조금이라도 다르면 같은 파산재단이어도 빠질 수 있습니다.
             </p>
         </section>
