@@ -11,12 +11,13 @@ interface PageProps {
     end?: string;
     q?: string;
     cat?: string;
+    court?: string;
   }>;
 }
 
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
   const params = await searchParams;
-  const hasSearchParams = Boolean(params.start || params.end || params.q || params.cat);
+  const hasSearchParams = Boolean(params.start || params.end || params.q || params.cat || params.court);
 
   if (hasSearchParams) {
     return {
@@ -30,7 +31,7 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   return {
     title: { absolute: '로옥션(LawAuction) | 법원 회생·파산 자산매각 공고 검색·입찰 일정·취득세 계산기' },
     description:
-      '전국 회생법원과 지방법원의 파산관재인 자산매각 공고를 검색하고, 첨부 공고문에서 읽은 회차별 최저입찰가와 입찰 마감일, 취득세·입찰가 계산기를 함께 쓰는 도구 사이트입니다.',
+      '전국 회생법원과 지방법원의 파산관재인 자산매각 공고를 검색하고, 첨부 공고문에서 읽은 회차별 최저입찰가와 입찰일, 취득세·입찰가 계산기를 함께 쓰는 도구 사이트입니다.',
     alternates: { canonical: '/' },
     robots: { index: true, follow: true },
   };
@@ -42,7 +43,8 @@ export default async function Home({ searchParams }: PageProps) {
   const end = params.end?.trim();
   const keyword = params.q?.trim();
   const category = params.cat?.trim();
-  const hasSearchParams = Boolean(start || end || keyword || category);
+  const court = params.court?.trim();
+  const hasSearchParams = Boolean(start || end || keyword || category || court);
 
   if (hasSearchParams) {
     let query = supabase
@@ -53,6 +55,7 @@ export default async function Home({ searchParams }: PageProps) {
     if (start) query = query.gte('date_posted', start);
     if (end) query = query.lte('date_posted', end);
     if (category) query = query.eq('category', category);
+    if (court) query = query.eq('department', court);
     if (keyword) {
       const safeKeyword = keyword.replace(/[,%()]/g, ' ').trim();
       if (safeKeyword) query = query.or(`title.ilike.%${safeKeyword}%,content_text.ilike.%${safeKeyword}%`);

@@ -2,19 +2,98 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 편집형 디자인(2026-11-10) — 종이 바탕, 먹색 글자, 가는 선. 홈 시안 Editorial.dc.html 기준 */
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --ink: #161616;
+  --paper: #EFEBE2;
+  --paper-light: #FAF7EC;
+  --rule: #C9C2B4;
+  --ink-soft: #3A3A3A;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: white;
+  color: var(--ink);
+  background: var(--paper);
+  letter-spacing: -0.015em;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
-@layer utilities {
-  .animation-delay-2000 {
-    animation-delay: 2s;
+/* 금액·날짜·건수는 자릿수를 세로로 맞춘다 */
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── 홈 모션 ───────────────────────────────────────────────
+   모두 transform·opacity 만 움직인다(레이아웃 재계산 없음).
+   운영체제에서 '동작 줄이기'를 켠 방문자에게는 전부 끈다. */
+
+/* 상단 입찰 티커: 같은 목록을 두 번 이어 붙이고 절반만큼 흘린다 */
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.ticker-track {
+  animation: ticker 60s linear infinite;
+}
+.ticker:hover .ticker-track,
+.ticker:focus-within .ticker-track {
+  animation-play-state: paused;
+}
+
+/* 회차 막대가 아래에서 자라난다 */
+@keyframes bar-grow {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+.bar-grow {
+  transform-origin: bottom;
+  animation: bar-grow 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* 가로 막대가 왼쪽에서 채워진다(.reveal 이 보일 때) */
+.fill-bar {
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.2s;
+}
+.is-revealed .fill-bar {
+  transform: scaleX(1);
+}
+
+/* 스크롤하면 구역이 살짝 떠오른다 */
+.reveal-pending {
+  opacity: 0;
+  transform: translateY(24px);
+}
+.reveal-pending.is-revealed {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* 오늘·내일 입찰 표시가 천천히 깜박인다 */
+@keyframes soft-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+.soft-blink {
+  animation: soft-blink 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track,
+  .bar-grow,
+  .soft-blink {
+    animation: none !important;
+  }
+  .fill-bar {
+    transform: none !important;
+    transition: none !important;
+  }
+  .reveal-pending {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
   }
 }

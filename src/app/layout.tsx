@@ -1,12 +1,11 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+// Pretendard(OFL) 동적 서브셋 — 페이지에 쓰인 글자 묶음만 내려받는다. CSP 상 글꼴은 자체 도메인에서만 받는다.
+import 'pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css';
 import './globals.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import AdSenseLoader from '@/components/AdSenseLoader';
 import { ADSENSE_CLIENT_ID } from '@/lib/adsense';
-
-const inter = Inter({ subsets: ['latin'] });
 
 const siteUrl = 'https://www.courtauction.site';
 const siteName = '로옥션(LawAuction)';
@@ -110,7 +109,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         />
         <AdSenseLoader />
       </head>
-      <body className={`${inter.className} min-h-screen flex flex-col bg-gray-50`}>
+      <body className="font-sans min-h-screen flex flex-col bg-[#EFEBE2] text-[#161616] antialiased">
         <Header />
         <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {children}

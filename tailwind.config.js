@@ -7,6 +7,15 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['"Pretendard Variable"', 'Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', '"Apple SD Gothic Neo"', '"Noto Sans KR"', '"Malgun Gothic"', 'sans-serif'],
+      },
+      colors: {
+        // 로옥션 브랜드 파랑과 회색 단계 (홈 시안 2026-11-10)
+        brand: { 50: '#EEF3FF', 100: '#E4EBFF', 200: '#C9D6FF', 500: '#2B5CFF', 600: '#1E44C8' },
+        ink: { DEFAULT: '#191F28', 700: '#333D4B', 600: '#4E5968', 500: '#5F6875', 400: '#6B7684' },
+        surface: { DEFAULT: '#F2F4F6', soft: '#F7F8FA', line: '#EEF0F3' },
+      },
       animation: {
         blob: "blob 7s infinite",
         "steam-1": "steam 2s ease-out infinite",
