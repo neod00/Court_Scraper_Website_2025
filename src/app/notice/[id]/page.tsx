@@ -8,6 +8,7 @@ import NoticeHero from '@/components/NoticeHero';
 import RelatedNoticesRSS from '@/components/RelatedNoticesRSS';
 import SameEstateNotices from '@/components/SameEstateNotices';
 import CourtCostCalculator from '@/components/CourtCostCalculator';
+import { AdSenseTag } from '@/components/AdSenseLoader';
 import { getRecentPosts } from '@/data/blog-posts';
 import { glossaryTerms } from '@/data/glossary';
 import { isQualityNotice, hasUsefulSummary } from '@/lib/noticeQuality';
@@ -111,8 +112,11 @@ export default async function NoticeDetail({ params }: PageProps) {
 
     const categorySlug = getCategoryByDbCategory(notice.category)?.slug;
     const courtInfo = getCourtByName(notice.department);
+    // 광고는 검색에 노출하는 공고(색인 기준과 동일)에만 싣는다. 원문·요약이 없는 얇은 페이지는 광고 없음.
+    const showAds = INDEX_AUTOMATED_NOTICE_PAGES && isQualityNotice(notice);
     return (
         <div className="max-w-7xl mx-auto px-4 py-6 md:py-10">
+            {showAds && <AdSenseTag />}
             <Breadcrumbs
                 items={[
                     { label: '공고 검색', href: '/' },
