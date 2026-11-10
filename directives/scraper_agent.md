@@ -221,6 +221,7 @@ supabase
   - 법원 파일 서버는 `downFile` 인자를 저장 파일명으로만 쓴다 → 다운로드 링크에 가린 파일명을 넣어도 같은 파일이 받아진다.
 - **GitHub Actions(해외 IP)에서 첨부 다운로드가 자주 끊김**: 2026-10 로그 기준 22건 중 15건 `RemoteDisconnected`. 한국 IP(로컬)에서는 같은 파일이 정상 다운로드됨. 대응: 재시도(5·15·40초), 다운로드 간 대기, 실패 시 대체 요약을 쓰지 않고 7일간 재시도(`ai_report_generator.RETRY_WINDOW_DAYS`). 그래도 남는 공백은 로컬에서 `python scripts/attachment_text_extractor.py --all-missing` 로 메운다.
 - **과거 결함**: 다운로드 실패 시에도 '첨부파일을 확인하라'는 대체 요약을 저장해 재시도 대상에서 영구 제외됐다(PDF 첨부 883건 중 479건). 원문이 채워진 뒤 `python scripts/ai_report_generator.py --refresh-fallback --limit N` 으로 다시 요약할 수 있다(OpenAI 비용 발생 — 실행 전 사용자 확인).
+- **스캔 PDF 판독(2026-11-11 비교 결과)**: 무료 Tesseract(kor)는 회차별 가격 표의 행을 대부분 잃어(3건 중 3건) 쓸 수 없다. GPT-4o-mini Vision 은 표는 잘 읽지만 이름·차량번호·차대번호·주소를 그럴듯하게 지어낸다(1건). 그래서 Vision 으로 읽은 원문은 맨 앞에 `[이미지 판독]` 줄(`notice_text.OCR_MARKER`)을 붙여 저장하고, 사이트는 원문·회차표·요약에 '이미지에서 읽은 글자' 안내를 띄운다. GPT 응답의 ``` 울타리는 `clean_text` 가 지운다. extractor 는 이 표시가 있는 원문을 NULL 로 지우지 않는다.
 - HWP 첨부는 `olefile` 로 BodyText 문단 레코드를 읽는다. 스캔 이미지 PDF 는 extractor 가 건너뛰고(무료 원칙), OCR 은 ai_report_generator 의 Vision 경로만 사용.
 
 ### 사이트 변경 이력

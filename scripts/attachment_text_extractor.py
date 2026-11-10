@@ -31,7 +31,7 @@ from dotenv import load_dotenv
 from supabase import create_client
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from notice_text import build_notice_text, visible_len  # noqa: E402
+from notice_text import OCR_MARKER, build_notice_text, visible_len  # noqa: E402
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 load_dotenv(os.path.join(BASE_DIR, ".env.local"))
@@ -137,8 +137,9 @@ def main() -> None:
                 if row.get("content_text") and needs_text(row):
                     save(sb, row, None)
             else:
-                # 첨부 없음·스캔본·너무 짧음 → 원문 없음으로 확정(NULL)
-                if row.get("content_text"):
+                # 첨부 없음·스캔본·너무 짧음 → 원문 없음으로 확정(NULL).
+                # 단 ai_report_generator 가 스캔본을 GPT 로 읽어 둔 원문은 남긴다.
+                if row.get("content_text") and not row["content_text"].startswith(OCR_MARKER):
                     save(sb, row, None)
         except Exception as e:
             print(f"    저장 오류, 건너뜀: {type(e).__name__} {str(e)[:120]}")

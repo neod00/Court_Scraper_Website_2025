@@ -19,6 +19,7 @@ import {
     hasSubstantialText,
     maskPersonNames,
     parseRoundTable,
+    splitOcrText,
     toTextBlocks,
     textExcerpt,
 } from '@/lib/noticeText';
@@ -60,7 +61,7 @@ export async function generateMetadata({ params }: PageProps) {
     if (hasUsefulSummary(notice.ai_summary)) {
         description = textExcerpt(notice.ai_summary.replace(/[*#]/g, ''), 155);
     } else if (hasSubstantialText(notice.content_text, notice.title)) {
-        description = textExcerpt(`${notice.department || ''} ${notice.content_text}`, 155);
+        description = textExcerpt(`${notice.department || ''} ${splitOcrText(notice.content_text).text}`, 155);
     }
 
     const shouldIndex = INDEX_AUTOMATED_NOTICE_PAGES && isQualityNotice(notice);
@@ -106,7 +107,8 @@ export default async function NoticeDetail({ params }: PageProps) {
     };
 
     const safeTitle = maskPersonNames(notice.title);
-    const originalText: string | null = hasSubstantialText(notice.content_text, notice.title) ? notice.content_text : null;
+    const stored = splitOcrText(notice.content_text);
+    const originalText: string | null = hasSubstantialText(stored.text, notice.title) ? stored.text : null;
     const rounds = originalText ? parseRoundTable(originalText) : null;
     const showSummary = hasUsefulSummary(notice.ai_summary);
 
@@ -179,7 +181,7 @@ export default async function NoticeDetail({ params }: PageProps) {
                         </div>
                     </div>
 
-                    {rounds && <RoundTableSection rows={rounds} />}
+                    {rounds && <RoundTableSection rows={rounds} ocr={stored.ocr} />}
 
                     {/* AI Analysis Report Section — '첨부파일을 확인하라'는 대체 요약은 보여주지 않는다 */}
                     {showSummary && (
@@ -188,6 +190,12 @@ export default async function NoticeDetail({ params }: PageProps) {
                                 <h2 className="text-base font-bold text-[#161616]">공고 첨부문서 요약</h2>
                                 <span className="text-[11px] font-medium text-[#57534E]">AI 추출 · 원문 확인 필수</span>
                             </div>
+                            {stored.ocr && (
+                                <p role="note" className="px-6 py-3 bg-[#F6F1C4] border-b border-[#161616] text-sm text-[#161616] leading-relaxed">
+                                    <strong className="font-bold">스캔 이미지를 AI가 읽어 만든 요약입니다.</strong>{' '}
+                                    이름·차량번호·주소·금액이 틀릴 수 있으니 첨부파일 원본과 대조하세요.
+                                </p>
+                            )}
 
                             <div className="p-6 md:p-8">
                                 <div className="prose prose-indigo max-w-none text-[#2E2B27] leading-[1.8] prose-strong:text-[#1F3D7A] prose-strong:font-bold prose-p:my-4 prose-li:my-1">
@@ -261,7 +269,7 @@ export default async function NoticeDetail({ params }: PageProps) {
                     )}
 
                     {/* 첨부문서 원문 — PDF·HWP 를 열지 않고 읽을 수 있게 텍스트로 옮긴 것 */}
-                    {originalText && <OriginalTextSection text={originalText} />}
+                    {originalText && <OriginalTextSection text={originalText} ocr={stored.ocr} />}
 
                     <SameEstateNotices currentId={notice.id} saleOrg={notice.sale_org} />
 

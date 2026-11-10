@@ -52,6 +52,9 @@ _ORG_SUFFIXES = ("법원", "지방법원", "회생법원", "과", "팀", "부", 
 
 # src/lib/noticeText.ts MIN_TEXT_CHARS 와 같은 값이어야 한다.
 MIN_STORE_CHARS = 400
+# 스캔 이미지 PDF 를 GPT Vision 으로 읽은 원문 맨 앞에 붙이는 표시 줄.
+# 사이트(src/lib/noticeText.ts OCR_MARKER)가 이 줄을 보고 '이미지에서 읽은 글자' 안내를 띄운다. 함께 고칠 것.
+OCR_MARKER = "[이미지 판독]"
 MAX_STORE_CHARS = 20000
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
@@ -201,6 +204,8 @@ def clean_text(raw: str) -> str:
     t = re.sub(r"[\x00-\x08\x0b\x0c\x0e-\x1f�]", "", t)
     # 짝 없는 서로게이트(HWP·PDF 글꼴 깨짐)는 UTF-8 로 인코딩되지 않아 DB 전송 단계에서 예외가 난다.
     t = t.encode("utf-8", "ignore").decode("utf-8")
+    # GPT 가 답을 ``` 코드 블록으로 감싸 보내는 경우가 있다 — 울타리 줄만 지운다.
+    t = re.sub(r"^[ \t]*```[a-zA-Z]*[ \t]*$", "", t, flags=re.M)
     lines = []
     for line in t.split("\n"):
         line = re.sub(r"[ \t]+", " ", line).strip()

@@ -11,6 +11,21 @@ export function visibleLength(text: string | null | undefined): number {
     return (text || '').replace(/\s/g, '').length;
 }
 
+/** 스캔 이미지 PDF 를 GPT 로 읽은 원문의 첫 줄 표시. scripts/notice_text.py OCR_MARKER 와 같은 값. */
+export const OCR_MARKER = '[이미지 판독]';
+
+/**
+ * 저장된 원문에서 판독 표시 줄과 코드 울타리(```)를 걷어 내고, 이미지 판독 원문인지 알려 준다.
+ * 표시·회차표·설명문에는 반드시 이 함수를 거친 text 를 쓴다.
+ */
+export function splitOcrText(contentText: string | null | undefined): { text: string; ocr: boolean } {
+    let t = contentText || '';
+    const ocr = t.startsWith(OCR_MARKER);
+    if (ocr) t = t.slice(OCR_MARKER.length);
+    t = t.replace(/^[ \t]*```[a-zA-Z]*[ \t]*$/gm, '').replace(/\n{3,}/g, '\n\n').trim();
+    return { text: t, ocr };
+}
+
 /** 예전 스크래퍼가 넣은 '제목 복제' 값을 걸러내고, 읽을 만한 원문인지 본다. */
 export function hasSubstantialText(contentText: string | null | undefined, title?: string | null): boolean {
     if (!contentText) return false;

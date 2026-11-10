@@ -37,6 +37,7 @@ from notice_text import (  # noqa: E402  공용 다운로드(재시도)·정리�
     visible_len,
     MIN_STORE_CHARS,
     MAX_STORE_CHARS,
+    OCR_MARKER,
 )
 
 # 첨부 다운로드가 전부 실패한 공고는 이 기간 동안 대체 요약을 쓰지 않고 다음 실행에서 다시 시도한다.
@@ -101,11 +102,12 @@ def download_attachment(server_filename: str, original_filename: str, path: str 
 
 
 # ── 2. Text Extraction ────────────────────────────────────────────
-def extract_text_from_pdf(file_path: str) -> str:
+def extract_text_from_pdf(file_path: str) -> tuple[str, bool]:
     """
     Extracts text from a PDF file.
     First tries pdfplumber (for text-based PDFs).
     Falls back to pymupdf image extraction + OpenAI Vision (for image-based PDFs).
+    Returns (text, used_vision_ocr).
     """
     text = ""
     
@@ -122,7 +124,7 @@ def extract_text_from_pdf(file_path: str) -> str:
     # If we got enough text, return it
     if len(text.strip()) >= MIN_TEXT_LENGTH:
         print(f"  📄 Text extracted (pdfplumber): {len(text)} chars")
-        return text.strip()
+        return text.strip(), False
     
     # Strategy 2: Image-based PDF → render pages as images → OpenAI Vision
     print(f"  🖼️ Text too short ({len(text.strip())} chars), trying image-based OCR via GPT Vision...")
@@ -130,11 +132,11 @@ def extract_text_from_pdf(file_path: str) -> str:
         text = extract_text_from_image_pdf(file_path)
         if text and len(text.strip()) >= MIN_TEXT_LENGTH:
             print(f"  📄 Text extracted (Vision OCR): {len(text)} chars")
-            return text.strip()
+            return text.strip(), True
     except Exception as e:
         print(f"  ⚠️ Vision OCR failed: {e}")
     
-    return text.strip()
+    return text.strip(), bool(text.strip())
 
 
 def extract_text_from_image_pdf(file_path: str, max_pages: int = 5) -> str:
@@ -315,6 +317,7 @@ def process_single_notice(notice: Dict) -> bool:
     temp_files = []
     attempted_files = 0
     downloaded_files = 0
+    used_ocr = False  # 한 첨부라도 GPT Vision 으로 읽었으면 원문에 판독 표시를 붙인다
 
     stored_text = notice.get('content_text') or ''
     if visible_len(stored_text) >= MIN_STORE_CHARS and stored_text.strip() != (title or '').strip():
@@ -338,7 +341,8 @@ def process_single_notice(notice: Dict) -> bool:
             if local_path:
                 downloaded_files += 1
                 temp_files.append(local_path)
-                file_text = extract_text_from_pdf(local_path)
+                file_text, file_ocr = extract_text_from_pdf(local_path)
+                used_ocr = used_ocr or file_ocr
                 if file_text:
                     extracted_text += f"\n--- {original_fn} ---\n{file_text}\n"
     else:
@@ -357,6 +361,8 @@ def process_single_notice(notice: Dict) -> bool:
         candidate = mask_personal_info(clean_text(re.sub(r"\n--- .+? ---\n", "\n\n", extracted_text)))
         if visible_len(candidate) >= MIN_STORE_CHARS:
             new_content_text = candidate[:MAX_STORE_CHARS]
+            if used_ocr:
+                new_content_text = f"{OCR_MARKER}\n{new_content_text}"
 
     # Generate AI summary
     ai_data = generate_ai_summary(title, category, department, extracted_text)
