@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { INDEX_AUTO_EDITORIAL } from '@/lib/contentPolicy';
 import {
     type WeeklyReport,
     filterPublishedColumns,
@@ -24,6 +25,7 @@ export const metadata: Metadata = {
     description: '로옥션이 매주 수집한 법원 회생·파산 자산매각 공고 집계에 수치 검증을 거친 데이터 노트를 더한 주간 칼럼입니다.',
     keywords: '주간통계, 자산매각, 회생파산, 매각공고, 법원경매, 주간칼럼',
     alternates: { canonical: '/trend' },
+        robots: { index: INDEX_AUTO_EDITORIAL, follow: true },
 };
 
 interface TrendingTag {

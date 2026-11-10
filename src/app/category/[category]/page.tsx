@@ -2,9 +2,9 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { categories, getCategoryBySlug } from '@/data/categories';
-import { supabase } from '@/lib/supabase';
-import NoticeCard from '@/components/NoticeCard';
-import { filterQualityNotices } from '@/lib/noticeQuality';
+import { INDEX_DAYS, getNoticeIndex, groupStats, upcomingRounds } from '@/lib/noticeIndex';
+import { CountChips, RecentNoticeList, StatsCards, UpcomingTable } from '@/components/NoticeIndexViews';
+import { getCourtByName } from '@/data/courts';
 import { glossaryTerms } from '@/data/glossary';
 import { isPublicBlogSlug } from '@/lib/contentPolicy';
 
@@ -14,18 +14,6 @@ interface PageProps {
     params: Promise<{
         category: string;
     }>;
-}
-
-interface CategoryNotice {
-    id: string;
-    title: string;
-    department: string | null;
-    date_posted: string;
-    category: string | null;
-    site_id: string;
-    ai_summary: string | null;
-    view_count?: number | null;
-
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -43,7 +31,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         description: categoryInfo.description,
         keywords: `${categoryInfo.name}, 매각공고, 회생, 파산, ${categoryInfo.relatedTerms.join(', ')}`,
         alternates: { canonical: `/category/${categoryInfo.slug}` },
-        robots: { index: false, follow: true },
+        robots: { index: true, follow: true },
     };
 }
 
@@ -61,21 +49,12 @@ export default async function CategoryPage({ params }: PageProps) {
         notFound();
     }
 
-    // 해당 카테고리의 최근 공고 가져오기
-    let notices: CategoryNotice[] = [];
-
-    if (categoryInfo.dbCategory) {
-        const { data } = await supabase
-            .from('court_notices')
-            .select('*')
-            .eq('category', categoryInfo.dbCategory)
-            .eq('source_type', 'notice')
-            .not('ai_summary', 'is', null)
-            .order('date_posted', { ascending: false })
-            .limit(40);
-        // 크롤 가능한 페이지이므로 분석이 담긴(색인 가능한) 공고만 노출.
-        notices = filterQualityNotices(data).slice(0, 12);
-    }
+    // 원문이 저장된 최근 공고 색인(6시간 캐시)에서 이 유형만 고른다.
+    const index = await getNoticeIndex();
+    const list = index.filter((n) => categoryInfo.dbCategories.includes(n.category));
+    const stats = groupStats(list);
+    const upcoming = upcomingRounds(list, 14).slice(0, 15);
+    const recent = list.slice(0, 20);
 
     // 마크다운 스타일 콘텐츠 렌더링
     const renderContent = (content: string) => {
@@ -183,7 +162,7 @@ export default async function CategoryPage({ params }: PageProps) {
                 {/* 빠른 검색 버튼 */}
                 <div className="flex gap-3 mt-6">
                     <Link
-                        href={categoryInfo.dbCategory ? `/?cat=${categoryInfo.dbCategory}` : `/?q=${encodeURIComponent(categoryInfo.slug === 'bonds' ? '채권' : '특허')}`}
+                        href={`/?cat=${categoryInfo.dbCategory}`}
                         className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-700 transition-colors"
                     >
                         {categoryInfo.name} 공고 검색
@@ -201,34 +180,51 @@ export default async function CategoryPage({ params }: PageProps) {
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 mb-8 border border-blue-100 text-gray-700 leading-relaxed text-[15px] shadow-sm">
                 <p>
                     이 페이지는 대한민국 법원에 공개된 회생·파산 관련 <strong>{categoryInfo.name}</strong> 자산매각 공고를 모아 보여줍니다.
-                    공고마다 매각 방식, 권리관계, 자산 상태와 계약 조건이 다르며, AI 요약은 첨부 문서에서 주요 항목을 찾기 위한 보조 자료입니다.
+                    최근 {INDEX_DAYS}일 동안 첨부 공고문 원문을 확인한 공고만 모았고, 회차별 최저입찰가는 원문 표에서 읽은 값입니다.
+                    공고마다 매각 방식, 권리관계, 자산 상태와 계약 조건이 다르므로 입찰 전에는 공고 상세의 원문과 법원 게시물을 확인해야 합니다.
                     확인 방법은 <Link href="/editorial-policy" className="underline hover:text-indigo-600">데이터·편집 원칙</Link>에 정리되어 있습니다.
                 </p>
             </div>
 
-            {/* 최근 공고 */}
-            {notices.length > 0 && (
-                <section className="mb-12">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                        최근 {categoryInfo.name} 공고
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {notices.map((notice) => (
-                            <NoticeCard key={notice.id} notice={notice} />
-                        ))}
+            {/* 집계 */}
+            <section className="mb-12" aria-labelledby="stats-heading">
+                <h2 id="stats-heading" className="text-2xl font-bold text-gray-900 mb-4">{categoryInfo.name} 공고 현황</h2>
+                <StatsCards stats={stats} days={INDEX_DAYS} />
+                {stats.medianLastRatio && (
+                    <p className="mt-3 text-sm text-gray-600 leading-relaxed">
+                        회차표가 있는 공고는 마지막 회차 최저가가 1회차의 {Math.round(stats.medianLastRatio * 100)}% 수준(중앙값)까지 내려갑니다.
+                        회차마다 얼마씩 낮추는지는 공고마다 다르므로 개별 공고의 회차표를 확인하세요.
+                    </p>
+                )}
+                {stats.byCourt.length > 0 && (
+                    <div className="mt-5">
+                        <h3 className="text-sm font-semibold text-gray-700 mb-2">법원별 공고 수</h3>
+                        <CountChips
+                            items={stats.byCourt}
+                            hrefOf={(name) => {
+                                const court = getCourtByName(name);
+                                return court ? `/court/${court.slug}` : null;
+                            }}
+                        />
                     </div>
-                    {notices.length >= 12 && (
-                        <div className="text-center mt-6">
-                            <Link
-                                href={`/?cat=${categoryInfo.dbCategory}`}
-                                className="text-indigo-600 font-bold hover:underline"
-                            >
-                                더 많은 {categoryInfo.name} 공고 보기 →
-                            </Link>
-                        </div>
-                    )}
-                </section>
-            )}
+                )}
+            </section>
+
+            {/* 마감 임박 */}
+            <section className="mb-12" aria-labelledby="upcoming-heading">
+                <h2 id="upcoming-heading" className="text-2xl font-bold text-gray-900 mb-2">2주 안에 입찰일이 있는 {categoryInfo.name} 공고</h2>
+                <p className="text-sm text-gray-600 mb-4">원문 회차표에서 오늘 이후 가장 가까운 회차를 골랐습니다. 앞 회차에서 낙찰되면 뒤 회차는 열리지 않습니다.</p>
+                <UpcomingTable rows={upcoming} showCategory={categoryInfo.dbCategories.length > 1} />
+            </section>
+
+            {/* 최근 공고 */}
+            <section className="mb-12" aria-labelledby="recent-heading">
+                <div className="flex items-end justify-between gap-4 mb-4">
+                    <h2 id="recent-heading" className="text-2xl font-bold text-gray-900">최근 {categoryInfo.name} 공고</h2>
+                    <Link href={`/?cat=${categoryInfo.dbCategory}`} className="text-sm text-indigo-600 font-bold hover:underline whitespace-nowrap">전체 검색 →</Link>
+                </div>
+                <RecentNoticeList notices={recent} showCategory={categoryInfo.dbCategories.length > 1} />
+            </section>
 
             {/* 가이드 콘텐츠 */}
             <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-12">

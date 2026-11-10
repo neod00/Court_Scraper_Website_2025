@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { INDEX_AUTO_EDITORIAL } from '@/lib/contentPolicy';
 import { supabase } from '@/lib/supabase';
 import {
     type WeeklyReport,
@@ -74,6 +75,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         title: `${title} | 주간 칼럼`,
         description,
         alternates: { canonical: `${siteUrl}/trend/${report.week_start}` },
+        robots: { index: INDEX_AUTO_EDITORIAL, follow: true },
         openGraph: {
             title,
             description,

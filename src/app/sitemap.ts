@@ -3,6 +3,10 @@ import { getPublicBlogPosts } from '@/data/blog-posts';
 import { supabase } from '@/lib/supabase';
 import { type WeeklyReport, filterPublishedColumns, columnDate } from '@/lib/weeklyColumn';
 import { getPublishedReports } from '@/lib/monthlyReport';
+import { INDEX_AUTO_EDITORIAL } from '@/lib/contentPolicy';
+import { getNoticeIndex } from '@/lib/noticeIndex';
+import { COURT_INDEX_MIN_NOTICES, courts } from '@/data/courts';
+import { categories } from '@/data/categories';
 
 export const revalidate = 3600;
 
@@ -22,7 +26,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         { url: `${baseUrl}/terms`, changeFrequency: 'yearly', priority: 0.4 },
         { url: `${baseUrl}/contact`, changeFrequency: 'yearly', priority: 0.5 },
         { url: `${baseUrl}/faq`, changeFrequency: 'monthly', priority: 0.6 },
-        { url: `${baseUrl}/trend`, changeFrequency: 'weekly', priority: 0.9 },
+        { url: `${baseUrl}/court`, changeFrequency: 'daily', priority: 0.9 },
+        { url: `${baseUrl}/tools`, changeFrequency: 'monthly', priority: 0.9 },
+        { url: `${baseUrl}/tools/acquisition-tax`, changeFrequency: 'monthly', priority: 0.9 },
+        { url: `${baseUrl}/tools/bid-calculator`, changeFrequency: 'monthly', priority: 0.8 },
+        { url: `${baseUrl}/tools/vehicle-transfer`, changeFrequency: 'monthly', priority: 0.8 },
+        { url: `${baseUrl}/tools/roi-calculator`, changeFrequency: 'monthly', priority: 0.7 },
         { url: `${baseUrl}/datalab`, changeFrequency: 'daily', priority: 0.8 },
         { url: `${baseUrl}/blog`, changeFrequency: 'monthly', priority: 0.9 },
         { url: `${baseUrl}/glossary`, changeFrequency: 'monthly', priority: 0.7 },
@@ -109,5 +118,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         console.error('Error fetching notices for sitemap:', error);
     }
 
-    return [...reviewedPages, ...reviewedBlogPages, ...weeklyColumnPages, ...monthlyReportPages, ...noticePages];
+    // 법원별·자산 유형별 랜딩 — 공고가 충분한 법원만(페이지 robots 와 같은 기준)
+    const noticeIndex = await getNoticeIndex();
+    const courtPages: MetadataRoute.Sitemap = courts
+        .filter((c) => noticeIndex.filter((n) => n.court === c.name).length >= COURT_INDEX_MIN_NOTICES)
+        .map((c) => ({ url: `${baseUrl}/court/${c.slug}`, changeFrequency: 'daily' as const, priority: 0.8 }));
+    const categoryPages: MetadataRoute.Sitemap = categories.map((c) => ({
+        url: `${baseUrl}/category/${c.slug}`,
+        changeFrequency: 'daily' as const,
+        priority: 0.8,
+    }));
+
+    // 자동 작성 칼럼·리포트는 INDEX_AUTO_EDITORIAL 이 꺼져 있으면 싣지 않는다(페이지도 noindex).
+    const editorialPages = INDEX_AUTO_EDITORIAL ? [...weeklyColumnPages, ...monthlyReportPages] : [];
+
+    return [...reviewedPages, ...courtPages, ...categoryPages, ...reviewedBlogPages, ...editorialPages, ...noticePages];
 }

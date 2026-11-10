@@ -5,11 +5,12 @@ import Link from 'next/link';
 import { useState } from 'react';
 
 const navLinks = [
-  { href: '/', label: '홈' },
-  { href: '/trend', label: '주간 칼럼' },
+  { href: '/', label: '공고 검색' },
+  { href: '/court', label: '법원별' },
+  { href: '/tools', label: '계산기' },
   { href: '/datalab', label: '데이터랩' },
-  { href: '/blog', label: '블로그' },
   { href: '/glossary', label: '용어사전' },
+  { href: '/blog', label: '가이드' },
   { href: '/about', label: '소개' },
 ];
 

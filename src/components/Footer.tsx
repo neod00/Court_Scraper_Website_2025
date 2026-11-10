@@ -3,7 +3,8 @@ import Link from 'next/link';
 const serviceLinks = [
     { href: '/', label: '공고 검색' },
     { href: '/datalab', label: '데이터랩' },
-    { href: '/trend', label: '주간 칼럼' },
+    { href: '/court', label: '법원별 공고' },
+    { href: '/tools', label: '계산기' },
     { href: '/glossary', label: '용어사전' },
 ];
 

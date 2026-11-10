@@ -6,7 +6,7 @@ export const metadata: Metadata = {
     description: '회생·파산 자산매각 공고를 검토할 때 비용을 가늠하기 위한 참고용 계산기입니다. 취득세, 입찰가, 차량 이전비, 매도·임대 손익 계산기를 제공합니다.',
     keywords: '취득세 계산기, 입찰가 계산기, 차량 이전비 계산기, 매도·임대 손익 계산기',
     alternates: { canonical: '/tools' },
-    robots: { index: false, follow: true },
+    robots: { index: true, follow: true },
 };
 
 const tools = [
@@ -14,21 +14,21 @@ const tools = [
         slug: 'acquisition-tax',
         title: '취득세 계산기',
         description: '부동산 또는 차량 취득 시 납부할 취득세를 입력값 기준으로 계산합니다.',
-        features: ['부동산 취득세 (주택/상가/토지)', '다주택 중과 반영', '차량 취득세 계산', '지방교육세, 농어촌특별세 포함'],
+        features: ['주택·상가·토지·농지 취득세', '다주택 중과·조정대상지역 반영', '1주택 6억~9억 구간 산식', '차량 취득세와 경차 감면'],
         color: 'from-indigo-500 to-blue-600',
     },
     {
         slug: 'bid-calculator',
         title: '입찰가 계산기',
         description: '목표 이익률을 입력하면 그에 대응하는 입찰가를 역산합니다.',
-        features: ['부동산 입찰가 역산', '차량 입찰가 역산', '취득세/수리비/명도비 반영', '비용 합계 확인'],
+        features: ['목표 이익률로 입찰가 상한 역산', '취득세를 가격 구간별로 반영', '최저입찰가와 비교', '차량 입찰가 역산'],
         color: 'from-green-500 to-emerald-600',
     },
     {
         slug: 'vehicle-transfer',
         title: '차량 이전비 계산기',
         description: '법원 매각 차량의 이전 등록에 드는 비용 항목을 합산합니다.',
-        features: ['차종별 취득세 계산', '지역별 공채 매입비', '번호판/인지세 포함', '법원 매각 필요 서류 안내'],
+        features: ['차종·용도별 취득세율', '경차 감면 자동 반영', '공채 매입률·할인율 직접 입력', '법원 매각 차량 서류 안내'],
         color: 'from-orange-500 to-red-600',
     },
     {

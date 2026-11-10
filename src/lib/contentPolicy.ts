@@ -8,6 +8,11 @@
 export const INDEX_AUTOMATED_NOTICE_PAGES = true;
 export const ALLOW_DATABASE_BLOG_POSTS = false;
 
+// 2026-11: 주간 칼럼(/trend)과 월간 리포트(/reports)는 자동 작성 글이라 색인하지 않는다.
+// 로옥션은 도구형 사이트이고, 표 수치를 다시 적은 자동 글은 애드센스 '가치가 낮은 콘텐츠' 판정 위험만 키운다.
+// 페이지는 계속 열리고 내부 링크도 따라갈 수 있다(follow). 사람이 해석을 쓰는 체계가 생기면 true 로 되돌린다.
+export const INDEX_AUTO_EDITORIAL = false;
+
 export const PUBLIC_BLOG_SLUGS = new Set([
     'court-auction-vs-rehabilitation-sale',
     'beginner-guide-first-bid',

@@ -6,7 +6,8 @@ export interface CategoryInfo {
     name: string;
     icon: string;
     description: string;
-    dbCategory: string | null; // DB에서 사용하는 카테고리 값
+    dbCategory: string | null; // 검색 링크(?cat=)에 쓰는 대표 DB 카테고리 값
+    dbCategories: string[]; // 이 페이지에 모으는 court_notices.category 값들
     guideContent: string;
     tips: string[];
     relatedTerms: string[];
@@ -20,6 +21,7 @@ export const categories: CategoryInfo[] = [
         icon: '🏠',
         description: '아파트, 상가, 토지, 공장 등 부동산 매각 공고를 검색합니다.',
         dbCategory: 'real_estate',
+        dbCategories: ['real_estate'],
         guideContent: `
 ## 부동산 자산 매각 가이드
 
@@ -61,6 +63,7 @@ export const categories: CategoryInfo[] = [
         icon: '🚗',
         description: '승용차, 화물차, 중장비, 기계설비 등 동산 매각 공고를 검색합니다.',
         dbCategory: 'vehicle',
+        dbCategories: ['vehicle'],
         guideContent: `
 ## 차량 및 동산 매각 가이드
 
@@ -102,7 +105,8 @@ export const categories: CategoryInfo[] = [
         name: '채권/주식',
         icon: '📄',
         description: '매출채권, 대여금채권, 비상장주식 등 금융자산 매각 공고를 검색합니다.',
-        dbCategory: null, // 별도 카테고리 없음, 키워드 검색
+        dbCategory: 'bond',
+        dbCategories: ['bond', 'stock'],
         guideContent: `
 ## 채권 및 주식 매각 가이드
 
@@ -146,7 +150,8 @@ export const categories: CategoryInfo[] = [
         name: '특허/상표',
         icon: '💡',
         description: '특허권, 상표권, 디자인권 등 지식재산권 매각 공고를 검색합니다.',
-        dbCategory: null, // 별도 카테고리 없음, 키워드 검색
+        dbCategory: 'patent',
+        dbCategories: ['patent', 'intangible'],
         guideContent: `
 ## 지식재산권 매각 가이드
 
@@ -154,9 +159,9 @@ export const categories: CategoryInfo[] = [
 
 ### IP 매각의 특징
 
-1. **가치평가 불확실성**: 거래사례가 적어 별도 가치평가 필요
-2. **가치 평가 어려움**: 전문적인 IP 가치 평가 필요
-3. **사업 연계 가능**: 취득한 IP로 사업 시너지 창출
+1. **가치평가 불확실성**: 거래사례가 적어 감정평가나 별도 가치평가가 필요
+2. **권리 상태 확인**: 등록원부로 존속기간, 질권·전용실시권 설정 여부를 확인
+3. **이전 절차**: 매수 후 특허청에 권리 이전등록을 해야 효력이 생김
 
 ### 입찰 전 체크리스트
 
@@ -180,6 +185,46 @@ export const categories: CategoryInfo[] = [
         ],
         relatedTerms: ['수의계약', '파산관재인'],
         relatedGuides: []
+    },
+    {
+        slug: 'equipment',
+        name: '기계설비/유체동산',
+        icon: '🏭',
+        description: '공장 기계설비, 재고자산, 사무집기, 전자장비 등 유체동산 매각 공고를 모아 봅니다.',
+        dbCategory: 'asset',
+        dbCategories: ['asset', 'electronics', 'etc'],
+        guideContent: `
+## 기계설비·유체동산 매각 가이드
+
+회생·파산 기업이 정리하는 공장 설비, 재고, 사무집기, 전자장비는 대부분 **현재 있는 상태 그대로** 매각되며, 여러 물건을 한 번에 파는 일괄매각이 많습니다.
+
+### 유체동산 매각의 특징
+
+1. **현상 매각**: 작동 여부나 하자를 보증하지 않는 조건이 대부분
+2. **반출 책임**: 해체·운반·폐기물 처리 비용과 반출 기한을 매수인이 지는 경우가 많음
+3. **일괄매각**: 목록 전체를 한 가격에 사야 하는 공고가 많음
+4. **부가가치세**: 매각대금에 부가가치세가 별도로 붙는지 공고 문구를 확인
+
+### 입찰 전 체크리스트
+
+- [ ] 물건 목록과 현장 열람(현장 확인) 가능 일정 확인
+- [ ] 리스·할부 물건, 소유권 유보, 양도담보 설정 여부 확인
+- [ ] 해체·운반 비용과 반출 기한 확인
+- [ ] 부가가치세 포함 여부와 대금 납부 기한 확인
+- [ ] 임대 공장 안의 물건이면 건물주와의 반출 조건 확인
+
+### 주의사항
+
+목록에 있는 물건이 실제로 모두 남아 있는지, 다른 사람 소유 물건이 섞여 있지 않은지는 현장에서 직접 확인해야 합니다. 공고문의 "현 상태대로" 문구가 있으면 사고 나서 하자를 이유로 계약을 되돌리기 어렵습니다.
+        `,
+        tips: [
+            '현장 열람 일정을 놓치면 물건 상태를 확인할 방법이 없음',
+            '반출 비용이 매각대금보다 큰 경우도 있으므로 견적을 먼저 받을 것',
+            '리스 회사 소유 설비는 매각 대상에서 빠질 수 있음',
+            '부가가치세 별도 여부를 입찰가에 반영할 것'
+        ],
+        relatedTerms: ['현상 인도', '일괄매각', '수의계약'],
+        relatedGuides: []
     }
 ];
 
@@ -190,5 +235,5 @@ export const getCategoryBySlug = (slug: string): CategoryInfo | undefined => {
 
 export const getCategoryByDbCategory = (dbCategory: string | null): CategoryInfo | undefined => {
     if (!dbCategory) return undefined;
-    return categories.find((category) => category.dbCategory === dbCategory);
+    return categories.find((category) => category.dbCategories.includes(dbCategory));
 };

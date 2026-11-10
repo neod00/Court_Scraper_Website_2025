@@ -213,6 +213,14 @@ export default function sitemap() {
 
 ---
 
+## 학습 기록 — 도구형 색인 구조 (2026-11-10)
+
+- **색인 대상**: 홈, 법원별(/court, /court/[slug]), 자산 유형별(/category/[slug]), 계산기 4종(/tools/*), 원문이 있는 공고 상세, 사람이 검수한 블로그 5편. 주간 칼럼(/trend)과 월간 리포트(/reports)는 `contentPolicy.INDEX_AUTO_EDITORIAL=false` 로 noindex·사이트맵 제외(자동 작성 글이라 thin content 위험).
+- **법원 페이지 기준**: 최근 180일 원문 공고가 `COURT_INDEX_MIN_NOTICES`(10건) 미만인 법원은 noindex, 사이트맵도 같은 기준.
+- **랜딩 데이터 출처**: `src/lib/noticeIndex.ts` 가 content_text 를 한 번 읽어 회차표만 남긴 작은 레코드를 6시간 캐시한다(unstable_cache, 2MB 한도 주의). 홈·법원·자산 유형 페이지와 사이트맵이 이 캐시를 함께 쓴다. 본문을 요청마다 읽지 말 것(Supabase egress).
+- **'마감일' 대신 '입찰일'**: 원문 회차표 줄의 첫 날짜는 입찰 시작일일 수도 있어 '마감'이라고 단정하지 않는다.
+- **계산기 세율**: `src/lib/acquisitionTax.ts` 한 곳에서 관리. 세율을 바꾸면 `RULES_CHECKED_AT` 과 취득세 계산기 페이지의 부담률표를 함께 고치고, 알려진 총 부담률(1.1%·8.4%·9.0%·12.4%·13.4%·4.6%·3.4%)과 비교해 검증한다. 공채 매입률처럼 지역 조례로 달라지는 값은 근거 없이 내장하지 않고 사용자 입력으로 받는다.
+
 ## 승인 정책
 
 ⚠️ **메타태그/SEO 설정 변경 시 사용자 승인 필요**

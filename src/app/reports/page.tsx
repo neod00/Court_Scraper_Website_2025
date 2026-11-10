@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { INDEX_AUTO_EDITORIAL } from '@/lib/contentPolicy';
 import { notFound } from 'next/navigation';
 import {
     getPublishedReports,
@@ -32,6 +33,7 @@ export function generateMetadata(): Metadata {
         title: '월간 리포트 | 법원 회생·파산 자산매각 공고 월별 집계',
         description: hubDescription,
         alternates: { canonical: `${siteUrl}/reports` },
+        robots: { index: INDEX_AUTO_EDITORIAL, follow: true },
         openGraph: {
             title: '월간 리포트',
             description: hubDescription,

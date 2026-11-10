@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import { INDEX_AUTO_EDITORIAL } from '@/lib/contentPolicy';
 import { notFound } from 'next/navigation';
 import {
     type MonthlyReport,
@@ -78,6 +79,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         title,
         description,
         alternates: { canonical: url },
+        robots: { index: INDEX_AUTO_EDITORIAL, follow: true },
         openGraph: {
             title,
             description,

@@ -13,6 +13,7 @@ import { glossaryTerms } from '@/data/glossary';
 import { isQualityNotice, hasUsefulSummary } from '@/lib/noticeQuality';
 import { INDEX_AUTOMATED_NOTICE_PAGES } from '@/lib/contentPolicy';
 import { getCategoryByDbCategory } from '@/data/categories';
+import { getCourtByName } from '@/data/courts';
 import {
     hasSubstantialText,
     maskPersonNames,
@@ -109,6 +110,7 @@ export default async function NoticeDetail({ params }: PageProps) {
     const showSummary = hasUsefulSummary(notice.ai_summary);
 
     const categorySlug = getCategoryByDbCategory(notice.category)?.slug;
+    const courtInfo = getCourtByName(notice.department);
     return (
         <div className="max-w-7xl mx-auto px-4 py-6 md:py-10">
             <Breadcrumbs
@@ -147,7 +149,11 @@ export default async function NoticeDetail({ params }: PageProps) {
                                 </div>
                                 <div className="border-b border-gray-100 pb-2">
                                     <dt className="text-gray-500 font-medium mb-1">관할부서</dt>
-                                    <dd className="text-gray-900">{notice.department || '-'}</dd>
+                                    <dd className="text-gray-900">
+                                        {courtInfo ? (
+                                            <Link href={`/court/${courtInfo.slug}`} className="text-indigo-700 hover:underline">{notice.department}</Link>
+                                        ) : (notice.department || '-')}
+                                    </dd>
                                 </div>
                                 <div className="border-b border-gray-100 pb-2">
                                     <dt className="text-gray-500 font-medium mb-1">매각기관</dt>

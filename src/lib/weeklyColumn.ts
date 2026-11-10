@@ -118,6 +118,7 @@ export const CATEGORY_LABELS: Record<string, string> = {
     patent: '특허',
     intangible: '무체재산',
     electronics: '전자장비',
+    etc: '기타',
 };
 
 export function categoryLabel(key: string): string {
