@@ -25,6 +25,8 @@ import {
     textExcerpt,
 } from '@/lib/noticeText';
 import { OriginalTextSection, RoundTableSection } from '@/components/NoticeOriginalText';
+import PropertyMap from '@/components/PropertyMap';
+import { extractPropertyAddress } from '@/lib/propertyAddress';
 
 // Revalidate every hour
 export const revalidate = 3600;
@@ -125,6 +127,10 @@ export default async function NoticeDetail({ params }: PageProps) {
         return m ? `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}` >= todayIso : false;
     }) ?? null;
     const phoneText = formatPhone(notice.phone || null);
+    // 지도: 부동산 공고에 한해, 원문 '매각대상' 항목에서 찾은 물건 주소만(사무실·법원 주소 제외).
+    const place = notice.category === 'real_estate' && originalText ? extractPropertyAddress(originalText) : null;
+    // 회차별 총비용 계산기에 넘길 물건 종류: 원문 앞부분에 주택을 가리키는 말이 있으면 주택, 아니면 토지·상가(4%).
+    const roundCostKind: 'house' | 'building' = /(아파트|다세대|연립|단독주택|빌라|공동주택)/.test((originalText || '').slice(0, 2000)) ? 'house' : 'building';
     // 광고는 검색에 노출하는 공고(색인 기준과 동일)에만 싣는다. 원문·요약이 없는 얇은 페이지는 광고 없음.
     const showAds = INDEX_AUTOMATED_NOTICE_PAGES && isQualityNotice(notice);
     return (
@@ -215,7 +221,9 @@ export default async function NoticeDetail({ params }: PageProps) {
                         </div>
                     </div>
 
-                    {rounds && <RoundTableSection rows={rounds} ocr={stored.ocr} />}
+                    {rounds && <RoundTableSection rows={rounds} ocr={stored.ocr} kind={notice.category === 'real_estate' ? roundCostKind : undefined} />}
+
+                    {place && <PropertyMap place={place} />}
 
                     {/* AI Analysis Report Section — '첨부파일을 확인하라'는 대체 요약은 보여주지 않는다 */}
                     {showSummary && (

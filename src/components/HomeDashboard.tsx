@@ -35,6 +35,15 @@ const TOOLS = [
     { href: '/tools/roi-calculator', no: 'p.04', kicker: '손익', name: '매도·임대 손익 계산기', desc: '총비용 대비 차익과 임대 수익률을 계산합니다.', exIn: '총비용 3억 1,380만 원 · 매도가 3억 6천만 원', exOut: '차익 4,620만 원', bg: '#F7F3E6' },
 ];
 
+const MORE_TOOLS = [
+    { href: '/tools/share-area', name: '지분·면적 환산 계산기', desc: '공고의 ’A분의 B 지분’을 실제 면적·평수와 평당가로 바꿉니다.' },
+    { href: '/tools/round-cost', name: '회차별 총비용 비교', desc: '회차마다 최저가에 취득세와 비용을 더한 총액을 나란히 봅니다.' },
+    { href: '/tools/bid-deposit', name: '입찰보증금·잔금 계산기', desc: '보증금 비율로 입찰보증금, 잔금, 잔금 기한을 계산합니다.' },
+    { href: '/tools/brokerage-fee', name: '중개보수 계산기', desc: '되팔거나 임대할 때 드는 중개보수 상한을 계산합니다.' },
+    { href: '/tools/loan', name: '대출 이자·상환 계산기', desc: '잔금 대출의 월 납입액과 총이자를 상환 방식별로 봅니다.' },
+    { href: '/tools/bond-recovery', name: '채권 회수율 계산기', desc: '채권 매수 시 손익분기 회수율과 예상 손익을 계산합니다.' },
+];
+
 /**
  * 주목할 공고: 2주 안에 입찰 회차가 있고 회차가 3개 이상인 공고 중
  * 부동산 → 1회차의 70% 이하로 내려간 공고 → 1회차 최저가가 큰 공고 순으로 고른다.
@@ -82,16 +91,30 @@ export default async function HomeDashboard() {
     const prepItems = toBoardItems(prepRows, today);
     const tickerItems = recentItems.slice(0, 12);
 
+    // 02: 자산 유형별 '지금 게시 중' 공고. 회차 계획 수치(마지막 회차 비율)는 실제 낙찰가가 아니라 공고문상
+    // 계획이라 보조 줄로만 둔다(2026-11-11 검토 — 시세처럼 읽혀 오해 소지).
+    const quantile = (vals: number[], q: number) => {
+        if (vals.length === 0) return null;
+        const v = [...vals].sort((a, b) => a - b);
+        return v[Math.min(v.length - 1, Math.max(0, Math.round((v.length - 1) * q)))];
+    };
     const types = TYPE_ORDER.map((t, i) => {
         const cat = categories.find((c) => c.slug === t.slug);
-        const s = groupStats(index.filter((n) => cat?.dbCategories.includes(n.category)));
+        const inCat = (n: { category: string }) => Boolean(cat?.dbCategories.includes(n.category));
+        const activeHere = active.filter(inCat);
+        const firsts = activeHere.map((n) => n.rounds?.[0]?.price).filter((v): v is number => typeof v === 'number' && v > 0);
+        const lo = quantile(firsts, 0.25);
+        const hi = quantile(firsts, 0.75);
+        const plan = groupStats(index.filter(inCat));
         return {
             ...t,
             no: String(i + 1).padStart(2, '0'),
-            count: s.total,
-            first: s.medianFirstPrice ? shortWon(s.medianFirstPrice) : '-',
-            step: s.medianStepRatio ? Math.round((1 - s.medianStepRatio) * 100) : null,
-            last: s.medianLastRatio ? Math.round(s.medianLastRatio * 100) : null,
+            active: activeHere.length,
+            fresh: recentRows.filter((r) => inCat(r.notice)).length,
+            prep: prepRows.filter((r) => inCat(r.notice)).length,
+            range: lo && hi ? (lo === hi ? shortWon(lo) : `${shortWon(lo)} ~ ${shortWon(hi)}`) : null,
+            priced: firsts.length,
+            last: plan.medianLastRatio ? Math.round(plan.medianLastRatio * 100) : null,
             bg: ASSET_GROUPS[t.group].bg,
         };
     });
@@ -200,29 +223,35 @@ export default async function HomeDashboard() {
 
                 {/* 02 자산 유형별 */}
                 <Reveal as="section">
-                    <SectionHead no="02" id="types-title" title="자산 유형별로 얼마나 내려가나" note={`최근 ${INDEX_DAYS}일 · 회차표가 있는 공고의 중앙값`} />
+                    <SectionHead no="02" id="types-title" title="자산 유형별 게시 중 공고" note="법원 게시판 공고만료일 기준 · 오늘" />
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 border-l border-[#161616]" aria-labelledby="types-title">
                         {types.map((t) => (
-                            <Link key={t.slug} href={`/category/${t.slug}`} className="p-4 border-r border-b border-[#161616] flex flex-col gap-3.5 hover:brightness-[0.97]" style={{ background: t.bg }}>
+                            <Link key={t.slug} href={`/category/${t.slug}`} className="p-4 border-r border-b border-[#161616] flex flex-col gap-3 hover:brightness-[0.97]" style={{ background: t.bg }}>
                                 <span className="flex justify-between items-baseline">
                                     <span className="num text-xs font-bold">{t.no}</span>
-                                    <span className="num text-[13px] font-semibold">{t.count.toLocaleString('ko-KR')}건</span>
+                                    <span className="text-xs font-bold underline underline-offset-2">목록 보기 →</span>
                                 </span>
                                 <span className="text-[19px] font-extrabold tracking-[-0.04em]">{t.name}</span>
                                 <span className="flex flex-col gap-0.5">
-                                    <span className="text-xs font-semibold">마지막 회차는 1회차의</span>
-                                    <span className="num text-[40px] font-bold tracking-[-0.05em] leading-none">{t.last !== null ? `${t.last}%` : '-'}</span>
-                                </span>
-                                <span className="h-2.5 border border-[#161616] bg-[#FAF7EC] block overflow-hidden" aria-hidden="true">
-                                    <span className="fill-bar block h-full bg-[#161616]" style={{ width: `${t.last ?? 0}%` }} />
+                                    <span className="text-xs font-semibold">지금 법원에 게시 중</span>
+                                    <span className="num text-[40px] font-bold tracking-[-0.05em] leading-none">{t.active.toLocaleString('ko-KR')}<span className="text-lg font-bold">건</span></span>
                                 </span>
                                 <dl className="flex flex-col gap-1 text-[13px] border-t border-[#161616] pt-2.5">
-                                    <div className="flex justify-between"><dt>1회차 최저가</dt><dd className="num font-bold">{t.first}</dd></div>
-                                    <div className="flex justify-between"><dt>회차당 인하</dt><dd className="num font-bold">{t.step !== null ? `${t.step}%` : '-'}</dd></div>
+                                    <div className="flex justify-between"><dt>이번 주 새로 올라옴</dt><dd className="num font-bold">{t.fresh}건</dd></div>
+                                    <div className="flex justify-between"><dt>만료까지 {LEAD_DAYS}일 이상</dt><dd className="num font-bold">{t.prep}건</dd></div>
+                                    <div className="flex justify-between gap-2"><dt>1회차 최저가 (중간 50%)</dt><dd className="num font-bold text-right">{t.range ?? '-'}</dd></div>
                                 </dl>
+                                {t.last !== null && (
+                                    <span className="text-[11px] leading-snug text-[#3A3A3A]">
+                                        공고문상 회차 계획: 마지막 회차는 1회차의 {t.last}% (중앙값, 실제 낙찰가 아님)
+                                    </span>
+                                )}
                             </Link>
                         ))}
                     </div>
+                    <p className="mt-2 text-xs text-[#3A3A3A]">
+                        최저가 범위는 지금 게시 중이면서 원문에서 회차표를 찾은 공고의 1회차 최저입찰가 중 가운데 50% 구간입니다.
+                    </p>
                 </Reveal>
 
                 {/* 03 법원별 + 최근 공고 */}
@@ -277,7 +306,7 @@ export default async function HomeDashboard() {
 
                 {/* 04 계산기 */}
                 <Reveal as="section">
-                    <SectionHead no="04" id="tools-title" title="입찰 전에 계산해 볼 것" note="지방세법 세율 · 확인일 2026-11-10" />
+                    <SectionHead no="04" id="tools-title" title="입찰 전에 계산해 볼 것" note="계산기 10종 · 세율·요율 확인일 2026-11-11" />
                     <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" aria-labelledby="tools-title">
                         {TOOLS.map((t) => (
                             <Link key={t.href} href={t.href} className="group border border-[#161616] flex flex-col min-h-[300px] transition-transform hover:-translate-y-1" style={{ background: t.bg }}>
@@ -296,6 +325,16 @@ export default async function HomeDashboard() {
                             </Link>
                         ))}
                     </div>
+                    <ul className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 border-l border-t border-[#161616]">
+                        {MORE_TOOLS.map((t) => (
+                            <li key={t.href} className="border-r border-b border-[#161616] bg-[#FAF7EC]">
+                                <Link href={t.href} className="flex flex-col gap-1 p-4 h-full hover:bg-[#161616] hover:text-[#FAF7EC] group">
+                                    <span className="font-extrabold">{t.name} →</span>
+                                    <span className="text-[13px] leading-snug text-[#3A3A3A] group-hover:text-[#CFC8B8]">{t.desc}</span>
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
                 </Reveal>
 
                 <p className="text-[13px] leading-relaxed text-[#3A3A3A] border-t border-[#161616] pt-4">

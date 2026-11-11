@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { toTextBlocks, formatWon, type RoundRow } from '@/lib/noticeText';
 
 /** 원문 한 줄이 '1. 매각대상', '가. 입찰방법' 같은 항목 제목인지 */
@@ -47,7 +48,7 @@ export function OriginalTextSection({ text, ocr = false }: { text: string; ocr?:
 }
 
 /** 원문에서 복원한 회차별 최저입찰가 표 */
-export function RoundTableSection({ rows, ocr = false }: { rows: RoundRow[]; ocr?: boolean }) {
+export function RoundTableSection({ rows, ocr = false, kind }: { rows: RoundRow[]; ocr?: boolean; kind?: 'house' | 'building' }) {
     const first = rows[0].price;
     const last = rows[rows.length - 1].price;
     const hasSchedule = rows.some((r) => r.schedule.length > 0);
@@ -97,6 +98,20 @@ export function RoundTableSection({ rows, ocr = false }: { rows: RoundRow[]; ocr
                 {hasSchedule ? '일정 칸은 원문 표의 같은 줄에 적힌 날짜·시각(입찰 마감, 개찰 등)을 순서대로 적은 것입니다. ' : ''}
                 정정 공고나 별지로 조건이 바뀔 수 있으니 입찰 전 원문을 확인하세요.
             </p>
+            <div className="px-6 py-3 border-t border-[#C9C2B4] flex flex-wrap gap-2">
+                {kind && (
+                    // 회차별 총비용 계산기는 부동산 취득세 규칙만 있어 부동산 공고에서만 연결한다.
+                    <Link
+                        href={`/tools/round-cost?prices=${rows.map((r) => r.price).join(',')}&kind=${kind}`}
+                        className="inline-flex items-center min-h-11 px-3 border border-[#161616] text-sm font-bold hover:bg-[#161616] hover:text-[#FAF7EC]"
+                    >
+                        이 회차표로 총비용 계산하기 →
+                    </Link>
+                )}
+                <Link href="/tools/bid-deposit" className="inline-flex items-center min-h-11 px-3 border border-[#161616] text-sm font-bold hover:bg-[#161616] hover:text-[#FAF7EC]">
+                    보증금·잔금 계산 →
+                </Link>
+            </div>
         </section>
     );
 }
