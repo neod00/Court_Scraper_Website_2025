@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 import { getPublicBlogPosts } from '@/data/blog-posts';
 import { supabase } from '@/lib/supabase';
-import { getNoticeIndex } from '@/lib/noticeIndex';
+import { getNoticeIndex, withText } from '@/lib/noticeIndex';
 import { COURT_INDEX_MIN_NOTICES, courts } from '@/data/courts';
 import { categories } from '@/data/categories';
 
@@ -76,7 +76,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
 
     // 법원별·자산 유형별 랜딩 — 공고가 충분한 법원만(페이지 robots 와 같은 기준)
-    const noticeIndex = await getNoticeIndex();
+    const noticeIndex = withText(await getNoticeIndex());
     const courtPages: MetadataRoute.Sitemap = courts
         .filter((c) => noticeIndex.filter((n) => n.court === c.name).length >= COURT_INDEX_MIN_NOTICES)
         .map((c) => ({ url: `${baseUrl}/court/${c.slug}`, changeFrequency: 'daily' as const, priority: 0.8 }));

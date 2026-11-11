@@ -3,9 +3,11 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { COURT_INDEX_MIN_NOTICES, courts, getCourtBySlug } from '@/data/courts';
 import { getCategoryByDbCategory } from '@/data/categories';
-import { INDEX_DAYS, getNoticeIndex, groupStats, upcomingRounds } from '@/lib/noticeIndex';
+import { INDEX_DAYS, expiringBoard, getNoticeIndex, groupStats, todayKst, withText } from '@/lib/noticeIndex';
+import NoticeBoardRows from '@/components/NoticeBoardRows';
+import { toBoardItems } from '@/lib/noticeBoard';
 import { categoryLabel } from '@/lib/categoryLabels';
-import { CountChips, RecentNoticeList, StatsCards, UpcomingTable, shortWon } from '@/components/NoticeIndexViews';
+import { CountChips, RecentNoticeList, StatsCards, shortWon } from '@/components/NoticeIndexViews';
 
 export const revalidate = 3600;
 
@@ -21,10 +23,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const { slug } = await params;
     const court = getCourtBySlug(slug);
     if (!court) return { title: '법원을 찾을 수 없습니다' };
-    const list = (await getNoticeIndex()).filter((n) => n.court === court.name);
+    const list = withText(await getNoticeIndex()).filter((n) => n.court === court.name);
     return {
         title: `${court.name} 회생·파산 자산매각 공고`,
-        description: `${court.name}에 게시된 파산관재인·회생 관리인의 자산매각 공고 ${list.length}건(최근 ${INDEX_DAYS}일)을 모았습니다. 2주 안에 입찰일이 있는 회차, 자산 유형별 건수, 회차별 최저가 변화를 원문 기준으로 보여줍니다.`,
+        description: `${court.name}에 게시된 파산관재인·회생 관리인의 자산매각 공고 ${list.length}건(최근 ${INDEX_DAYS}일)을 모았습니다. 법원 게시판 공고만료일 기준 게시 중인 공고, 자산 유형별 건수, 회차별 최저가 변화를 보여줍니다.`,
         alternates: { canonical: `/court/${court.slug}` },
         robots: { index: list.length >= COURT_INDEX_MIN_NOTICES, follow: true },
     };
@@ -35,11 +37,14 @@ export default async function CourtPage({ params }: PageProps) {
     const court = getCourtBySlug(slug);
     if (!court) notFound();
 
-    const index = await getNoticeIndex();
-    const list = index.filter((n) => n.court === court.name);
+    const all = await getNoticeIndex();
+    const today = todayKst();
+    const courtAll = all.filter((n) => n.court === court.name);
+    const list = withText(courtAll); // 통계는 원문이 있는 공고 기준
     const stats = groupStats(list);
-    const upcoming = upcomingRounds(list, 14).slice(0, 20);
-    const recent = list.slice(0, 30);
+    const activeRows = expiringBoard(courtAll, null, today);
+    const board = toBoardItems(activeRows.slice(0, 30), today);
+    const recent = courtAll.slice(0, 30);
     const topCategory = stats.byCategory[0];
 
     // 같은 법원 공고 중 1회차 최저가가 가장 높은/낮은 공고(회차표가 있는 것만)
@@ -93,9 +98,9 @@ export default async function CourtPage({ params }: PageProps) {
             </section>
 
             <section className="mb-10" aria-labelledby="upcoming-heading">
-                <h2 id="upcoming-heading" className="text-2xl font-bold text-[#161616] mb-2">2주 안에 입찰일이 있는 공고</h2>
-                <p className="text-sm text-[#3A3A3A] mb-4">원문 회차표에서 오늘 이후 가장 가까운 회차를 골랐습니다. 앞 회차에서 낙찰되면 뒤 회차는 열리지 않으니 관재인 사무실에 진행 여부를 확인하세요.</p>
-                <UpcomingTable rows={upcoming} showCourt={false} />
+                <h2 id="upcoming-heading" className="text-2xl font-bold text-[#161616] mb-2">지금 게시 중인 공고 <span className="num">{activeRows.length}</span>건</h2>
+                <p className="text-sm text-[#3A3A3A] mb-4">법원 게시판의 공고만료일 순입니다. 회차표는 첨부 공고문에서 읽은 참고 정보이고, 앞 회차에서 낙찰되면 뒤 회차는 열리지 않으니 관재인 사무실에 진행 여부를 확인하세요.</p>
+                <NoticeBoardRows items={board} showCourt={false} empty="지금 이 법원에 게시 중인 공고가 없습니다." />
             </section>
 
             <section className="mb-10" aria-labelledby="recent-heading">

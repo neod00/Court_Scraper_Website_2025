@@ -1,8 +1,7 @@
 // 공고 색인(noticeIndex) 기반 목록 표 — 홈·법원별·자산 유형별 페이지 공용.
 import Link from 'next/link';
 import { categoryLabel } from '@/lib/categoryLabels';
-import { getCourtByName } from '@/data/courts';
-import type { GroupStats, IndexedNotice, UpcomingRound } from '@/lib/noticeIndex';
+import type { GroupStats, IndexedNotice } from '@/lib/noticeIndex';
 
 const won = (n: number) => `${n.toLocaleString('ko-KR')}원`;
 
@@ -15,60 +14,9 @@ export function shortWon(n: number): string {
     return won(n);
 }
 
-function CourtLink({ name }: { name: string }) {
-    const court = getCourtByName(name);
-    if (!court) return <span>{name || '-'}</span>;
-    return <Link href={`/court/${court.slug}`} className="hover:text-[#1F3D7A] hover:underline">{name}</Link>;
-}
-
-export function UpcomingTable({ rows, showCourt = true, showCategory = true }: { rows: UpcomingRound[]; showCourt?: boolean; showCategory?: boolean }) {
-    if (rows.length === 0) {
-        return <p className="rounded-none border border-[#161616] bg-[#FAF7EC] p-6 text-sm text-[#3A3A3A]">앞으로 2주 안에 입찰 회차가 원문 표에서 확인된 공고가 없습니다.</p>;
-    }
-    return (
-        <div className="overflow-x-auto rounded-none border border-[#161616] bg-[#FAF7EC]">
-            <table className="w-full text-sm">
-                <thead className="bg-[#F4F0E6] text-[#3A3A3A]">
-                    <tr>
-                        <th scope="col" className="text-left px-3 py-3 font-medium whitespace-nowrap">입찰일</th>
-                        <th scope="col" className="text-left px-3 py-3 font-medium">공고</th>
-                        {showCourt && <th scope="col" className="text-left px-3 py-3 font-medium hidden md:table-cell">법원</th>}
-                        <th scope="col" className="text-right px-3 py-3 font-medium whitespace-nowrap">회차 최저가</th>
-                        <th scope="col" className="text-right px-3 py-3 font-medium whitespace-nowrap hidden sm:table-cell">1회차 대비</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {rows.map((r) => (
-                        <tr key={`${r.notice.id}-${r.round}`} className="border-t border-[#C9C2B4] align-top">
-                            <td className="px-3 py-3 whitespace-nowrap">
-                                <span className="font-semibold text-[#161616]">{r.date.slice(5).replace('-', '.')}</span>
-                                <span className={`ml-1.5 inline-block rounded-none px-1.5 py-0.5 text-[11px] font-bold ${r.dDay <= 3 ? 'bg-red-50 text-red-700' : 'bg-[#E9E4D8] text-[#3A3A3A]'}`}>
-                                    {r.dDay === 0 ? '오늘' : `D-${r.dDay}`}
-                                </span>
-                            </td>
-                            <td className="px-3 py-3">
-                                <Link href={`/notice/${r.notice.id}`} className="font-medium text-[#161616] hover:text-[#1F3D7A] hover:underline">{r.notice.title}</Link>
-                                <span className="block text-xs text-[#57534E] mt-0.5">
-                                    {showCategory && `${categoryLabel(r.notice.category)} · `}{r.round}/{r.totalRounds}회차
-                                    {showCourt && <span className="md:hidden"> · {r.notice.court}</span>}
-                                </span>
-                            </td>
-                            {showCourt && <td className="px-3 py-3 text-[#2E2B27] whitespace-nowrap hidden md:table-cell"><CourtLink name={r.notice.court} /></td>}
-                            <td className="px-3 py-3 text-right font-semibold text-[#161616] whitespace-nowrap">{shortWon(r.price)}</td>
-                            <td className="px-3 py-3 text-right text-[#3A3A3A] whitespace-nowrap hidden sm:table-cell">
-                                {r.firstPrice > 0 ? `${Math.round((r.price / r.firstPrice) * 100)}%` : '-'}
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
-    );
-}
-
 export function RecentNoticeList({ notices, showCourt = true, showCategory = true }: { notices: IndexedNotice[]; showCourt?: boolean; showCategory?: boolean }) {
     if (notices.length === 0) {
-        return <p className="rounded-none border border-[#161616] bg-[#FAF7EC] p-6 text-sm text-[#3A3A3A]">원문이 확인된 공고가 아직 없습니다.</p>;
+        return <p className="rounded-none border border-[#161616] bg-[#FAF7EC] p-6 text-sm text-[#3A3A3A]">공고가 아직 없습니다.</p>;
     }
     return (
         <ul className="divide-y divide-[#C9C2B4] rounded-none border border-[#161616] bg-[#FAF7EC]">

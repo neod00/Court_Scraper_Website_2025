@@ -1,14 +1,17 @@
 // 홈 기본 화면 — 편집형 시안(2026-11-10, Editorial.dc.html)을 실제 데이터로 옮긴 것.
-// 수치는 모두 noticeIndex(원문이 저장된 최근 180일 공고, 6시간 캐시)에서 계산한다.
-// 모션: 상단 입찰 티커, 숫자 올라가기, 회차 막대 자라기, 구역 떠오르기 — '동작 줄이기' 설정이면 모두 꺼진다(globals.css).
+// 수치는 모두 noticeIndex(최근 180일 공고, 6시간 캐시)에서 계산한다. 목록·숫자의 날짜 기준은 법원 게시판의
+// 작성일·공고만료일이다(2026-11-11). 원문 회차표는 '앞 회차 유찰 시' 조건이 붙은 참고 정보로만 쓴다.
+// 모션: 상단 만료 티커, 숫자 올라가기, 회차 막대 자라기, 구역 떠오르기 — '동작 줄이기' 설정이면 모두 꺼진다(globals.css).
 import Link from 'next/link';
-import UpcomingList, { type UpcomingItem } from '@/components/UpcomingList';
+import UpcomingList from '@/components/UpcomingList';
+import { formatPhone } from '@/components/NoticeBoardRows';
+import { toBoardItems } from '@/lib/noticeBoard';
 import { CountUp, Reveal } from '@/components/Motion';
 import { shortWon } from '@/components/NoticeIndexViews';
 import { categories } from '@/data/categories';
 import { courts as COURT_LIST, getCourtByName, type CourtInfo } from '@/data/courts';
 import { ASSET_GROUPS, assetGroupOf, type AssetGroup } from '@/lib/assetGroups';
-import { INDEX_DAYS, getNoticeIndex, groupStats, todayKst, upcomingRounds, type UpcomingRound } from '@/lib/noticeIndex';
+import { INDEX_DAYS, expiringBoard, getNoticeIndex, groupStats, isActive, recentBoard, todayKst, upcomingRounds, withText, type UpcomingRound } from '@/lib/noticeIndex';
 
 const DOW = ['일', '월', '화', '수', '목', '금', '토'];
 const dowOf = (iso: string) => DOW[new Date(`${iso}T12:00:00+09:00`).getUTCDay()];
@@ -45,7 +48,7 @@ function pickFeatured(rows: UpcomingRound[]): UpcomingRound | null {
 }
 
 const QUICK = [
-    { href: '#upcoming', label: '이번 주 입찰' },
+    { href: '#upcoming', label: '이번 주 만료' },
     { href: `/?court=${encodeURIComponent('서울회생법원')}&cat=real_estate`, label: '서울회생법원 부동산' },
     { href: '/category/vehicle', label: '차량' },
     { href: '/category/bonds', label: '채권·주식' },
@@ -65,28 +68,19 @@ function SectionHead({ no, id, title, note }: { no: string; id: string; title: s
 }
 
 export default async function HomeDashboard() {
-    const index = await getNoticeIndex();
+    const all = await getNoticeIndex();
+    const index = withText(all); // 통계·유형 카드는 원문이 있는 공고 기준
     const today = todayKst();
-    const week = upcomingRounds(index, 7, today);
-    const twoWeeks = upcomingRounds(index, 14, today);
+    const active = all.filter((n) => isActive(n, today));
+    const expiringRows = expiringBoard(all, 7, today);
+    const recentRows = recentBoard(all, 7, today);
     const stats = groupStats(index);
-    const featured = pickFeatured(twoWeeks);
+    const featured = pickFeatured(upcomingRounds(index, 14, today));
     const since30 = new Date(Date.parse(`${today}T00:00:00Z`) - 30 * 86400000).toISOString().slice(0, 10);
 
-    const upcomingItems: UpcomingItem[] = week.slice(0, 14).map((r) => ({
-        id: r.notice.id,
-        title: r.notice.title,
-        court: r.notice.court,
-        group: assetGroupOf(r.notice.category),
-        md: md(r.date),
-        dow: r.dDay === 0 ? '오늘' : r.dDay === 1 ? '내일' : dowOf(r.date),
-        dDay: r.dDay,
-        round: r.round,
-        total: r.totalRounds,
-        price: shortWon(r.price),
-        ratio: r.firstPrice > 0 ? Math.round((r.price / r.firstPrice) * 100) : 100,
-    }));
-    const tickerItems = upcomingItems.slice(0, 12);
+    const expiringItems = toBoardItems(expiringRows.slice(0, 15), today);
+    const recentItems = toBoardItems(recentRows.slice(0, 15), today);
+    const tickerItems = expiringItems.slice(0, 12);
 
     const types = TYPE_ORDER.map((t, i) => {
         const cat = categories.find((c) => c.slug === t.slug);
@@ -102,14 +96,14 @@ export default async function HomeDashboard() {
         };
     });
 
-    const soonByCourt = new Map<string, number>();
-    for (const r of twoWeeks) soonByCourt.set(r.notice.court, (soonByCourt.get(r.notice.court) || 0) + 1);
+    const activeByCourt = new Map<string, number>();
+    for (const n of active) activeByCourt.set(n.court, (activeByCourt.get(n.court) || 0) + 1);
     const courtRows = stats.byCourt
-        .map(([name, count]) => ({ court: getCourtByName(name), count, soon: soonByCourt.get(name) || 0 }))
+        .map(([name, count]) => ({ court: getCourtByName(name), count, soon: activeByCourt.get(name) || 0 }))
         .filter((c): c is { court: CourtInfo; count: number; soon: number } => Boolean(c.court))
         .slice(0, 10);
 
-    const recent = index.slice(0, 8);
+    const recent = all.slice(0, 8);
     const searchCourts = COURT_LIST.filter((c) => stats.byCourt.some(([name]) => name === c.name));
 
     return (
@@ -117,23 +111,22 @@ export default async function HomeDashboard() {
             {/* 상단 정보 띠 + 입찰 티커 */}
             <div className="flex flex-wrap justify-between gap-x-6 gap-y-1 py-2 text-xs font-medium border-b border-[#161616]">
                 <span className="num">{Number(today.slice(0, 4))}년 {Number(today.slice(5, 7))}월 {Number(today.slice(8, 10))}일 {dowOf(today)}요일</span>
-                <span className="num">원문 공고 {stats.total.toLocaleString('ko-KR')}건 · 회차표 {stats.withRounds.toLocaleString('ko-KR')}건 · 7일 내 입찰 {week.length.toLocaleString('ko-KR')}건</span>
+                <span className="num">법원 게시 중 {active.length.toLocaleString('ko-KR')}건 · 이번 주 만료 {expiringRows.length.toLocaleString('ko-KR')}건 · 이번 주 신규 {recentRows.length.toLocaleString('ko-KR')}건</span>
             </div>
             {tickerItems.length > 0 && (
-                <div className="ticker flex items-stretch border-b border-[#161616] overflow-hidden" role="region" aria-label="이번 주 입찰 공고 흐름">
-                    <span className="shrink-0 bg-[#161616] text-[#FAF7EC] text-xs font-bold px-3 flex items-center">이번 주 입찰</span>
+                <div className="ticker flex items-stretch border-b border-[#161616] overflow-hidden" role="region" aria-label="곧 게시가 끝나는 공고 흐름">
+                    <span className="shrink-0 bg-[#161616] text-[#FAF7EC] text-xs font-bold px-3 flex items-center">곧 만료</span>
                     <div className="relative flex-1 overflow-hidden">
                         <div className="ticker-track flex w-max">
                             {[0, 1].map((copy) => (
                                 <ul key={copy} className="flex shrink-0" aria-hidden={copy === 1 ? true : undefined}>
                                     {tickerItems.map((t) => (
-                                        <li key={`${copy}-${t.id}-${t.round}`} className="shrink-0 border-r border-[#C9C2B4]">
+                                        <li key={`${copy}-${t.id}`} className="shrink-0 border-r border-[#C9C2B4]">
                                             <Link href={`/notice/${t.id}`} tabIndex={copy === 1 ? -1 : undefined} className="flex items-baseline gap-2 px-4 py-2 text-[13px] whitespace-nowrap hover:bg-[#FAF7EC]">
-                                                <span className="num font-bold">{t.md} {t.dow}</span>
+                                                <span className="num font-bold">{md(t.expiry)} {t.daysLeft === 0 ? '오늘 만료' : `${t.daysLeft}일 남음`}</span>
                                                 <span>{t.court}</span>
                                                 <span className="font-semibold">{t.title}</span>
-                                                <span className="num font-extrabold">{t.price}</span>
-                                                <span className="num text-[#3A3A3A]">1회차의 {t.ratio}%</span>
+                                                {formatPhone(t.phone) && <span className="num text-[#3A3A3A]">☎ {formatPhone(t.phone)}</span>}
                                             </Link>
                                         </li>
                                     ))}
@@ -183,10 +176,10 @@ export default async function HomeDashboard() {
 
                     <dl className="mt-2 grid grid-cols-2 sm:grid-cols-4 border border-[#161616] bg-[#FAF7EC]">
                         {[
-                            { label: `원문 공고 · ${INDEX_DAYS}일`, value: stats.total },
-                            { label: '회차표 정리', value: stats.withRounds },
-                            { label: '7일 안에 입찰', value: week.length },
-                            { label: '2주 안에 입찰', value: twoWeeks.length },
+                            { label: '법원 게시 중', value: active.length },
+                            { label: '이번 주 만료', value: expiringRows.length },
+                            { label: '이번 주 신규', value: recentRows.length },
+                            { label: `원문 정리 · ${INDEX_DAYS}일`, value: stats.total },
                         ].map((s, i) => (
                             <div key={s.label} className={`px-4 py-3.5 border-[#161616] ${i % 2 === 1 ? 'border-l' : ''} ${i >= 2 ? 'border-t sm:border-t-0' : ''} ${i === 2 ? 'sm:border-l' : ''}`}>
                                 <dt className="text-xs font-semibold">{s.label}</dt>
@@ -194,13 +187,16 @@ export default async function HomeDashboard() {
                             </div>
                         ))}
                     </dl>
+                    <p className="text-xs leading-relaxed text-[#3A3A3A]">
+                        게시 중·만료는 법원 게시판의 공고만료일 기준입니다. 낙찰 여부는 법원이 공개하지 않아 표시할 수 없습니다.
+                    </p>
                 </div>
 
                 {featured && <FeaturedPanel r={featured} />}
             </section>
 
             <div className="flex flex-col gap-16 pt-12 pb-4">
-                <Reveal><UpcomingList items={upcomingItems} total={week.length} /></Reveal>
+                <Reveal><UpcomingList expiring={expiringItems} expiringTotal={expiringRows.length} recent={recentItems} recentTotal={recentRows.length} /></Reveal>
 
                 {/* 02 자산 유형별 */}
                 <Reveal as="section">
@@ -243,7 +239,7 @@ export default async function HomeDashboard() {
                                         <Link href={`/court/${court.slug}`} className="grid grid-cols-[32px_minmax(0,1fr)_auto_auto] items-baseline gap-3 py-3 hover:bg-white/5">
                                             <span className="num text-[13px] text-[#B8B2A6]">{String(i + 1).padStart(2, '0')}</span>
                                             <span className="font-bold">{court.name}</span>
-                                            <span className="num text-[13px] text-[#B8B2A6]">2주 내 {soon}</span>
+                                            <span className="num text-[13px] text-[#B8B2A6]">게시 중 {soon}</span>
                                             <span className="num font-bold min-w-10 text-right">{count.toLocaleString('ko-KR')}</span>
                                         </Link>
                                     </li>
@@ -322,8 +318,8 @@ function FeaturedPanel({ r }: { r: UpcomingRound }) {
     return (
         <article aria-labelledby="feat-title" className="flex-[1_1_380px] min-w-0 my-8 border border-[#161616] flex flex-col" style={{ background: g.bg }}>
             <div className="px-4 py-2.5 border-b border-[#161616] flex justify-between gap-3 text-xs font-bold tracking-[0.04em]">
-                <span>곧 입찰하는 공고</span>
-                <span className="num">{r.dDay === 0 ? '오늘 입찰' : `${md(r.date)} ${dowOf(r.date)} 입찰 · ${r.dDay}일 후`}</span>
+                <span>게시 중 · 회차표 참고</span>
+                <span className="num">{r.notice.expiry ? `공고만료 ${md(r.notice.expiry)}` : ''}</span>
             </div>
             <div className="px-5 pt-5 pb-4 flex flex-col gap-2">
                 <span className="text-[13px] font-semibold">{r.notice.court} · {g.label} · 공고일 {r.notice.date}</span>
@@ -354,7 +350,13 @@ function FeaturedPanel({ r }: { r: UpcomingRound }) {
                 <dt className="font-semibold">{r.round}회차 최저가</dt>
                 <dd className="num font-extrabold">{r.price.toLocaleString('ko-KR')}원 (1회차의 {pct}%)</dd>
                 <dt className="font-semibold">회차</dt>
-                <dd className="num">전체 {r.totalRounds}회 중 {r.round}회차</dd>
+                <dd className="num">전체 {r.totalRounds}회 중 {r.round}회차 · {md(r.date)} {dowOf(r.date)}{r.round > 1 ? ' (앞 회차 유찰 시)' : ''}</dd>
+                {formatPhone(r.notice.phone) && (
+                    <>
+                        <dt className="font-semibold">진행 문의</dt>
+                        <dd className="num"><a href={`tel:${(r.notice.phone || '').replace(/\D/g, '')}`} className="underline underline-offset-[3px]">{formatPhone(r.notice.phone)}</a> (관재인 사무실)</dd>
+                    </>
+                )}
                 <dt className="font-semibold">확인할 것</dt>
                 <dd>입찰보증금·제출 방법·비용 부담은 공고 원문 기준</dd>
             </dl>

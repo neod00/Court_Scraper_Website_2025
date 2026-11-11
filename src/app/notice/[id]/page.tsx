@@ -15,6 +15,7 @@ import { isQualityNotice, hasUsefulSummary } from '@/lib/noticeQuality';
 import { INDEX_AUTOMATED_NOTICE_PAGES } from '@/lib/contentPolicy';
 import { getCategoryByDbCategory } from '@/data/categories';
 import { getCourtByName } from '@/data/courts';
+import { formatPhone } from '@/components/NoticeBoardRows';
 import {
     hasSubstantialText,
     maskPersonNames,
@@ -114,6 +115,16 @@ export default async function NoticeDetail({ params }: PageProps) {
 
     const categorySlug = getCategoryByDbCategory(notice.category)?.slug;
     const courtInfo = getCourtByName(notice.department);
+    // 법원 게시판 기준 게시 상태(작성일·공고만료일). 낙찰 여부는 법원이 공개하지 않는다.
+    const todayIso = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
+    const expiry: string | null = notice.expiry_date || null;
+    const daysLeft = expiry ? Math.round((Date.parse(expiry) - Date.parse(todayIso)) / 86400000) : null;
+    const isPosted = daysLeft !== null && daysLeft >= 0;
+    const nextRoundRow = rounds?.find((r) => {
+        const m = r.schedule[0]?.match(/(20\d{2})\.\s*(\d{1,2})\.\s*(\d{1,2})/);
+        return m ? `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}` >= todayIso : false;
+    }) ?? null;
+    const phoneText = formatPhone(notice.phone || null);
     // 광고는 검색에 노출하는 공고(색인 기준과 동일)에만 싣는다. 원문·요약이 없는 얇은 페이지는 광고 없음.
     const showAds = INDEX_AUTOMATED_NOTICE_PAGES && isQualityNotice(notice);
     return (
@@ -134,6 +145,29 @@ export default async function NoticeDetail({ params }: PageProps) {
                 date_posted: notice.date_posted,
                 department: notice.department
             }} />
+
+            {expiry && (
+                <section aria-label="법원 게시 상태" className={`mb-8 border border-[#161616] ${isPosted ? 'bg-[#D7E7DF]' : 'bg-[#E9E4D8]'}`}>
+                    <div className="px-5 py-4 flex flex-wrap items-center gap-x-5 gap-y-2">
+                        <span className={`text-sm font-bold px-2 py-1 ${isPosted ? 'bg-[#161616] text-[#FAF7EC]' : 'border border-[#161616] bg-[#FAF7EC]'}`}>
+                            {isPosted ? (daysLeft === 0 ? '법원 게시 중 · 오늘 만료' : `법원 게시 중 · ${daysLeft}일 남음`) : `게시 종료 · ${expiry} 만료`}
+                        </span>
+                        <span className="num text-sm">작성일 {notice.date_posted} · 공고만료일 {expiry}</span>
+                        {phoneText && (
+                            <a href={`tel:${phoneText.replace(/-/g, '')}`} className="num text-sm font-bold border border-[#161616] bg-[#FAF7EC] px-2 py-1 hover:bg-[#161616] hover:text-[#FAF7EC]">
+                                ☎ {phoneText} 관재인 사무실
+                            </a>
+                        )}
+                    </div>
+                    <p className="px-5 pb-4 text-sm leading-relaxed">
+                        {isPosted
+                            ? (nextRoundRow
+                                ? `원문 회차표상 다음 입찰은 ${nextRoundRow.round}회차(${nextRoundRow.schedule[0] ?? ''})입니다. ${nextRoundRow.round > 1 ? '앞 회차에서 낙찰됐을 수 있으니 ' : ''}진행 여부는 관재인 사무실에 확인하세요.`
+                                : '법원은 낙찰 결과를 공개하지 않습니다. 진행 여부는 관재인 사무실에 확인하세요.')
+                            : '법원 게시 기간이 끝난 공고입니다. 기록으로 남겨 두며, 목록의 \'게시 중\' 공고에서는 빠집니다.'}
+                    </p>
+                </section>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                 {/* Main Content Area */}
