@@ -212,9 +212,9 @@ class CourtScraper:
                             "detail_link": detail_url,
                             "file_info": file_info_list if file_info_list else None,
                             "category": category,
-                            # content_text는 본문이 아닌 제목 복제였으므로 thin-content 방지를 위해 NULL 처리.
-                            # (실제 공고 본문/PDF 추출은 추후 별도 작업으로 채운다)
-                            "content_text": None,
+                            # content_text 는 여기서 넣지 않는다. upsert 에 None 을 실으면 수집할 때마다(하루 3회)
+                            # attachment_text_extractor·ai_report_generator 가 채운 원문이 지워진다(2026-11-11 발견).
+                            # 키를 빼면 새 행은 NULL 로 들어가고, 기존 행의 원문은 그대로 남는다.
                             "sale_org": sale_org,
                             "expiry_date": expiry_date,
                             "phone": phone,
