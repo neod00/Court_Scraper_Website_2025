@@ -11,7 +11,7 @@ import { shortWon } from '@/components/NoticeIndexViews';
 import { categories } from '@/data/categories';
 import { courts as COURT_LIST, getCourtByName, type CourtInfo } from '@/data/courts';
 import { ASSET_GROUPS, assetGroupOf, type AssetGroup } from '@/lib/assetGroups';
-import { INDEX_DAYS, expiringBoard, getNoticeIndex, groupStats, isActive, recentBoard, todayKst, upcomingRounds, withText, type UpcomingRound } from '@/lib/noticeIndex';
+import { INDEX_DAYS, LEAD_DAYS, expiringBoard, getNoticeIndex, groupStats, isActive, recentBoard, todayKst, upcomingRounds, withText, type UpcomingRound } from '@/lib/noticeIndex';
 
 const DOW = ['일', '월', '화', '수', '목', '금', '토'];
 const dowOf = (iso: string) => DOW[new Date(`${iso}T12:00:00+09:00`).getUTCDay()];
@@ -48,7 +48,7 @@ function pickFeatured(rows: UpcomingRound[]): UpcomingRound | null {
 }
 
 const QUICK = [
-    { href: '#upcoming', label: '이번 주 만료' },
+    { href: '#upcoming', label: '새로 올라온 공고' },
     { href: `/?court=${encodeURIComponent('서울회생법원')}&cat=real_estate`, label: '서울회생법원 부동산' },
     { href: '/category/vehicle', label: '차량' },
     { href: '/category/bonds', label: '채권·주식' },
@@ -72,15 +72,15 @@ export default async function HomeDashboard() {
     const index = withText(all); // 통계·유형 카드는 원문이 있는 공고 기준
     const today = todayKst();
     const active = all.filter((n) => isActive(n, today));
-    const expiringRows = expiringBoard(all, 7, today);
+    const prepRows = expiringBoard(all, null, today).filter((r) => r.daysLeft >= LEAD_DAYS);
     const recentRows = recentBoard(all, 7, today);
     const stats = groupStats(index);
     const featured = pickFeatured(upcomingRounds(index, 14, today));
     const since30 = new Date(Date.parse(`${today}T00:00:00Z`) - 30 * 86400000).toISOString().slice(0, 10);
 
-    const expiringItems = toBoardItems(expiringRows.slice(0, 15), today);
-    const recentItems = toBoardItems(recentRows.slice(0, 15), today);
-    const tickerItems = expiringItems.slice(0, 12);
+    const recentItems = toBoardItems(recentRows, today);
+    const prepItems = toBoardItems(prepRows, today);
+    const tickerItems = recentItems.slice(0, 12);
 
     const types = TYPE_ORDER.map((t, i) => {
         const cat = categories.find((c) => c.slug === t.slug);
@@ -111,11 +111,11 @@ export default async function HomeDashboard() {
             {/* 상단 정보 띠 + 입찰 티커 */}
             <div className="flex flex-wrap justify-between gap-x-6 gap-y-1 py-2 text-xs font-medium border-b border-[#161616]">
                 <span className="num">{Number(today.slice(0, 4))}년 {Number(today.slice(5, 7))}월 {Number(today.slice(8, 10))}일 {dowOf(today)}요일</span>
-                <span className="num">법원 게시 중 {active.length.toLocaleString('ko-KR')}건 · 이번 주 만료 {expiringRows.length.toLocaleString('ko-KR')}건 · 이번 주 신규 {recentRows.length.toLocaleString('ko-KR')}건</span>
+                <span className="num">법원 게시 중 {active.length.toLocaleString('ko-KR')}건 · 이번 주 신규 {recentRows.length.toLocaleString('ko-KR')}건 · 만료까지 {LEAD_DAYS}일 이상 {prepRows.length.toLocaleString('ko-KR')}건</span>
             </div>
             {tickerItems.length > 0 && (
-                <div className="ticker flex items-stretch border-b border-[#161616] overflow-hidden" role="region" aria-label="곧 게시가 끝나는 공고 흐름">
-                    <span className="shrink-0 bg-[#161616] text-[#FAF7EC] text-xs font-bold px-3 flex items-center">곧 만료</span>
+                <div className="ticker flex items-stretch border-b border-[#161616] overflow-hidden" role="region" aria-label="새로 올라온 공고 흐름">
+                    <span className="shrink-0 bg-[#161616] text-[#FAF7EC] text-xs font-bold px-3 flex items-center">새로 올라옴</span>
                     <div className="relative flex-1 overflow-hidden">
                         <div className="ticker-track flex w-max">
                             {[0, 1].map((copy) => (
@@ -123,7 +123,7 @@ export default async function HomeDashboard() {
                                     {tickerItems.map((t) => (
                                         <li key={`${copy}-${t.id}`} className="shrink-0 border-r border-[#C9C2B4]">
                                             <Link href={`/notice/${t.id}`} tabIndex={copy === 1 ? -1 : undefined} className="flex items-baseline gap-2 px-4 py-2 text-[13px] whitespace-nowrap hover:bg-[#FAF7EC]">
-                                                <span className="num font-bold">{md(t.expiry)} {t.daysLeft === 0 ? '오늘 만료' : `${t.daysLeft}일 남음`}</span>
+                                                <span className="num font-bold">{md(t.posted)} {t.daysSincePosted === 0 ? '오늘 게시' : `${t.daysSincePosted}일 전`}</span>
                                                 <span>{t.court}</span>
                                                 <span className="font-semibold">{t.title}</span>
                                                 {formatPhone(t.phone) && <span className="num text-[#3A3A3A]">☎ {formatPhone(t.phone)}</span>}
@@ -177,8 +177,8 @@ export default async function HomeDashboard() {
                     <dl className="mt-2 grid grid-cols-2 sm:grid-cols-4 border border-[#161616] bg-[#FAF7EC]">
                         {[
                             { label: '법원 게시 중', value: active.length },
-                            { label: '이번 주 만료', value: expiringRows.length },
                             { label: '이번 주 신규', value: recentRows.length },
+                            { label: `만료까지 ${LEAD_DAYS}일 이상`, value: prepRows.length },
                             { label: `원문 정리 · ${INDEX_DAYS}일`, value: stats.total },
                         ].map((s, i) => (
                             <div key={s.label} className={`px-4 py-3.5 border-[#161616] ${i % 2 === 1 ? 'border-l' : ''} ${i >= 2 ? 'border-t sm:border-t-0' : ''} ${i === 2 ? 'sm:border-l' : ''}`}>
@@ -196,7 +196,7 @@ export default async function HomeDashboard() {
             </section>
 
             <div className="flex flex-col gap-16 pt-12 pb-4">
-                <Reveal><UpcomingList expiring={expiringItems} expiringTotal={expiringRows.length} recent={recentItems} recentTotal={recentRows.length} /></Reveal>
+                <Reveal><UpcomingList recent={recentItems} prep={prepItems} /></Reveal>
 
                 {/* 02 자산 유형별 */}
                 <Reveal as="section">

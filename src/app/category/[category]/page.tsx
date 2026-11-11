@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import { categories, getCategoryBySlug } from '@/data/categories';
 import { INDEX_DAYS, expiringBoard, getNoticeIndex, groupStats, todayKst, withText } from '@/lib/noticeIndex';
 import { CountChips, RecentNoticeList, StatsCards } from '@/components/NoticeIndexViews';
-import NoticeBoardRows from '@/components/NoticeBoardRows';
+import NoticeBoard from '@/components/NoticeBoard';
 import { toBoardItems } from '@/lib/noticeBoard';
 import { getCourtByName } from '@/data/courts';
 import { ASSET_GROUPS, assetGroupOf } from '@/lib/assetGroups';
@@ -59,7 +59,7 @@ export default async function CategoryPage({ params }: PageProps) {
     const list = withText(catAll); // 통계는 원문이 있는 공고 기준
     const stats = groupStats(list);
     const activeRows = expiringBoard(catAll, null, today);
-    const board = toBoardItems(activeRows.slice(0, 20), today);
+    const board = toBoardItems(activeRows, today);
     const recent = catAll.slice(0, 20);
 
     // 마크다운 스타일 콘텐츠 렌더링
@@ -218,9 +218,10 @@ export default async function CategoryPage({ params }: PageProps) {
 
             {/* 마감 임박 */}
             <section className="mb-12" aria-labelledby="upcoming-heading">
-                <h2 id="upcoming-heading" className="text-2xl font-bold text-[#161616] mb-2">지금 게시 중인 {categoryInfo.name} 공고 <span className="num">{activeRows.length}</span>건</h2>
-                <p className="text-sm text-[#3A3A3A] mb-4">법원 게시판의 공고만료일 순입니다. 회차표는 참고 정보이고, 앞 회차에서 낙찰되면 뒤 회차는 열리지 않습니다.</p>
-                <NoticeBoardRows items={board} empty={`지금 게시 중인 ${categoryInfo.name} 공고가 없습니다.`} />
+                <NoticeBoard
+                    headingId="upcoming-heading"
+                    views={[{ key: 'active', label: '게시 중', heading: `지금 게시 중인 ${categoryInfo.name} 공고`, sub: '회차표는 첨부 공고문에서 읽은 참고 정보이고, 앞 회차에서 낙찰되면 뒤 회차는 열리지 않습니다.', items: board, empty: `지금 게시 중인 ${categoryInfo.name} 공고가 없습니다.` }]}
+                />
             </section>
 
             {/* 최근 공고 */}

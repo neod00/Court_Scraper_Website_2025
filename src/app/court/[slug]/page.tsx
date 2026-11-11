@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import { COURT_INDEX_MIN_NOTICES, courts, getCourtBySlug } from '@/data/courts';
 import { getCategoryByDbCategory } from '@/data/categories';
 import { INDEX_DAYS, expiringBoard, getNoticeIndex, groupStats, todayKst, withText } from '@/lib/noticeIndex';
-import NoticeBoardRows from '@/components/NoticeBoardRows';
+import NoticeBoard from '@/components/NoticeBoard';
 import { toBoardItems } from '@/lib/noticeBoard';
 import { categoryLabel } from '@/lib/categoryLabels';
 import { CountChips, RecentNoticeList, StatsCards, shortWon } from '@/components/NoticeIndexViews';
@@ -43,7 +43,7 @@ export default async function CourtPage({ params }: PageProps) {
     const list = withText(courtAll); // 통계는 원문이 있는 공고 기준
     const stats = groupStats(list);
     const activeRows = expiringBoard(courtAll, null, today);
-    const board = toBoardItems(activeRows.slice(0, 30), today);
+    const board = toBoardItems(activeRows, today);
     const recent = courtAll.slice(0, 30);
     const topCategory = stats.byCategory[0];
 
@@ -98,9 +98,11 @@ export default async function CourtPage({ params }: PageProps) {
             </section>
 
             <section className="mb-10" aria-labelledby="upcoming-heading">
-                <h2 id="upcoming-heading" className="text-2xl font-bold text-[#161616] mb-2">지금 게시 중인 공고 <span className="num">{activeRows.length}</span>건</h2>
-                <p className="text-sm text-[#3A3A3A] mb-4">법원 게시판의 공고만료일 순입니다. 회차표는 첨부 공고문에서 읽은 참고 정보이고, 앞 회차에서 낙찰되면 뒤 회차는 열리지 않으니 관재인 사무실에 진행 여부를 확인하세요.</p>
-                <NoticeBoardRows items={board} showCourt={false} empty="지금 이 법원에 게시 중인 공고가 없습니다." />
+                <NoticeBoard
+                    headingId="upcoming-heading"
+                    showCourt={false}
+                    views={[{ key: 'active', label: '게시 중', heading: '지금 게시 중인 공고', sub: '회차표는 첨부 공고문에서 읽은 참고 정보입니다. 앞 회차에서 낙찰되면 뒤 회차는 열리지 않으니 진행 여부는 관재인 사무실에 확인하세요.', items: board, empty: '지금 이 법원에 게시 중인 공고가 없습니다.' }]}
+                />
             </section>
 
             <section className="mb-10" aria-labelledby="recent-heading">

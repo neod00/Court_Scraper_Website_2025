@@ -11,6 +11,8 @@ import { supabase } from '@/lib/supabase';
 import { hasSubstantialText, maskPersonNames, parseRoundTable, splitOcrText } from '@/lib/noticeText';
 
 export const INDEX_DAYS = 180;
+/** 입찰을 검토할 시간이 남았다고 보는 공고만료일까지의 최소 일수(홈 두 번째 탭). */
+export const LEAD_DAYS = 7;
 const PAGE = 200;
 const MAX_ROWS = 5000;
 

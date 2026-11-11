@@ -30,13 +30,13 @@ export default function Header() {
     <header className="sticky top-0 z-50 bg-[#EFEBE2]/95 backdrop-blur border-b border-[#161616]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center min-h-[68px] gap-6 py-2">
-          <Link href="/" className="flex items-center gap-3 shrink-0" aria-label="로옥션(LawAuction) 홈">
+          <Link href="/" className="flex items-center gap-3 min-w-0" aria-label="로옥션(LawAuction) 홈">
             <span className="relative w-11 h-11">
               <Image src="/logo.png" alt="" fill sizes="44px" className="object-contain" priority />
             </span>
             <span className="flex flex-col leading-none">
               <span className="text-[24px] font-extrabold tracking-[-0.05em]">로옥션</span>
-              <span className="mt-1 text-[10.5px] font-semibold tracking-[0.06em]">LAWAUCTION · 법원 매각 공고</span>
+              <span className="mt-1 hidden min-[360px]:block text-[10.5px] font-semibold tracking-[0.06em] whitespace-nowrap">LAWAUCTION · 법원 매각 공고</span>
             </span>
           </Link>
 
@@ -64,7 +64,7 @@ export default function Header() {
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-expanded={isMenuOpen}
             aria-controls="mobile-nav"
-            className="lg:hidden inline-flex items-center gap-2 h-11 px-3 border border-[#161616] text-sm font-bold hover:bg-[#FAF7EC]"
+            className="lg:hidden shrink-0 inline-flex items-center gap-2 h-11 px-3 border border-[#161616] text-sm font-bold hover:bg-[#FAF7EC]"
           >
             <span>{isMenuOpen ? '닫기' : '메뉴'}</span>
             <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">

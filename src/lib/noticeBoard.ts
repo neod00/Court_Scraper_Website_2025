@@ -26,6 +26,7 @@ export function toBoardItems(rows: BoardRow[], today: string): BoardItem[] {
                     total: r.totalRounds,
                     date: r.next.date,
                     price: shortWon(r.next.price),
+                    priceValue: r.next.price,
                     ratio: r.firstPrice > 0 ? Math.round((r.next.price / r.firstPrice) * 100) : 100,
                 }
                 : null,

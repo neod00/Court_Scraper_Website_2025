@@ -1,15 +1,15 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { courts } from '@/data/courts';
-import { INDEX_DAYS, expiringBoard, getNoticeIndex, groupStats, isActive, todayKst, withText } from '@/lib/noticeIndex';
-import NoticeBoardRows from '@/components/NoticeBoardRows';
+import { INDEX_DAYS, LEAD_DAYS, expiringBoard, getNoticeIndex, groupStats, isActive, recentBoard, todayKst, withText } from '@/lib/noticeIndex';
+import NoticeBoard from '@/components/NoticeBoard';
 import { toBoardItems } from '@/lib/noticeBoard';
 
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
     title: '법원별 회생·파산 자산매각 공고',
-    description: '서울회생법원, 수원회생법원 등 전국 회생법원과 지방법원의 파산관재인 자산매각 공고를 법원별로 모았습니다. 법원마다 게시 중인 공고 수와 이번 주에 게시가 끝나는 공고를 보여줍니다.',
+    description: '서울회생법원, 수원회생법원 등 전국 회생법원과 지방법원의 파산관재인 자산매각 공고를 법원별로 모았습니다. 법원마다 게시 중인 공고 수와 최근 올라온 공고를 보여줍니다.',
     alternates: { canonical: '/court' },
     robots: { index: true, follow: true },
 };
@@ -24,8 +24,8 @@ export default async function CourtHubPage() {
             return { court, total: stats.total, upcoming: courtAll.filter((n) => isActive(n, today)).length, latest: stats.latestDate };
         })
         .sort((a, b) => b.total - a.total);
-    const weekRows = expiringBoard(all, 7, today);
-    const weekItems = toBoardItems(weekRows.slice(0, 15), today);
+    const recentItems = toBoardItems(recentBoard(all, 7, today), today);
+    const prepItems = toBoardItems(expiringBoard(all, null, today).filter((r) => r.daysLeft >= LEAD_DAYS), today);
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8">
@@ -63,9 +63,13 @@ export default async function CourtHubPage() {
             </section>
 
             <section aria-labelledby="upcoming-heading">
-                <h2 id="upcoming-heading" className="text-2xl font-bold text-[#161616] mb-2">이번 주 게시가 끝나는 공고 <span className="num">{weekRows.length}</span>건</h2>
-                <p className="text-sm text-[#3A3A3A] mb-4">전국 법원 게시판에서 공고만료일이 7일 안인 공고입니다. 낙찰 여부는 법원이 공개하지 않으니 진행 여부는 관재인 사무실에 확인하세요.</p>
-                <NoticeBoardRows items={weekItems} empty="7일 안에 게시가 끝나는 공고가 없습니다." />
+                <NoticeBoard
+                    headingId="upcoming-heading"
+                    views={[
+                        { key: 'new', label: '새로 올라온 공고', heading: '전국 새로 올라온 공고', sub: '법원 게시판 작성일이 최근 7일인 공고', items: recentItems, empty: '최근 7일 동안 새로 올라온 공고가 없습니다.' },
+                        { key: 'prep', label: '만료까지 7일 이상', heading: '입찰을 검토할 시간이 남은 공고', sub: '법원 게시 중이고 공고만료일까지 7일 이상 남은 공고', items: prepItems, empty: '만료까지 7일 이상 남은 공고가 없습니다.' },
+                    ]}
+                />
             </section>
         </div>
     );

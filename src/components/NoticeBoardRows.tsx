@@ -17,7 +17,7 @@ export interface BoardItem {
     life: number;
     gone: number;
     hasText: boolean;
-    round: null | { round: number; total: number; date: string; price: string; ratio: number };
+    round: null | { round: number; total: number; date: string; price: string; priceValue: number; ratio: number };
     roundsPassed: boolean; // 회차표는 있지만 날짜가 모두 지났다
 }
 
