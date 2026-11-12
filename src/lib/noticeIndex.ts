@@ -9,6 +9,7 @@
 import { unstable_cache } from 'next/cache';
 import { supabase } from '@/lib/supabase';
 import { hasSubstantialText, maskPersonNames, parseRoundTable, splitOcrText } from '@/lib/noticeText';
+import { extractVehicleInfo, type VehicleInfo } from '@/lib/vehicleInfo';
 
 export const INDEX_DAYS = 180;
 /** 입찰을 검토할 시간이 남았다고 보는 공고만료일까지의 최소 일수(홈 두 번째 탭). */
@@ -33,6 +34,7 @@ export interface IndexedNotice {
     phone: string | null; // 법원 게시판 전화번호(관재인 사무실)
     hasText: boolean; // 읽을 만한 첨부 원문이 저장돼 있는가
     ocr: boolean; // 원문을 스캔 이미지에서 읽었는가
+    vehicle: VehicleInfo | null; // 차량 공고: 원문에서 읽은 차명·최초등록일·차고지
 }
 
 function toIsoDate(schedule: string | undefined): string | null {
@@ -73,6 +75,7 @@ async function loadIndex(): Promise<IndexedNotice[]> {
                 phone: (row.phone || '').trim() || null,
                 hasText,
                 ocr: hasText && stored.ocr,
+                vehicle: hasText && row.category === 'vehicle' ? extractVehicleInfo(stored.text) : null,
             });
         }
         if (!data || data.length < PAGE) break;
@@ -90,7 +93,7 @@ export const getNoticeIndex = unstable_cache(
             return [] as IndexedNotice[];
         }
     },
-    ['notice-index-v2'],
+    ['notice-index-v3'],
     { revalidate: 21600 },
 );
 

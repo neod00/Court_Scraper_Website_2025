@@ -149,7 +149,7 @@ export default async function HomeDashboard() {
                                                 <span className="num font-bold">{md(t.posted)} {t.daysSincePosted === 0 ? '오늘 게시' : `${t.daysSincePosted}일 전`}</span>
                                                 <span>{t.court}</span>
                                                 <span className="font-semibold">{t.title}</span>
-                                                {formatPhone(t.phone) && <span className="num text-[#3A3A3A]">☎ {formatPhone(t.phone)}</span>}
+                                                {t.vehicle?.model && <span className="text-[#3A3A3A]">{t.vehicle.model}</span>}
                                             </Link>
                                         </li>
                                     ))}

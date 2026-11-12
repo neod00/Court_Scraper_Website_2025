@@ -3,6 +3,7 @@
 // 날짜 기준은 법원 게시판의 작성일·공고만료일이고, 원문 회차표는 '앞 회차 유찰 시' 조건이 붙은 참고 정보다.
 import Link from 'next/link';
 import { ASSET_GROUPS, assetGroupOf } from '@/lib/assetGroups';
+import type { VehicleInfo } from '@/lib/vehicleInfo';
 
 export interface BoardItem {
     id: string;
@@ -11,7 +12,7 @@ export interface BoardItem {
     category: string;
     posted: string; // YYYY-MM-DD
     expiry: string; // YYYY-MM-DD
-    phone: string | null;
+    vehicle: VehicleInfo | null; // 차량 공고만: 원문에서 읽은 차명·등록·차고지
     daysLeft: number;
     daysSincePosted: number;
     life: number;
@@ -32,7 +33,30 @@ export function formatPhone(raw: string | null): string | null {
     return d.length === 10 ? `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}` : `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}`;
 }
 
-const GRID = 'md:grid md:grid-cols-[96px_minmax(0,1fr)_150px_210px_128px] md:gap-x-3 md:items-start';
+// 진행 문의(관재인 전화)는 목록에서 빼고 공고 상세에만 둔다(2026-11-12 사용자 요청).
+const GRID = 'md:grid md:grid-cols-[96px_minmax(0,1fr)_150px_210px] md:gap-x-4 md:items-start';
+
+/** 차량 공고 한 줄 요약: '그랜저 외 4대 · 최초등록 2018.2.20 · 차고지 경기 남양주시' */
+function VehicleLine({ v }: { v: VehicleInfo }) {
+    const parts: { label: string; value: string }[] = [];
+    if (v.model) parts.push({ label: '차명', value: v.count > 1 ? `${v.model} 외 ${v.count - 1}대` : v.model });
+    if (v.reg) {
+        parts.push(v.regKind === 'first'
+            ? { label: '최초등록', value: `${Number(v.reg.slice(0, 4))}.${Number(v.reg.slice(5, 7))}.${Number(v.reg.slice(8, 10))}` }
+            : { label: '연식', value: `${v.reg}년` });
+    }
+    if (v.garage) parts.push({ label: '차고지', value: v.garage });
+    if (parts.length === 0) return null;
+    return (
+        <span className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[13px]">
+            {parts.map((p) => (
+                <span key={p.label} className="whitespace-nowrap">
+                    <span className="text-[#57534E]">{p.label}</span> <span className="num font-semibold">{p.value}</span>
+                </span>
+            ))}
+        </span>
+    );
+}
 
 export default function NoticeBoardRows({
     items,
@@ -52,7 +76,6 @@ export default function NoticeBoardRows({
                 <span>공고{showCourt ? ' · 법원' : ''}</span>
                 <span>게시 기간</span>
                 <span>원문 회차표 (참고)</span>
-                <span className="text-right">진행 문의</span>
             </div>
             {items.length === 0 ? (
                 <p className="py-6 text-[15px] border-b border-[#C9C2B4]">{empty}</p>
@@ -60,7 +83,6 @@ export default function NoticeBoardRows({
                 <ul>
                     {items.map((r) => {
                         const g = ASSET_GROUPS[assetGroupOf(r.category)];
-                        const phone = formatPhone(r.phone);
                         const urgent = mode === 'expiry' && r.daysLeft <= 1;
                         const confirmed = r.round?.round === 1;
                         return (
@@ -80,6 +102,7 @@ export default function NoticeBoardRows({
                                     <span className="inline-block text-xs font-bold px-1.5 py-0.5 border border-[#161616]" style={{ background: g.bg }}>{g.label}</span>
                                     <Link href={`/notice/${r.id}`} className="block mt-1.5 font-bold leading-snug hover:underline underline-offset-[3px]">{r.title}</Link>
                                     {showCourt && <span className="block mt-0.5 text-[13px] text-[#3A3A3A]">{r.court}</span>}
+                                    {r.vehicle && <VehicleLine v={r.vehicle} />}
                                 </span>
 
                                 <span className="hidden md:block">
@@ -108,16 +131,6 @@ export default function NoticeBoardRows({
                                     )}
                                 </span>
 
-                                <span className="md:text-right">
-                                    {phone ? (
-                                        <a href={`tel:${phone.replace(/-/g, '')}`} className="num inline-block text-sm font-bold border border-[#161616] px-2 py-1.5 bg-[#FAF7EC] whitespace-nowrap hover:bg-[#161616] hover:text-[#FAF7EC]">
-                                            ☎ {phone}
-                                        </a>
-                                    ) : (
-                                        <span className="text-xs text-[#3A3A3A]">번호 없음</span>
-                                    )}
-                                    <span className="hidden md:block mt-1 text-[11px] text-[#3A3A3A]">관재인 사무실</span>
-                                </span>
                             </li>
                         );
                     })}

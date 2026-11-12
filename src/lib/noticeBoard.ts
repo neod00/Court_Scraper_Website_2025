@@ -14,7 +14,7 @@ export function toBoardItems(rows: BoardRow[], today: string): BoardItem[] {
             category: n.category,
             posted: n.date,
             expiry: n.expiry || n.date,
-            phone: n.phone,
+            vehicle: n.vehicle,
             daysLeft: r.daysLeft,
             daysSincePosted: Math.max(0, Math.round((Date.parse(today) - Date.parse(n.date)) / 86400000)),
             life: r.life,
