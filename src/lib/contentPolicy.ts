@@ -5,6 +5,7 @@
 
 // 2026-11: 공고 상세는 첨부 원문(content_text)·회차표·같은 매각기관 공고 묶음을 갖춘 경우에만
 // 색인한다(noticeQuality.isQualityNotice). 원문·요약 둘 다 없는 공고는 계속 noindex.
+// 2026-11-14: 게시가 끝난(공고만료일 지난) 공고도 noindex·사이트맵 제외(noticeQuality.isIndexableNotice).
 export const INDEX_AUTOMATED_NOTICE_PAGES = true;
 export const ALLOW_DATABASE_BLOG_POSTS = false;
 

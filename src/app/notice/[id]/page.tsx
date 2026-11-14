@@ -11,7 +11,7 @@ import CourtCostCalculator from '@/components/CourtCostCalculator';
 import { AdSenseTag } from '@/components/AdSenseLoader';
 import { getRecentPosts } from '@/data/blog-posts';
 import { glossaryTerms } from '@/data/glossary';
-import { isQualityNotice, hasUsefulSummary } from '@/lib/noticeQuality';
+import { isIndexableNotice, hasUsefulSummary } from '@/lib/noticeQuality';
 import { INDEX_AUTOMATED_NOTICE_PAGES } from '@/lib/contentPolicy';
 import { getCategoryByDbCategory } from '@/data/categories';
 import { getCourtByName } from '@/data/courts';
@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: PageProps) {
     const { id } = await params;
     const { data: notice } = await supabase
         .from('court_notices')
-        .select('title, category, department, ai_summary, content_text')
+        .select('title, category, department, ai_summary, content_text, expiry_date')
         .eq('id', id)
         .single();
 
@@ -67,7 +67,8 @@ export async function generateMetadata({ params }: PageProps) {
         description = textExcerpt(`${notice.department || ''} ${splitOcrText(notice.content_text).text}`, 155);
     }
 
-    const shouldIndex = INDEX_AUTOMATED_NOTICE_PAGES && isQualityNotice(notice);
+    // 원문이 있고 아직 게시 중인 공고만 색인. 게시 종료 공고는 기록으로 열어 두되 noindex(2026-11-14).
+    const shouldIndex = INDEX_AUTOMATED_NOTICE_PAGES && isIndexableNotice(notice);
 
     return {
         title,
@@ -131,8 +132,8 @@ export default async function NoticeDetail({ params }: PageProps) {
     const place = notice.category === 'real_estate' && originalText ? extractPropertyAddress(originalText) : null;
     // 회차별 총비용 계산기에 넘길 물건 종류: 원문 앞부분에 주택을 가리키는 말이 있으면 주택, 아니면 토지·상가(4%).
     const roundCostKind: 'house' | 'building' = /(아파트|다세대|연립|단독주택|빌라|공동주택)/.test((originalText || '').slice(0, 2000)) ? 'house' : 'building';
-    // 광고는 검색에 노출하는 공고(색인 기준과 동일)에만 싣는다. 원문·요약이 없는 얇은 페이지는 광고 없음.
-    const showAds = INDEX_AUTOMATED_NOTICE_PAGES && isQualityNotice(notice);
+    // 광고는 검색에 노출하는 공고(색인 기준과 동일)에만 싣는다. 원문·요약이 없거나 게시가 끝난 공고는 광고 없음.
+    const showAds = INDEX_AUTOMATED_NOTICE_PAGES && isIndexableNotice(notice);
     return (
         <div className="max-w-7xl mx-auto px-4 py-6 md:py-10">
             {showAds && <AdSenseTag />}

@@ -9,8 +9,8 @@ export const revalidate = 3600;
 
 const baseUrl = 'https://www.courtauction.site';
 
-// 최근 N일 공고만 sitemap 에 싣는다. 오래된 공고 페이지도 열리고 색인될 수 있지만, 크롤 예산은 최신 공고에 쓴다.
-const NOTICE_SITEMAP_DAYS = 180;
+// 공고는 법원 게시판에 아직 게시 중인 것(공고만료일 ≥ 오늘)만 싣는다(2026-11-14).
+// 게시가 끝난 공고는 페이지가 noindex 라 사이트맵에 넣지 않는다 — 기준은 noticeQuality.isIndexableNotice 와 같다.
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // 정적 페이지에는 lastModified 를 붙이지 않는다 — 실제 수정일을 추적하지 않는 페이지에 날짜를 꾸며 넣지 않는다.
@@ -47,12 +47,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.8,
     }));
 
-    // 공고 상세 — 첨부 원문(content_text)이 저장된 공고만. content_text 는 attachment_text_extractor 가
+    // 공고 상세 — 게시 중이고 첨부 원문(content_text)이 저장된 공고만. content_text 는 attachment_text_extractor 가
     // '읽을 만한 원문'일 때만 채우므로 NULL 여부만으로 거르고, 본문은 내려받지 않는다(egress 절약).
     // 페이지 자체도 noticeQuality 게이트로 한 번 더 확인해 robots 를 정한다.
     let noticePages: MetadataRoute.Sitemap = [];
     try {
-        const since = new Date(Date.now() - NOTICE_SITEMAP_DAYS * 86400000).toISOString().slice(0, 10);
+        const today = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10); // 한국 시각
         // Supabase 는 요청 1번에 최대 1,000행만 돌려주므로(.limit 이 커도 동일) 1,000건씩 나눠 받는다.
         const PAGE = 1000;
         const MAX_NOTICE_URLS = 5000;
@@ -63,7 +63,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
                 .select('id, date_posted')
                 .eq('source_type', 'notice')
                 .not('content_text', 'is', null)
-                .gte('date_posted', since)
+                .gte('expiry_date', today)
                 .order('date_posted', { ascending: false })
                 .order('id', { ascending: true })
                 .range(from, from + PAGE - 1);
